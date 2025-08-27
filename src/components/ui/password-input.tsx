@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
 import type {
   ButtonProps,
   GroupProps,
   InputProps,
   StackProps,
-} from "@chakra-ui/react"
+} from "@chakra-ui/react";
 import {
   Box,
   HStack,
@@ -15,33 +15,33 @@ import {
   Stack,
   mergeRefs,
   useControllableState,
-} from "@chakra-ui/react"
-import * as React from "react"
-import { LuEye, LuEyeOff } from "react-icons/lu"
+} from "@chakra-ui/react";
+import * as React from "react";
+import { LuEye, LuEyeOff } from "react-icons/lu";
 
 export interface PasswordVisibilityProps {
   /**
    * The default visibility state of the password input.
    */
-  defaultVisible?: boolean
+  defaultVisible?: boolean;
   /**
    * The controlled visibility state of the password input.
    */
-  visible?: boolean
+  visible?: boolean;
   /**
    * Callback invoked when the visibility state changes.
    */
-  onVisibleChange?: (visible: boolean) => void
+  onVisibleChange?: (visible: boolean) => void;
   /**
    * Custom icons for the visibility toggle button.
    */
-  visibilityIcon?: { on: React.ReactNode; off: React.ReactNode }
+  visibilityIcon?: { on: React.ReactNode; off: React.ReactNode };
 }
 
 export interface PasswordInputProps
   extends InputProps,
     PasswordVisibilityProps {
-  rootProps?: GroupProps
+  rootProps?: GroupProps;
 }
 
 export const PasswordInput = React.forwardRef<
@@ -55,15 +55,15 @@ export const PasswordInput = React.forwardRef<
     onVisibleChange,
     visibilityIcon = { on: <LuEye />, off: <LuEyeOff /> },
     ...rest
-  } = props
+  } = props;
 
   const [visible, setVisible] = useControllableState({
     value: visibleProp,
     defaultValue: defaultVisible || false,
     onChange: onVisibleChange,
-  })
+  });
 
-  const inputRef = React.useRef<HTMLInputElement>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   return (
     <InputGroup
@@ -71,10 +71,10 @@ export const PasswordInput = React.forwardRef<
         <VisibilityTrigger
           disabled={rest.disabled}
           onPointerDown={(e) => {
-            if (rest.disabled) return
-            if (e.button !== 0) return
-            e.preventDefault()
-            setVisible(!visible)
+            if (rest.disabled) return;
+            if (e.button !== 0) return;
+            e.preventDefault();
+            setVisible(!visible);
           }}
         >
           {visible ? visibilityIcon.off : visibilityIcon.on}
@@ -88,8 +88,8 @@ export const PasswordInput = React.forwardRef<
         type={visible ? "text" : "password"}
       />
     </InputGroup>
-  )
-})
+  );
+});
 
 const VisibilityTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
   function VisibilityTrigger(props, ref) {
@@ -105,23 +105,21 @@ const VisibilityTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-label="Toggle password visibility"
         {...props}
       />
-    )
-  },
-)
+    );
+  }
+);
 
 interface PasswordStrengthMeterProps extends StackProps {
-  max?: number
-  value: number
+  max?: number;
+  value: number;
 }
 
 export const PasswordStrengthMeter = React.forwardRef<
   HTMLDivElement,
   PasswordStrengthMeterProps
 >(function PasswordStrengthMeter(props, ref) {
-  const { max = 4, value, ...rest } = props
-
-  const percent = (value / max) * 100
-  const { label, colorPalette } = getColorPalette(percent)
+  const { max = 4, value, ...rest } = props;
+  const { label, colorPalette } = getColorPalette(value);
 
   return (
     <Stack align="flex-end" gap="1" ref={ref} {...rest}>
@@ -144,16 +142,18 @@ export const PasswordStrengthMeter = React.forwardRef<
       </HStack>
       {label && <HStack textStyle="xs">{label}</HStack>}
     </Stack>
-  )
-})
+  );
+});
 
-function getColorPalette(percent: number) {
+function getColorPalette(value: number) {
   switch (true) {
-    case percent < 33:
-      return { label: "Low", colorPalette: "red" }
-    case percent < 66:
-      return { label: "Medium", colorPalette: "orange" }
+    case value < 8:
+      return { label: "Too short", colorPalette: "red" };
+    case value < 14:
+      return { label: "Short", colorPalette: "orange" };
+    case value >= 21:
+      return { label: "Very long", colorPalette: "green" };
     default:
-      return { label: "High", colorPalette: "green" }
+      return { label: "Long", colorPalette: "green" };
   }
 }
