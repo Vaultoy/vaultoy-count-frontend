@@ -11,14 +11,21 @@ import {
   Heading,
   HStack,
   Input,
+  Progress,
   Text,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { derivateKeys } from "../utils/keyDerivation";
 
 export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
+  const [passwordLength, setPasswordLength] = useState(0);
+  const [keyDerivationProgress, setKeyDerivationProgress] = useState<
+    number | undefined
+  >(undefined);
+
   const formValuesSchema = z
     .object({
       username: z.string().min(3).max(100),
@@ -51,9 +58,20 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     resolver: zodResolver(formValuesSchema),
   });
 
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const onSubmit = handleSubmit(async (data) => {
+    setKeyDerivationProgress(0);
+    const keys = await derivateKeys(
+      data.username,
+      data.password,
+      (progress) => {
+        setKeyDerivationProgress(progress);
+      }
+    );
 
-  const [passwordLength, setPasswordLength] = useState(0);
+    setKeyDerivationProgress(undefined);
+
+    console.log(data, keys);
+  });
 
   return (
     <AbsoluteCenter>
@@ -68,6 +86,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
             </Link>
           </HStack>
         </Card.Header>
+
         <Card.Body>
           <form onSubmit={onSubmit}>
             <Field.Root invalid={!!errors.username}>
@@ -75,7 +94,6 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
               <Input {...register("username")} />
               <Field.ErrorText>{errors.username?.message}</Field.ErrorText>
             </Field.Root>
-
             <Field.Root invalid={!!errors.password} marginTop="1em">
               <Field.Label>Password</Field.Label>
               <PasswordInput
@@ -109,9 +127,27 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                 </Text>
               </>
             )}
-            <Button type="submit" marginTop="2em">
+            <Button
+              type="submit"
+              marginTop="2em"
+              loading={keyDerivationProgress !== undefined}
+            >
               {isLogin ? "Log in" : "Sign up"}
             </Button>
+            {keyDerivationProgress !== undefined && (
+              <Progress.Root
+                value={100 * keyDerivationProgress}
+                maxW="sm"
+                marginTop="1em"
+              >
+                <Progress.Label marginBottom="0.5em">
+                  Derivating encryption keys
+                </Progress.Label>
+                <Progress.Track flex="1">
+                  <Progress.Range />
+                </Progress.Track>
+              </Progress.Root>
+            )}
           </form>
         </Card.Body>
       </Card.Root>
