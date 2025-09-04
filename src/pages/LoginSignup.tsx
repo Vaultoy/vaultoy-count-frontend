@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   PasswordInput,
   PasswordStrengthMeter,
@@ -19,12 +19,16 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { derivateKeys } from "../utils/keyDerivation";
+import { useMutation } from "@tanstack/react-query";
+import { toaster } from "../components/ui/toaster";
+import { postSignupLoginMutation } from "../api/auth";
 
 export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const [passwordLength, setPasswordLength] = useState(0);
   const [keyDerivationProgress, setKeyDerivationProgress] = useState<
     number | undefined
   >(undefined);
+  const navigate = useNavigate();
 
   const formValuesSchema = z
     .object({
@@ -58,11 +62,64 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     resolver: zodResolver(formValuesSchema),
   });
 
+  const mutation = useMutation({
+    mutationFn: postSignupLoginMutation,
+    onSuccess: async (data) => {
+      if (isLogin && data.status === 401) {
+        toaster.create({
+          title: "Login failed",
+          description: `Invalid username or password`,
+          type: "error",
+        });
+
+        return;
+      }
+
+      if (!isLogin && data.status === 409) {
+        toaster.create({
+          title: "Could not create your account",
+          description: `Username already taken`,
+          type: "error",
+        });
+
+        return;
+      }
+
+      if (data.status !== 200) {
+        toaster.create({
+          title: "An unknown error occurred",
+          description: `Try to refresh your page or try again later. Status: ${data.status}.`,
+          type: "error",
+        });
+
+        return;
+      }
+
+      toaster.create({
+        title: isLogin ? "Login successful" : "Account created successfully",
+        type: "success",
+      });
+
+      // TODO: Redirect to the app and save keys
+      await navigate("/app");
+    },
+    onError: (error) => {
+      // TODO
+      console.error("Login failed", error);
+
+      toaster.create({
+        title: "An unknown error occurred",
+        description: `Try to refresh your page or try again later.`,
+        type: "error",
+      });
+    },
+  });
+
   const onSubmit = handleSubmit(async (data) => {
     setKeyDerivationProgress(0);
     const keys = await derivateKeys(
-      data.username,
-      data.password,
+      data.username.normalize("NFKC"),
+      data.password.normalize("NFKC"),
       (progress) => {
         setKeyDerivationProgress(progress);
       }
@@ -71,6 +128,12 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     setKeyDerivationProgress(undefined);
 
     console.log(data, keys);
+
+    mutation.mutate({
+      username: data.username.normalize("NFKC"),
+      hashedPassword: Array.from(keys.encryptionKey).toString(),
+      isLogin,
+    });
   });
 
   return (

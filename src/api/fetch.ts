@@ -1,0 +1,16 @@
+export const fetchApi = (
+  method: "GET" | "POST" | "PUT" | "DELETE",
+  url: string,
+  body?: any,
+  options?: RequestInit
+) => {
+  return fetch(import.meta.env.VITE_API_URL + url, {
+    ...options,
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+    body: JSON.stringify(body),
+  });
+};

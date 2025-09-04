@@ -16,6 +16,8 @@ nvm install
 npm install
 ```
 
+- Create a `.env` file and copy the content of `.env.example` to it.
+
 ## Usage
 
 - Start development server
