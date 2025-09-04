@@ -7,13 +7,17 @@ import {
 } from "@chakra-ui/react";
 import { Link } from "react-router";
 
-export const NotFoundPage = () => (
+export const ErrorPage = ({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) => (
   <AbsoluteCenter>
     <VStack>
-      <Heading>404 - Page Not Found</Heading>
-      <Text marginBottom="2em">
-        Unfortunately, the page you were looking for was not found.
-      </Text>
+      <Heading>{title}</Heading>
+      <Text marginBottom="2em">{description}</Text>
       <Link to="/">
         <Button>Back to Home</Button>
       </Link>

@@ -10,12 +10,12 @@ export const postSignupLoginMutation = async ({
   isLogin: boolean;
 }) => {
   if (isLogin) {
-    return fetchApi("POST", "/login", {
+    return fetchApi("POST", "/v1/login", {
       username,
       password: hashedPassword,
     });
   } else {
-    return fetchApi("POST", "/signup", {
+    return fetchApi("POST", "/v1/signup", {
       username,
       password: hashedPassword,
     });

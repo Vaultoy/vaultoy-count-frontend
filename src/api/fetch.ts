@@ -11,6 +11,7 @@ export const fetchApi = (
       "Content-Type": "application/json",
       ...options?.headers,
     },
+    credentials: "include",
     body: JSON.stringify(body),
   });
 };
