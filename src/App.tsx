@@ -10,7 +10,7 @@ import { LoginSignup } from "./pages/LoginSignup";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
 import { AppHomePage } from "./pages/app/AppHome";
-import { GroupPage } from "./pages/app/Group";
+import { GroupPage } from "./pages/app/GroupPage/GroupPage";
 import { ErrorPage } from "./pages/ErrorPage";
 
 const queryClient = new QueryClient();
