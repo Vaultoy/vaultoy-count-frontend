@@ -17,7 +17,8 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { FaAngleDoubleRight, FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { FaAnglesRight } from "react-icons/fa6";
 import { NavLink } from "react-router";
 
 const formValuesSchema = z.object({
@@ -94,7 +95,7 @@ export const AppHomePage = () => {
             <Card.Body>
               <Flex alignItems="center" justifyContent="space-between">
                 <Heading>{group.name}</Heading>
-                <FaAngleDoubleRight size="2em" color="gray" />
+                <FaAnglesRight size="1.6em" />
               </Flex>
             </Card.Body>
           </Card.Root>

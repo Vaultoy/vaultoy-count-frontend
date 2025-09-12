@@ -13,10 +13,15 @@ import {
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
 import { AddTransactionDialog } from "./AddTransactionDialog";
+import { useContext, useMemo } from "react";
+import { UserContext } from "@/contexts/UserContext";
 
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
+  const user = useContext(UserContext);
+
+  console.log({ user });
 
   const { data } = useQuery({
     queryKey: ["getGroup", groupId],
@@ -25,6 +30,11 @@ export const GroupPage = () => {
         ? getGroupQuery(groupId)
         : Promise.resolve(null),
   });
+
+  const transactionsSorted = useMemo(
+    () => data?.group.transactions.sort((a, b) => b.date - a.date),
+    [data?.group.transactions]
+  );
 
   if (!groupId || isNaN(Number(groupId))) {
     return (
@@ -71,7 +81,7 @@ export const GroupPage = () => {
             <Text>🙅 No transactions yet.</Text>
           )}
 
-          {data?.group.transactions.map((transaction) => (
+          {transactionsSorted?.map((transaction) => (
             <Card.Root key={transaction.id} width="100%">
               <Card.Body>
                 <Flex alignItems="center" justifyContent="space-between">

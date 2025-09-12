@@ -1,8 +1,8 @@
 import { scrypt } from "scrypt-js";
 
-interface MasterKeys {
-  authentificationKey: Uint8Array<ArrayBufferLike>;
-  encryptionKey: Uint8Array<ArrayBufferLike>;
+export interface MasterKeys {
+  authentificationKey: string;
+  encryptionKey: CryptoKey;
 }
 
 // TODO: Choose parameters (I changed N for dev, the default was: 2 ** 16)
@@ -48,10 +48,23 @@ export const derivateKeys = async (
     scryptParams.dkLen
   );
 
-  const [authentificationKey, encryptionKey] = await Promise.all([
+  const [authentificationKeyRaw, encryptionKeyRaw] = await Promise.all([
     authentificationKeyPromise,
     encryptionKeyPromise,
   ]);
+
+  const encryptionKey = await crypto.subtle.importKey(
+    "raw",
+    Uint8Array.from(encryptionKeyRaw),
+    "AES-GCM",
+    false,
+    ["encrypt", "decrypt"]
+  );
+
+  // Transform Uint8Array to base64 string
+  const authentificationKey = btoa(
+    String.fromCharCode(...authentificationKeyRaw)
+  );
 
   return { authentificationKey, encryptionKey };
 };

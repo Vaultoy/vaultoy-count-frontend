@@ -22,6 +22,7 @@ export interface GroupTransaction {
   fromUserId: number;
   toUserIds: number[];
   amount: number;
+  date: number;
 }
 
 export interface GroupExtended {
@@ -49,17 +50,20 @@ export const postAddTransactionMutation = async ({
   amount,
   fromUserId,
   toUserIds,
+  date,
 }: {
   groupId: string;
   name: string;
   amount: number;
   fromUserId: number;
   toUserIds: number[];
+  date: number;
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/transaction`, {
     name,
     amount,
     fromUserId,
     toUserIds,
+    date,
   });
 };

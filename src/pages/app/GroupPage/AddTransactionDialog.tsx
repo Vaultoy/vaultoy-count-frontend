@@ -105,13 +105,13 @@ export const AddTransactionDialog = ({
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
     mutation.mutate({
       groupId: groupId as string,
       name: data.name,
       amount: data.amount,
-      fromUserId: 1, // TODO
-      toUserIds: [1], // TODO
+      fromUserId: data.fromUserId,
+      toUserIds: data.toUserIds,
+      date: Date.now(),
     });
   });
 
@@ -127,7 +127,7 @@ export const AddTransactionDialog = ({
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild marginTop="1em">
         <Center>
-          <Button variant="outline" width="fit-content">
+          <Button variant="outline" width="fit-content" disabled={!groupData}>
             <FaPlus /> Add a transaction
           </Button>
         </Center>
@@ -235,7 +235,9 @@ export const AddTransactionDialog = ({
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancel</Button>
                 </Dialog.ActionTrigger>
-                <Button type="submit">Add</Button>
+                <Button type="submit" loading={mutation.isPending}>
+                  Add
+                </Button>
               </Dialog.Footer>
             </form>
             <Dialog.CloseTrigger asChild>

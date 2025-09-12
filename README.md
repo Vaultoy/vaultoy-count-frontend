@@ -25,3 +25,7 @@ npm install
 ```sh
 npm run dev
 ```
+
+- Open https://localhost:5173
+
+- Accept the eventual warning about the self-signed HTTPS certificate

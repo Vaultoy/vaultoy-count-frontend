@@ -12,6 +12,7 @@ import { Toaster } from "./components/ui/toaster";
 import { AppHomePage } from "./pages/app/AppHome";
 import { GroupPage } from "./pages/app/GroupPage/GroupPage";
 import { ErrorPage } from "./pages/ErrorPage";
+import { UserContextProvider } from "./contexts/UserContext";
 
 const queryClient = new QueryClient();
 
@@ -29,28 +30,30 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ChakraProvider value={system}>
-        <Toaster />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
+        <UserContextProvider>
+          <Toaster />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
 
-            <Route path="/login" element={<LoginSignup isLogin />} />
-            <Route path="/signup" element={<LoginSignup isLogin={false} />} />
+              <Route path="/login" element={<LoginSignup isLogin />} />
+              <Route path="/signup" element={<LoginSignup isLogin={false} />} />
 
-            <Route path="/app" element={<AppHomePage />} />
-            <Route path="/app/group/:groupId" element={<GroupPage />} />
+              <Route path="/app" element={<AppHomePage />} />
+              <Route path="/app/group/:groupId" element={<GroupPage />} />
 
-            <Route
-              path="*"
-              element={
-                <ErrorPage
-                  title="404 - Page Not Found"
-                  description="Unfortunately, the page you were looking for was not found."
-                />
-              }
-            />
-          </Routes>
-        </BrowserRouter>
+              <Route
+                path="*"
+                element={
+                  <ErrorPage
+                    title="404 - Page Not Found"
+                    description="Unfortunately, the page you were looking for was not found."
+                  />
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </UserContextProvider>
       </ChakraProvider>
     </QueryClientProvider>
   );
