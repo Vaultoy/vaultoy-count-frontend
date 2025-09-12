@@ -16,10 +16,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { FaAnglesRight } from "react-icons/fa6";
 import { NavLink } from "react-router";
+import {
+  decrypt,
+  decryptGroupEncryptionKey,
+  encrypt,
+} from "@/utils/encryption";
+import { UserContext } from "@/contexts/UserContext";
+import { UNKNOWN_ERROR_TOAST } from "@/components/toastMessages";
 
 const formValuesSchema = z.object({
   name: z.string().min(3).max(100),
@@ -28,11 +35,49 @@ const formValuesSchema = z.object({
 export const AppHomePage = () => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const user = useContext(UserContext);
 
   const { data } = useQuery({
     queryKey: ["getGroupsAll"],
     queryFn: getGroupsQuery,
   });
+
+  const [decryptedGroups, setDecryptedGroups] = useState<
+    { id: number; name: string; encryptionKey: CryptoKey }[]
+  >([]);
+
+  useEffect(() => {
+    const decryptGroups = async () => {
+      console.log("Decrypting groups...", { user, data });
+      if (!user || !user.user || !data || !data.groups) return;
+
+      const groups = await Promise.all(
+        data.groups.map(async (group) => {
+          const groupEncryptionKey = await decryptGroupEncryptionKey(
+            group.encryptedGroupEncryptionKey,
+            user.user?.encryptionKey as CryptoKey
+          );
+
+          return {
+            id: group.id,
+            name: new TextDecoder().decode(
+              await decrypt(group.name, groupEncryptionKey)
+            ),
+            encryptionKey: groupEncryptionKey,
+          };
+        })
+      );
+
+      if (!active) return;
+      setDecryptedGroups(groups);
+    };
+
+    let active = true;
+    decryptGroups();
+    return () => {
+      active = false;
+    };
+  }, [user, data]);
 
   const {
     register,
@@ -79,8 +124,29 @@ export const AppHomePage = () => {
   });
 
   const onSubmit = handleSubmit(async (data) => {
+    if (!user || !user.user?.encryptionKey) {
+      toaster.create(UNKNOWN_ERROR_TOAST);
+      return;
+    }
+
+    const groupEncryptionKeyRaw = crypto.getRandomValues(new Uint8Array(32));
+
+    const encryptedGroupEncryptionKey = await encrypt(
+      groupEncryptionKeyRaw,
+      user.user.encryptionKey
+    );
+
+    const groupEncryptionKey = await decryptGroupEncryptionKey(
+      encryptedGroupEncryptionKey,
+      user.user.encryptionKey
+    );
+
     mutation.mutate({
-      name: data.name,
+      name: await encrypt(
+        new TextEncoder().encode(data.name),
+        groupEncryptionKey
+      ),
+      encryptedGroupEncryptionKey,
     });
   });
 
@@ -89,7 +155,7 @@ export const AppHomePage = () => {
       <Heading fontSize="3xl" marginBottom="1em">
         Your groups
       </Heading>
-      {(data?.groups ?? []).map((group) => (
+      {decryptedGroups.map((group) => (
         <NavLink to={`/app/group/${group.id}`} key={group.id}>
           <Card.Root width="40em">
             <Card.Body>

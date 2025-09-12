@@ -1,17 +1,16 @@
 export const encrypt = async (
-  data: string,
+  data: Uint8Array<ArrayBuffer>,
   key: CryptoKey
 ): Promise<string> => {
   const iv = crypto.getRandomValues(new Uint8Array(12));
 
-  const encodedData = new TextEncoder().encode(data);
   const encryptedData = await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
       iv: iv,
     },
     key,
-    encodedData
+    data
   );
 
   // Combine iv and encrypted data for storage/transmission
@@ -26,7 +25,7 @@ export const encrypt = async (
 export const decrypt = async (
   encryptedDataBase64: string,
   key: CryptoKey
-): Promise<string> => {
+): Promise<Uint8Array<ArrayBuffer>> => {
   const combined = Uint8Array.from(atob(encryptedDataBase64), (c) =>
     c.charCodeAt(0)
   );
@@ -43,5 +42,20 @@ export const decrypt = async (
     encryptedData
   );
 
-  return new TextDecoder().decode(decryptedData);
+  return new Uint8Array(decryptedData);
+};
+
+export const decryptGroupEncryptionKey = async (
+  encryptedGroupEncryptionKey: string,
+  userEncryptionKey: CryptoKey
+): Promise<CryptoKey> => {
+  const decryptedKeyRaw = await decrypt(
+    encryptedGroupEncryptionKey,
+    userEncryptionKey
+  );
+
+  return crypto.subtle.importKey("raw", decryptedKeyRaw, "AES-GCM", false, [
+    "encrypt",
+    "decrypt",
+  ]);
 };

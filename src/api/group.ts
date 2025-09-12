@@ -1,14 +1,16 @@
 import { fetchApi } from "./fetch";
 
-export const createGroupMutation = async ({ name }: { name: string }) => {
-  return fetchApi("POST", "/v1/group", {
-    name,
-  });
+export const createGroupMutation = async (data: {
+  name: string;
+  encryptedGroupEncryptionKey: string;
+}) => {
+  return fetchApi("POST", "/v1/group", data);
 };
 
 interface Group {
   id: number;
-  name: string;
+  name: string; // encrypted
+  encryptedGroupEncryptionKey: string; // Base64 encoded and encrypted with user's encryption key
 }
 
 export interface GroupMember {
