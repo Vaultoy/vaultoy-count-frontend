@@ -25,6 +25,12 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import {
+  encryptNumber,
+  encryptNumberList,
+  encryptString,
+} from "@/utils/encryption";
+import { UNKNOWN_ERROR_TOAST } from "@/components/toastMessages";
 
 const formValuesSchema = z.object({
   name: z.string().min(3).max(100),
@@ -52,7 +58,7 @@ const formValuesSchema = z.object({
 export const AddTransactionDialog = ({
   groupData,
 }: {
-  groupData: GroupExtended | undefined;
+  groupData: GroupExtended<false> | undefined;
 }) => {
   const { groupId } = useParams<{ groupId: string }>();
 
@@ -95,23 +101,32 @@ export const AddTransactionDialog = ({
     },
     onError: (error) => {
       console.error("Login failed", error);
-
-      toaster.create({
-        title: "An unknown error occurred",
-        description: `Try to refresh your page or try again later.`,
-        type: "error",
-      });
+      toaster.create(UNKNOWN_ERROR_TOAST);
     },
   });
 
   const onSubmit = handleSubmit(async (data) => {
+    if (!groupData) {
+      console.error("Group data is undefined");
+      toaster.create(UNKNOWN_ERROR_TOAST);
+      return;
+    }
+
     mutation.mutate({
       groupId: groupId as string,
-      name: data.name,
-      amount: data.amount,
-      fromUserId: data.fromUserId,
-      toUserIds: data.toUserIds,
-      date: Date.now(),
+      transactionData: {
+        name: await encryptString(data.name, groupData.groupEncryptionKey),
+        amount: await encryptNumber(data.amount, groupData.groupEncryptionKey),
+        fromUserId: await encryptNumber(
+          data.fromUserId,
+          groupData.groupEncryptionKey
+        ),
+        toUserIds: await encryptNumberList(
+          data.toUserIds,
+          groupData.groupEncryptionKey
+        ),
+        date: await encryptNumber(Date.now(), groupData.groupEncryptionKey),
+      },
     });
   });
 

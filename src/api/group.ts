@@ -46,26 +46,14 @@ export const getGroupQuery = async (
   return response.json();
 };
 
+type NewGroupTransaction = Omit<GroupTransaction, "id">;
+
 export const postAddTransactionMutation = async ({
   groupId,
-  name,
-  amount,
-  fromUserId,
-  toUserIds,
-  date,
+  transactionData,
 }: {
   groupId: string;
-  name: string;
-  amount: number;
-  fromUserId: number;
-  toUserIds: number[];
-  date: number;
+  transactionData: NewGroupTransaction;
 }) => {
-  return fetchApi("POST", `/v1/group/${groupId}/transaction`, {
-    name,
-    amount,
-    fromUserId,
-    toUserIds,
-    date,
-  });
+  return fetchApi("POST", `/v1/group/${groupId}/transaction`, transactionData);
 };

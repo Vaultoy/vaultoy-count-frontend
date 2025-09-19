@@ -22,6 +22,7 @@ import { UserContext } from "@/contexts/UserContext";
 import {
   decryptGroupEncryptionKey,
   decryptNumber,
+  decryptNumberList,
   decryptString,
 } from "@/utils/encryption";
 
@@ -38,8 +39,9 @@ export const GroupPage = () => {
         : Promise.resolve(null),
   });
 
-  const [decryptedGroup, setDecryptedGroup] =
-    useState<GroupExtended<false> | null>(null);
+  const [decryptedGroup, setDecryptedGroup] = useState<
+    GroupExtended<false> | undefined
+  >(undefined);
 
   useEffect(() => {
     const decryptGroup = async () => {
@@ -53,7 +55,7 @@ export const GroupPage = () => {
       const group = {
         ...data.group,
         name: await decryptString(data.group.name, groupEncryptionKey),
-        encryptedGroupEncryptionKey: groupEncryptionKey, // That is a terrible name as when decrypted it is not encrypted anymore
+        groupEncryptionKey,
         members: data.group.members,
         transactions: await Promise.all(
           data.group.transactions.map(async (transaction) => ({
@@ -65,10 +67,9 @@ export const GroupPage = () => {
               transaction.fromUserId,
               groupEncryptionKey
             ),
-            toUserIds: await Promise.all(
-              transaction.toUserIds.map(
-                async (id) => await decryptNumber(id, groupEncryptionKey)
-              )
+            toUserIds: await decryptNumberList(
+              transaction.toUserIds,
+              groupEncryptionKey
             ),
           }))
         ),
@@ -134,6 +135,8 @@ export const GroupPage = () => {
             <Text>🙅 No transactions yet.</Text>
           )}
 
+          <AddTransactionDialog groupData={decryptedGroup} />
+
           {decryptedGroup?.transactions.map((transaction) => (
             <Card.Root key={transaction.id} width="100%">
               <Card.Body>
@@ -156,8 +159,6 @@ export const GroupPage = () => {
             </Card.Root>
           ))}
         </VStack>
-
-        <AddTransactionDialog groupData={data?.group} />
       </Card.Body>
       <Card.Footer />
     </Card.Root>

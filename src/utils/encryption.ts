@@ -71,6 +71,28 @@ const decryptAndDecodeGenerator = <T>(
   };
 };
 
+const encryptListGenerator = <T>(
+  encryptSingle: (data: T, key: CryptoKey) => Promise<string>
+): ((data: T[], key: CryptoKey) => Promise<Encrypted<T, true>[]>) => {
+  return async (data: T[], key: CryptoKey): Promise<Encrypted<T, true>[]> => {
+    return Promise.all(data.map((value) => encryptSingle(value, key)));
+  };
+};
+
+const decryptListGenerator = <T>(
+  decryptSingle: (data: Encrypted<T, true>, key: CryptoKey) => Promise<T>
+): ((
+  data: Encrypted<T, true>[],
+  key: CryptoKey
+) => Promise<Encrypted<T, false>[]>) => {
+  return async (
+    data: Encrypted<T, true>[],
+    key: CryptoKey
+  ): Promise<Encrypted<T, false>[]> => {
+    return Promise.all(data.map((value) => decryptSingle(value, key)));
+  };
+};
+
 export const encryptString = encodeAndEncryptGenerator<string>((data) =>
   new TextEncoder().encode(data)
 );
@@ -84,6 +106,12 @@ export const encryptNumber = encodeAndEncryptGenerator<number>((data) =>
 export const decryptNumber = decryptAndDecodeGenerator<number>((data) =>
   parseInt(new TextDecoder().decode(data))
 );
+
+export const encryptNumberList = encryptListGenerator<number>(encryptNumber);
+export const decryptNumberList = decryptListGenerator<number>(decryptNumber);
+
+export const encryptStringList = encryptListGenerator<string>(encryptString);
+export const decryptStringList = decryptListGenerator<string>(decryptString);
 
 export const encryptGroupEncryptionKey = async (
   groupEncryptionKey: Uint8Array<ArrayBuffer>,

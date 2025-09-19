@@ -53,8 +53,6 @@ export const AppHomePage = () => {
 
       const groups = await Promise.all(
         data.groups.map(async (group) => {
-          console.log("GEKey:", group.groupEncryptionKey);
-
           const groupEncryptionKey = await decryptGroupEncryptionKey(
             group.groupEncryptionKey,
             user.user?.encryptionKey as CryptoKey
@@ -146,8 +144,6 @@ export const AppHomePage = () => {
       encryptedGroupEncryptionKey,
     });
   });
-
-  console.log(data?.groups);
 
   return (
     <VStack marginTop="4em">
