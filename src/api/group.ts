@@ -1,3 +1,4 @@
+import type { Encrypted } from "@/types";
 import { fetchApi } from "./fetch";
 
 export const createGroupMutation = async (data: {
@@ -7,10 +8,10 @@ export const createGroupMutation = async (data: {
   return fetchApi("POST", "/v1/group", data);
 };
 
-interface Group {
+interface Group<isEncrypted extends boolean = true> {
   id: number;
-  name: string; // encrypted
-  encryptedGroupEncryptionKey: string; // Base64 encoded and encrypted with user's encryption key
+  name: Encrypted<string, isEncrypted>; // encrypted with group encryption key
+  groupEncryptionKey: Encrypted<CryptoKey, isEncrypted>; // encrypted with user's encryption key
 }
 
 export interface GroupMember {
@@ -18,20 +19,19 @@ export interface GroupMember {
   username: string;
 }
 
-export interface GroupTransaction {
+export interface GroupTransaction<isEncrypted extends boolean = true> {
   id: number;
-  name: string;
-  fromUserId: number;
-  toUserIds: number[];
-  amount: number;
-  date: number;
+  name: Encrypted<string, isEncrypted>;
+  fromUserId: Encrypted<number, isEncrypted>;
+  toUserIds: Encrypted<number, isEncrypted>[];
+  amount: Encrypted<number, isEncrypted>;
+  date: Encrypted<number, isEncrypted>;
 }
 
-export interface GroupExtended {
-  id: number;
-  name: string;
+export interface GroupExtended<isEncrypted extends boolean = true>
+  extends Group<isEncrypted> {
   members: GroupMember[];
-  transactions: GroupTransaction[];
+  transactions: GroupTransaction<isEncrypted>[];
 }
 
 export const getGroupsQuery = async (): Promise<{ groups: Group[] }> => {

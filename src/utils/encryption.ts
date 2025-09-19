@@ -1,4 +1,6 @@
-export const encrypt = async (
+import type { Encrypted } from "@/types";
+
+const encrypt = async (
   data: Uint8Array<ArrayBuffer>,
   key: CryptoKey
 ): Promise<string> => {
@@ -22,7 +24,7 @@ export const encrypt = async (
   return btoa(String.fromCharCode(...combined));
 };
 
-export const decrypt = async (
+const decrypt = async (
   encryptedDataBase64: string,
   key: CryptoKey
 ): Promise<Uint8Array<ArrayBuffer>> => {
@@ -45,6 +47,50 @@ export const decrypt = async (
   return new Uint8Array(decryptedData);
 };
 
+const encodeAndEncryptGenerator = <T>(
+  encoder: (data: T) => Uint8Array<ArrayBuffer>
+): ((data: T, key: CryptoKey) => Promise<Encrypted<T, true>>) => {
+  return async (data: T, key: CryptoKey): Promise<Encrypted<T, true>> => {
+    const dataBuffer = encoder(data);
+    return encrypt(dataBuffer, key);
+  };
+};
+
+const decryptAndDecodeGenerator = <T>(
+  decoder: (data: Uint8Array<ArrayBuffer>) => T
+): ((
+  encryptedData: Encrypted<T, true>,
+  key: CryptoKey
+) => Promise<Encrypted<T, false>>) => {
+  return async (
+    encryptedData: Encrypted<T, true>,
+    key: CryptoKey
+  ): Promise<Encrypted<T, false>> => {
+    const decryptedBuffer = await decrypt(encryptedData, key);
+    return decoder(decryptedBuffer);
+  };
+};
+
+export const encryptString = encodeAndEncryptGenerator<string>((data) =>
+  new TextEncoder().encode(data)
+);
+export const decryptString = decryptAndDecodeGenerator<string>((data) =>
+  new TextDecoder().decode(data)
+);
+
+export const encryptNumber = encodeAndEncryptGenerator<number>((data) =>
+  new TextEncoder().encode(data.toString())
+);
+export const decryptNumber = decryptAndDecodeGenerator<number>((data) =>
+  parseInt(new TextDecoder().decode(data))
+);
+
+export const encryptGroupEncryptionKey = async (
+  groupEncryptionKey: Uint8Array<ArrayBuffer>,
+  userEncryptionKey: CryptoKey
+): Promise<string> => {
+  return encrypt(groupEncryptionKey, userEncryptionKey);
+};
 export const decryptGroupEncryptionKey = async (
   encryptedGroupEncryptionKey: string,
   userEncryptionKey: CryptoKey

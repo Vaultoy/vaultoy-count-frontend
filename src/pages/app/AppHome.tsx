@@ -21,9 +21,10 @@ import { FaPlus } from "react-icons/fa";
 import { FaAnglesRight } from "react-icons/fa6";
 import { NavLink } from "react-router";
 import {
-  decrypt,
   decryptGroupEncryptionKey,
-  encrypt,
+  decryptString,
+  encryptGroupEncryptionKey,
+  encryptString,
 } from "@/utils/encryption";
 import { UserContext } from "@/contexts/UserContext";
 import { UNKNOWN_ERROR_TOAST } from "@/components/toastMessages";
@@ -48,21 +49,20 @@ export const AppHomePage = () => {
 
   useEffect(() => {
     const decryptGroups = async () => {
-      console.log("Decrypting groups...", { user, data });
       if (!user || !user.user || !data || !data.groups) return;
 
       const groups = await Promise.all(
         data.groups.map(async (group) => {
+          console.log("GEKey:", group.groupEncryptionKey);
+
           const groupEncryptionKey = await decryptGroupEncryptionKey(
-            group.encryptedGroupEncryptionKey,
+            group.groupEncryptionKey,
             user.user?.encryptionKey as CryptoKey
           );
 
           return {
             id: group.id,
-            name: new TextDecoder().decode(
-              await decrypt(group.name, groupEncryptionKey)
-            ),
+            name: await decryptString(group.name, groupEncryptionKey),
             encryptionKey: groupEncryptionKey,
           };
         })
@@ -131,7 +131,7 @@ export const AppHomePage = () => {
 
     const groupEncryptionKeyRaw = crypto.getRandomValues(new Uint8Array(32));
 
-    const encryptedGroupEncryptionKey = await encrypt(
+    const encryptedGroupEncryptionKey = await encryptGroupEncryptionKey(
       groupEncryptionKeyRaw,
       user.user.encryptionKey
     );
@@ -142,13 +142,12 @@ export const AppHomePage = () => {
     );
 
     mutation.mutate({
-      name: await encrypt(
-        new TextEncoder().encode(data.name),
-        groupEncryptionKey
-      ),
+      name: await encryptString(data.name, groupEncryptionKey),
       encryptedGroupEncryptionKey,
     });
   });
+
+  console.log(data?.groups);
 
   return (
     <VStack marginTop="4em">

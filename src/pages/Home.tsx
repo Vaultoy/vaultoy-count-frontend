@@ -1,10 +1,11 @@
-import { Button, Heading, HStack, VStack } from "@chakra-ui/react";
+import { Logo } from "@/components/Logo";
+import { Button, HStack, VStack } from "@chakra-ui/react";
 import { Link } from "react-router";
 
 export const Home = () => {
   return (
     <VStack marginTop="5em">
-      <Heading>Secure Count</Heading>
+      <Logo />
       <HStack>
         <Link to="/login">
           <Button>Log In</Button>

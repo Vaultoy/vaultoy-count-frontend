@@ -1,4 +1,8 @@
-import { getGroupQuery, type GroupMember } from "../../../api/group";
+import {
+  getGroupQuery,
+  type GroupExtended,
+  type GroupMember,
+} from "@/api/group";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import { ErrorPage } from "../../ErrorPage";
@@ -13,15 +17,18 @@ import {
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
 import { AddTransactionDialog } from "./AddTransactionDialog";
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/contexts/UserContext";
+import {
+  decryptGroupEncryptionKey,
+  decryptNumber,
+  decryptString,
+} from "@/utils/encryption";
 
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const user = useContext(UserContext);
-
-  console.log({ user });
 
   const { data } = useQuery({
     queryKey: ["getGroup", groupId],
@@ -31,10 +38,54 @@ export const GroupPage = () => {
         : Promise.resolve(null),
   });
 
-  const transactionsSorted = useMemo(
-    () => data?.group.transactions.sort((a, b) => b.date - a.date),
-    [data?.group.transactions]
-  );
+  const [decryptedGroup, setDecryptedGroup] =
+    useState<GroupExtended<false> | null>(null);
+
+  useEffect(() => {
+    const decryptGroup = async () => {
+      if (!user || !user.user || !data || !data.group) return;
+
+      const groupEncryptionKey = await decryptGroupEncryptionKey(
+        data.group.groupEncryptionKey,
+        user.user.encryptionKey
+      );
+
+      const group = {
+        ...data.group,
+        name: await decryptString(data.group.name, groupEncryptionKey),
+        encryptedGroupEncryptionKey: groupEncryptionKey, // That is a terrible name as when decrypted it is not encrypted anymore
+        members: data.group.members,
+        transactions: await Promise.all(
+          data.group.transactions.map(async (transaction) => ({
+            ...transaction,
+            date: await decryptNumber(transaction.date, groupEncryptionKey),
+            name: await decryptString(transaction.name, groupEncryptionKey),
+            amount: await decryptNumber(transaction.amount, groupEncryptionKey),
+            fromUserId: await decryptNumber(
+              transaction.fromUserId,
+              groupEncryptionKey
+            ),
+            toUserIds: await Promise.all(
+              transaction.toUserIds.map(
+                async (id) => await decryptNumber(id, groupEncryptionKey)
+              )
+            ),
+          }))
+        ),
+      };
+
+      group.transactions.sort((a, b) => b.date - a.date);
+
+      if (!active) return;
+      setDecryptedGroup(group);
+    };
+
+    let active = true;
+    decryptGroup();
+    return () => {
+      active = false;
+    };
+  }, [user, data]);
 
   if (!groupId || isNaN(Number(groupId))) {
     return (
@@ -67,21 +118,23 @@ export const GroupPage = () => {
           <MdArrowBack /> Back
         </Button>
         <Center>
-          <Heading>{data?.group.name}</Heading>
+          <Heading>{decryptedGroup?.name}</Heading>
         </Center>
       </Card.Header>
       <Card.Body>
         <VStack>
           <Text marginBottom="3em">
             Members:{" "}
-            {data?.group.members.map((member) => member.username).join(", ")}
+            {decryptedGroup?.members
+              .map((member) => member.username)
+              .join(", ")}
           </Text>
 
-          {data?.group.transactions.length === 0 && (
+          {decryptedGroup?.transactions.length === 0 && (
             <Text>🙅 No transactions yet.</Text>
           )}
 
-          {transactionsSorted?.map((transaction) => (
+          {decryptedGroup?.transactions.map((transaction) => (
             <Card.Root key={transaction.id} width="100%">
               <Card.Body>
                 <Flex alignItems="center" justifyContent="space-between">

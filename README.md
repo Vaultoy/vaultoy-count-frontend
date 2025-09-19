@@ -29,3 +29,10 @@ npm run dev
 - Open https://localhost:5173
 
 - Accept the eventual warning about the self-signed HTTPS certificate
+
+## Logo
+
+Made by combining and modifying the two following assets :
+
+- [Ant Design](https://github.com/ant-design/ant-design-icons/blob/master/packages/icons-svg/svg/outlined/safety.svg) (`AiOutlineSafety` in React Icons)
+- [Lucide](https://lucide.dev/icons/split) (`LuSplit` in React Icons)
