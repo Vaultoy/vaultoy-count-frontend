@@ -95,3 +95,11 @@ export const getInvitationQuery = async (
 ): Promise<GroupInvitation | null> => {
   return (await fetchApi("GET", `/v1/group/${groupId}/invitation`)).json();
 };
+
+export const deleteInvitationMutation = async ({
+  groupId,
+}: {
+  groupId: string;
+}) => {
+  return fetchApi("DELETE", `/v1/group/${groupId}/invitation`);
+};

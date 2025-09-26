@@ -1,5 +1,6 @@
 import {
   createInvitationMutation,
+  deleteInvitationMutation,
   getInvitationQuery,
   type GroupExtended,
 } from "@/api/group";
@@ -12,6 +13,8 @@ import {
   CloseButton,
   Text,
   Card,
+  HStack,
+  VStack,
 } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
 import { useContext, useEffect, useState } from "react";
@@ -26,6 +29,8 @@ import {
   deriveVerificationTokenFromLinkSecret,
 } from "@/utils/keyDerivation";
 import { UserContext } from "@/contexts/UserContext";
+import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
+import { btoa_uri } from "@/utils/base64Uri";
 
 const urlFromInvitationLinkSecret = (
   groupId: string,
@@ -36,7 +41,7 @@ const urlFromInvitationLinkSecret = (
       "/join/" +
       groupId +
       "/" +
-      encodeURIComponent(invitationLinkSecret)
+      btoa_uri(invitationLinkSecret)
   );
   return url.toString();
 };
@@ -48,6 +53,7 @@ export const ShareGroupDialog = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
+  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
   const { user } = useContext(UserContext);
   const queryClient = useQueryClient();
@@ -66,8 +72,6 @@ export const ShareGroupDialog = ({
       if (!existingInvitation?.invitationLinkSecret || !groupData) {
         return;
       }
-
-      console.log(existingInvitation.invitationLinkSecret);
 
       const invitationLinkSecretKey = await decryptEncryptionKey(
         existingInvitation?.invitationLinkSecret,
@@ -89,7 +93,7 @@ export const ShareGroupDialog = ({
     existingInvitationDecrypt();
   }, [existingInvitation, groupData]);
 
-  const mutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: createInvitationMutation,
     onSuccess: async (data) => {
       if (data.status === 403) {
@@ -123,12 +127,48 @@ export const ShareGroupDialog = ({
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: deleteInvitationMutation,
+    onSuccess: async (data) => {
+      if (data.status === 403) {
+        toaster.create({
+          title: "You are not allowed to delete this invitation",
+          description: "Only group administrators can delete sharing links.",
+          type: "error",
+        });
+        setUrl(null);
+        return;
+      }
+      if (data.status !== 200) {
+        toaster.create(unknownErrorToastWithStatus(data.status));
+        setUrl(null);
+        return;
+      }
+
+      toaster.create({
+        title: "Sharing link deleted successfully",
+        type: "success",
+      });
+
+      setUrl(null);
+      setCopiedToClipboard(false);
+
+      queryClient.invalidateQueries({
+        queryKey: ["getInvitation", groupData?.id],
+      });
+    },
+    onError: (error) => {
+      console.error("Mutation failed", error);
+      toaster.create(UNKNOWN_ERROR_TOAST);
+      setUrl(null);
+    },
+  });
+
   const createShareGroup = async () => {
     const invitationLinkSecretRaw = crypto.getRandomValues(new Uint8Array(32));
     const invitationLinkSecret = btoa(
       String.fromCharCode(...invitationLinkSecretRaw)
     );
-
     const invitationVerificationToken =
       await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
 
@@ -158,7 +198,7 @@ export const ShareGroupDialog = ({
 
     setUrl(url);
 
-    mutation.mutate({
+    createMutation.mutate({
       groupId: groupData!.id.toString(),
       invitationData: {
         invitationVerificationToken,
@@ -199,16 +239,51 @@ export const ShareGroupDialog = ({
                 </Text>
               )}
               {isGroupAdmin && url && (
-                <Card.Root marginBottom="1em">
-                  <Card.Body>
-                    <Text>{url}</Text>
-                  </Card.Body>
-                </Card.Root>
+                <VStack>
+                  <Card.Root marginBottom="1em">
+                    <Card.Body>
+                      <Text wordBreak="break-all" marginRight="1em">
+                        {url}
+                      </Text>
+                    </Card.Body>
+                  </Card.Root>
+                  <HStack>
+                    <Button
+                      onClick={() => {
+                        navigator.clipboard.writeText(url);
+                        setCopiedToClipboard(true);
+                        toaster.create({
+                          title: "Link copied to clipboard",
+                          type: "success",
+                        });
+                      }}
+                    >
+                      {copiedToClipboard ? (
+                        <LuClipboardCheck />
+                      ) : (
+                        <LuClipboardCopy />
+                      )}
+                      Copy
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        deleteMutation.mutate({
+                          groupId: groupData!.id.toString(),
+                        });
+                      }}
+                      colorScheme="red"
+                      loading={deleteMutation.isPending}
+                    >
+                      <LuDelete />
+                      Delete
+                    </Button>
+                  </HStack>
+                </VStack>
               )}
               {isGroupAdmin && !url && (
                 <Center>
                   <Button
-                    loading={mutation.isPending}
+                    loading={createMutation.isPending}
                     onClick={createShareGroup}
                   >
                     Create link

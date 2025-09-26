@@ -5,21 +5,27 @@ import {
 } from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toaster";
 import { UserContext } from "@/contexts/UserContext";
+import { atob_uri } from "@/utils/base64Uri";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
 import {
   deriveVerificationTokenFromLinkSecret,
   stringToCryptoKey,
 } from "@/utils/keyDerivation";
-import { AbsoluteCenter, ProgressCircle } from "@chakra-ui/react";
+import { AbsoluteCenter, Heading, ProgressCircle } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 
 export const JoinInvitation = () => {
-  const { groupId, invitationLinkSecret } = useParams<{
-    groupId: string;
-    invitationLinkSecret: string;
-  }>();
+  const { groupId, invitationLinkSecret: invitationLinkSecretTransformed } =
+    useParams<{
+      groupId: string;
+      invitationLinkSecret: string;
+    }>();
+
+  const invitationLinkSecret = invitationLinkSecretTransformed
+    ? atob_uri(invitationLinkSecretTransformed)
+    : undefined;
 
   const navigate = useNavigate();
 
@@ -160,12 +166,20 @@ export const JoinInvitation = () => {
 
   return (
     <AbsoluteCenter>
-      <ProgressCircle.Root value={null} size="xl">
-        <ProgressCircle.Circle>
-          <ProgressCircle.Track />
-          <ProgressCircle.Range />
-        </ProgressCircle.Circle>
-      </ProgressCircle.Root>
+      {(firstMutation.isPending || secondMutation.isPending) && (
+        <ProgressCircle.Root value={null} size="xl">
+          <ProgressCircle.Circle>
+            <ProgressCircle.Track />
+            <ProgressCircle.Range />
+          </ProgressCircle.Circle>
+        </ProgressCircle.Root>
+      )}
+      {(firstMutation.isSuccess && secondMutation.isSuccess) ||
+        ((firstMutation.isError || secondMutation.isError) && (
+          <Heading size="xl">
+            There was an error joining the group. Please try again later.
+          </Heading>
+        ))}
     </AbsoluteCenter>
   );
 };
