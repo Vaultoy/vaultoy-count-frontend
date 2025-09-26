@@ -1,6 +1,9 @@
-import { createInvitationMutation, type GroupExtended } from "@/api/group";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router";
+import {
+  createInvitationMutation,
+  getInvitationQuery,
+  type GroupExtended,
+} from "@/api/group";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Center,
@@ -10,16 +13,33 @@ import {
   Text,
   Card,
 } from "@chakra-ui/react";
-import { toaster } from "../../../components/ui/toaster";
-import { useContext, useState } from "react";
+import { toaster } from "@/components/ui/toaster";
+import { useContext, useEffect, useState } from "react";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
 import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { FaShareNodes } from "react-icons/fa6";
-import { deriveVerificationTokenFromLinkSecret } from "@/utils/keyDerivation";
+import {
+  cryptoKeyToString,
+  deriveVerificationTokenFromLinkSecret,
+} from "@/utils/keyDerivation";
 import { UserContext } from "@/contexts/UserContext";
+
+const urlFromInvitationLinkSecret = (
+  groupId: string,
+  invitationLinkSecret: string
+) => {
+  const url = new URL(
+    window.location.origin +
+      "/join/" +
+      groupId +
+      "/" +
+      encodeURIComponent(invitationLinkSecret)
+  );
+  return url.toString();
+};
 
 export const ShareGroupDialog = ({
   groupData,
@@ -30,6 +50,44 @@ export const ShareGroupDialog = ({
   const [url, setUrl] = useState<string | null>(null);
 
   const { user } = useContext(UserContext);
+  const queryClient = useQueryClient();
+
+  const { data: existingInvitation, isLoading: isLoadingExistingInvitation } =
+    useQuery({
+      queryKey: ["getInvitation", groupData?.id],
+      queryFn: () =>
+        groupData?.id && !isNaN(Number(groupData?.id))
+          ? getInvitationQuery(groupData?.id.toString())
+          : Promise.resolve(null),
+    });
+
+  useEffect(() => {
+    const existingInvitationDecrypt = async () => {
+      if (!existingInvitation?.invitationLinkSecret || !groupData) {
+        return;
+      }
+
+      console.log(existingInvitation.invitationLinkSecret);
+
+      const invitationLinkSecretKey = await decryptEncryptionKey(
+        existingInvitation?.invitationLinkSecret,
+        groupData.groupEncryptionKey
+      );
+
+      const invitationLinkSecret = await cryptoKeyToString(
+        invitationLinkSecretKey
+      );
+
+      const url = urlFromInvitationLinkSecret(
+        groupData.id.toString(),
+        invitationLinkSecret
+      );
+
+      setUrl(url);
+    };
+
+    existingInvitationDecrypt();
+  }, [existingInvitation, groupData]);
 
   const mutation = useMutation({
     mutationFn: createInvitationMutation,
@@ -54,8 +112,9 @@ export const ShareGroupDialog = ({
         type: "success",
       });
 
-      // TODO
-      // queryClient.invalidateQueries({ queryKey: ["getGroup", groupId] });
+      queryClient.invalidateQueries({
+        queryKey: ["getInvitation", groupData?.id],
+      });
     },
     onError: (error) => {
       console.error("Mutation failed", error);
@@ -92,22 +151,19 @@ export const ShareGroupDialog = ({
       invitationLinkSecretKey
     );
 
-    const url = new URL(
-      window.location.origin +
-        "/join/" +
-        groupData!.id +
-        "/" +
-        encodeURIComponent(invitationLinkSecret)
+    const url = urlFromInvitationLinkSecret(
+      groupData!.id.toString(),
+      invitationLinkSecret
     );
 
-    setUrl(url.toString());
+    setUrl(url);
 
     mutation.mutate({
       groupId: groupData!.id.toString(),
       invitationData: {
         invitationVerificationToken,
         invitationKey,
-        invitationLinkSecret,
+        invitationLinkSecret: encryptedInvitationLinkSecret,
       },
     });
   };
@@ -136,6 +192,7 @@ export const ShareGroupDialog = ({
             </Dialog.Header>
 
             <Dialog.Body>
+              {isLoadingExistingInvitation && <Text>Loading...</Text>}
               {!isGroupAdmin && (
                 <Text marginBottom="1em">
                   Only group administrators can create sharing links.

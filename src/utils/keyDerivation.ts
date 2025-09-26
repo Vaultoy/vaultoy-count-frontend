@@ -103,6 +103,11 @@ export const stringToCryptoKey = async (
 };
 
 export const cryptoKeyToString = async (key: CryptoKey): Promise<string> => {
+  // Check if the key is extractable
+  if (!key.extractable) {
+    throw new Error("Key is not extractable");
+  }
+
   const keyBuffer = new Uint8Array(
     await window.crypto.subtle.exportKey("raw", key)
   );

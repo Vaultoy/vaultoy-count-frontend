@@ -17,6 +17,7 @@ interface Group<isEncrypted extends boolean = true> {
 export interface GroupMember {
   userId: number;
   username: string;
+  rights: "admin" | "member";
 }
 
 export interface GroupTransaction<isEncrypted extends boolean = true> {
@@ -83,4 +84,14 @@ export const joinInvitationMutation = async ({
   };
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/join`, invitationData);
+};
+
+interface GroupInvitation {
+  invitationLinkSecret: string;
+}
+
+export const getInvitationQuery = async (
+  groupId: string
+): Promise<GroupInvitation | null> => {
+  return (await fetchApi("GET", `/v1/group/${groupId}/invitation`)).json();
 };

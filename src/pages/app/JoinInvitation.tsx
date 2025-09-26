@@ -150,8 +150,13 @@ export const JoinInvitation = () => {
       });
     };
 
+    if (!user) {
+      // Wait for user to be set in context
+      return;
+    }
+
     joinGroup();
-  }, []);
+  }, [user, groupId, invitationLinkSecret]);
 
   return (
     <AbsoluteCenter>
