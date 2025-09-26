@@ -30,7 +30,7 @@ import {
   encryptNumberList,
   encryptString,
 } from "@/utils/encryption";
-import { UNKNOWN_ERROR_TOAST } from "@/components/toastMessages";
+import { UNKNOWN_ERROR_TOAST, unknownErrorToastWithStatus } from "@/components/toastMessages";
 
 const formValuesSchema = z.object({
   name: z.string().min(3).max(100),
@@ -82,12 +82,7 @@ export const AddTransactionDialog = ({
     mutationFn: postAddTransactionMutation,
     onSuccess: async (data) => {
       if (data.status !== 200) {
-        toaster.create({
-          title: "An unknown error occurred",
-          description: `Try to refresh your page or try again later. Status: ${data.status}.`,
-          type: "error",
-        });
-
+        toaster.create(unknownErrorToastWithStatus(data.status));
         return;
       }
 

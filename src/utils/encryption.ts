@@ -113,13 +113,13 @@ export const decryptNumberList = decryptListGenerator<number>(decryptNumber);
 export const encryptStringList = encryptListGenerator<string>(encryptString);
 export const decryptStringList = decryptListGenerator<string>(decryptString);
 
-export const encryptGroupEncryptionKey = async (
+export const encryptEncryptionKey = async (
   groupEncryptionKey: Uint8Array<ArrayBuffer>,
   userEncryptionKey: CryptoKey
 ): Promise<string> => {
   return encrypt(groupEncryptionKey, userEncryptionKey);
 };
-export const decryptGroupEncryptionKey = async (
+export const decryptEncryptionKey = async (
   encryptedGroupEncryptionKey: string,
   userEncryptionKey: CryptoKey
 ): Promise<CryptoKey> => {
@@ -128,7 +128,8 @@ export const decryptGroupEncryptionKey = async (
     userEncryptionKey
   );
 
-  return crypto.subtle.importKey("raw", decryptedKeyRaw, "AES-GCM", false, [
+  // Exportable is required to create a shareable link, TODO: Find a better way
+  return crypto.subtle.importKey("raw", decryptedKeyRaw, "AES-GCM", true, [
     "encrypt",
     "decrypt",
   ]);

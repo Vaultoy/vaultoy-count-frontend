@@ -21,9 +21,9 @@ import { FaPlus } from "react-icons/fa";
 import { FaAnglesRight } from "react-icons/fa6";
 import { NavLink } from "react-router";
 import {
-  decryptGroupEncryptionKey,
+  decryptEncryptionKey,
   decryptString,
-  encryptGroupEncryptionKey,
+  encryptEncryptionKey,
   encryptString,
 } from "@/utils/encryption";
 import { UserContext } from "@/contexts/UserContext";
@@ -53,7 +53,7 @@ export const AppHomePage = () => {
 
       const groups = await Promise.all(
         data.groups.map(async (group) => {
-          const groupEncryptionKey = await decryptGroupEncryptionKey(
+          const groupEncryptionKey = await decryptEncryptionKey(
             group.groupEncryptionKey,
             user.user?.encryptionKey as CryptoKey
           );
@@ -129,12 +129,12 @@ export const AppHomePage = () => {
 
     const groupEncryptionKeyRaw = crypto.getRandomValues(new Uint8Array(32));
 
-    const encryptedGroupEncryptionKey = await encryptGroupEncryptionKey(
+    const encryptedGroupEncryptionKey = await encryptEncryptionKey(
       groupEncryptionKeyRaw,
       user.user.encryptionKey
     );
 
-    const groupEncryptionKey = await decryptGroupEncryptionKey(
+    const groupEncryptionKey = await decryptEncryptionKey(
       encryptedGroupEncryptionKey,
       user.user.encryptionKey
     );

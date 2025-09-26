@@ -14,17 +14,19 @@ import {
   Heading,
   Button,
   Center,
+  HStack,
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
 import { AddTransactionDialog } from "./AddTransactionDialog";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/contexts/UserContext";
 import {
-  decryptGroupEncryptionKey,
+  decryptEncryptionKey,
   decryptNumber,
   decryptNumberList,
   decryptString,
 } from "@/utils/encryption";
+import { ShareGroupDialog } from "./ShareGroupDialog";
 
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -47,7 +49,7 @@ export const GroupPage = () => {
     const decryptGroup = async () => {
       if (!user || !user.user || !data || !data.group) return;
 
-      const groupEncryptionKey = await decryptGroupEncryptionKey(
+      const groupEncryptionKey = await decryptEncryptionKey(
         data.group.groupEncryptionKey,
         user.user.encryptionKey
       );
@@ -111,6 +113,7 @@ export const GroupPage = () => {
       marginRight={{ base: "1em", md: "10em", lg: "30em" }}
     >
       <Card.Header>
+        <HStack  justifyContent="space-between">
         <Button
           onClick={() => navigate(-1)}
           width="fit-content"
@@ -118,9 +121,12 @@ export const GroupPage = () => {
         >
           <MdArrowBack /> Back
         </Button>
+        <ShareGroupDialog groupData={decryptedGroup} />
+        </HStack>
         <Center>
           <Heading>{decryptedGroup?.name}</Heading>
         </Center>
+       
       </Card.Header>
       <Card.Body>
         <VStack>
