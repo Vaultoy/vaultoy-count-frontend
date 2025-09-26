@@ -113,20 +113,19 @@ export const GroupPage = () => {
       marginRight={{ base: "1em", md: "10em", lg: "30em" }}
     >
       <Card.Header>
-        <HStack  justifyContent="space-between">
-        <Button
-          onClick={() => navigate(-1)}
-          width="fit-content"
-          variant="outline"
-        >
-          <MdArrowBack /> Back
-        </Button>
-        <ShareGroupDialog groupData={decryptedGroup} />
+        <HStack justifyContent="space-between">
+          <Button
+            onClick={() => navigate("/app")}
+            width="fit-content"
+            variant="outline"
+          >
+            <MdArrowBack /> Back
+          </Button>
+          <ShareGroupDialog groupData={decryptedGroup} />
         </HStack>
         <Center>
           <Heading>{decryptedGroup?.name}</Heading>
         </Center>
-       
       </Card.Header>
       <Card.Body>
         <VStack>

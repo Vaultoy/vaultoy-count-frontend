@@ -13,6 +13,7 @@ import { AppHomePage } from "./pages/app/AppHome";
 import { GroupPage } from "./pages/app/GroupPage/GroupPage";
 import { ErrorPage } from "./pages/ErrorPage";
 import { UserContextProvider } from "./contexts/UserContext";
+import { JoinInvitation } from "./pages/app/JoinInvitation";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,11 @@ const App = () => {
 
               <Route path="/app" element={<AppHomePage />} />
               <Route path="/app/group/:groupId" element={<GroupPage />} />
+
+              <Route
+                path="/join/:groupId/:invitationLinkSecret"
+                element={<JoinInvitation />}
+              />
 
               <Route
                 path="*"

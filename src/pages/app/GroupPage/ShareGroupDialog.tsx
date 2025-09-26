@@ -1,63 +1,51 @@
-import {
-  postAddTransactionMutation,
-  type GroupExtended,
-} from "../../../api/group";
+import { createInvitationMutation, type GroupExtended } from "@/api/group";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import {
-  VStack,
   Button,
   Center,
   Dialog,
   Portal,
-  Field,
   CloseButton,
-  Input,
-  Select,
-  createListCollection,
-  Fieldset,
-  CheckboxGroup,
-  Checkbox,
   Text,
   Card,
 } from "@chakra-ui/react";
 import { toaster } from "../../../components/ui/toaster";
-import * as z from "zod";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import {
-  decryptEncryptionKey,
-  encryptEncryptionKey,
-  encryptNumber,
-  encryptNumberList,
-  encryptString,
-} from "@/utils/encryption";
+import { useContext, useState } from "react";
+import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
 import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { FaShareNodes } from "react-icons/fa6";
-import scrypt from "scrypt-js";
+import { deriveVerificationTokenFromLinkSecret } from "@/utils/keyDerivation";
+import { UserContext } from "@/contexts/UserContext";
 
 export const ShareGroupDialog = ({
   groupData,
 }: {
   groupData: GroupExtended<false> | undefined;
 }) => {
-  const { groupId } = useParams<{ groupId: string }>();
-
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
-
   const [url, setUrl] = useState<string | null>(null);
 
+  const { user } = useContext(UserContext);
+
   const mutation = useMutation({
-    mutationFn: postAddTransactionMutation,
+    mutationFn: createInvitationMutation,
     onSuccess: async (data) => {
+      if (data.status === 403) {
+        toaster.create({
+          title: "You are not allowed to share this group",
+          description: "Only group administrators can create sharing links.",
+          type: "error",
+        });
+        setUrl(null);
+        return;
+      }
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
+        setUrl(null);
         return;
       }
 
@@ -66,29 +54,31 @@ export const ShareGroupDialog = ({
         type: "success",
       });
 
-      setOpen(false);
       // TODO
       // queryClient.invalidateQueries({ queryKey: ["getGroup", groupId] });
     },
     onError: (error) => {
-      console.error("Login failed", error);
+      console.error("Mutation failed", error);
       toaster.create(UNKNOWN_ERROR_TOAST);
+      setUrl(null);
     },
   });
 
   const createShareGroup = async () => {
     const invitationLinkSecretRaw = crypto.getRandomValues(new Uint8Array(32));
-
-    const invitationLinkSecretString = btoa(
+    const invitationLinkSecret = btoa(
       String.fromCharCode(...invitationLinkSecretRaw)
     );
+
+    const invitationVerificationToken =
+      await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
 
     const encryptedInvitationLinkSecret = await encryptEncryptionKey(
       invitationLinkSecretRaw,
       groupData!.groupEncryptionKey
     );
 
-    const invitationLinkSecret = await decryptEncryptionKey(
+    const invitationLinkSecretKey = await decryptEncryptionKey(
       encryptedInvitationLinkSecret,
       groupData!.groupEncryptionKey
     );
@@ -99,31 +89,34 @@ export const ShareGroupDialog = ({
 
     const invitationKey = await encryptEncryptionKey(
       groupEncryptionKeyBuffer,
-      invitationLinkSecret
-    );
-    const invitationValidationSaltString =
-      "secure_count_invitation_validation_salt";
-
-    const invitationValidationTokenBuffer = await window.crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(
-        invitationLinkSecretString + invitationValidationSaltString
-      )
-    );
-
-    const invitationValidationToken = btoa(
-      String.fromCharCode(...new Uint8Array(invitationValidationTokenBuffer))
+      invitationLinkSecretKey
     );
 
     const url = new URL(
       window.location.origin +
-        "/app/join/" +
+        "/join/" +
         groupData!.id +
         "/" +
-        invitationLinkSecretString
+        encodeURIComponent(invitationLinkSecret)
     );
+
     setUrl(url.toString());
+
+    mutation.mutate({
+      groupId: groupData!.id.toString(),
+      invitationData: {
+        invitationVerificationToken,
+        invitationKey,
+        invitationLinkSecret,
+      },
+    });
   };
+
+  const isGroupAdmin = user
+    ? groupData?.members.find(
+        (member) => member.userId === user.id && member.rights === "admin"
+      ) !== undefined
+    : false;
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
@@ -143,14 +136,19 @@ export const ShareGroupDialog = ({
             </Dialog.Header>
 
             <Dialog.Body>
-              {url && (
+              {!isGroupAdmin && (
+                <Text marginBottom="1em">
+                  Only group administrators can create sharing links.
+                </Text>
+              )}
+              {isGroupAdmin && url && (
                 <Card.Root marginBottom="1em">
                   <Card.Body>
                     <Text>{url}</Text>
                   </Card.Body>
                 </Card.Root>
               )}
-              {!url && (
+              {isGroupAdmin && !url && (
                 <Center>
                   <Button
                     loading={mutation.isPending}

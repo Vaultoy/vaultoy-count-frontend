@@ -57,3 +57,30 @@ export const postAddTransactionMutation = async ({
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/transaction`, transactionData);
 };
+
+export const createInvitationMutation = async ({
+  groupId,
+  invitationData,
+}: {
+  groupId: string;
+  invitationData: {
+    invitationVerificationToken: string;
+    invitationKey: string;
+    invitationLinkSecret: string;
+  };
+}) => {
+  return fetchApi("POST", `/v1/group/${groupId}/invitation`, invitationData);
+};
+
+export const joinInvitationMutation = async ({
+  groupId,
+  invitationData,
+}: {
+  groupId: string;
+  invitationData: {
+    invitationVerificationToken: string;
+    encryptionKey?: string;
+  };
+}) => {
+  return fetchApi("POST", `/v1/group/${groupId}/join`, invitationData);
+};
