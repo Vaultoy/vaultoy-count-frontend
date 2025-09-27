@@ -106,66 +106,67 @@ export const GroupPage = () => {
     }, {} as Record<number, GroupMember>) ?? {};
 
   return (
-    <Card.Root
-      marginTop="4em"
-      marginBottom="4em"
-      marginLeft={{ base: "1em", md: "10em", lg: "30em" }}
-      marginRight={{ base: "1em", md: "10em", lg: "30em" }}
-    >
-      <Card.Header>
-        <HStack justifyContent="space-between">
-          <Button
-            onClick={() => navigate("/app")}
-            width="fit-content"
-            variant="outline"
-          >
-            <MdArrowBack /> Back
-          </Button>
-          <ShareGroupDialog groupData={decryptedGroup} />
-        </HStack>
-        <Center>
-          <Heading>{decryptedGroup?.name}</Heading>
-        </Center>
-      </Card.Header>
-      <Card.Body>
-        <VStack>
-          <Text marginBottom="3em">
-            Members:{" "}
-            {decryptedGroup?.members
-              .map((member) => member.username)
-              .join(", ")}
-          </Text>
+    <Center>
+      <Card.Root
+        marginTop="2em"
+        marginBottom="4em"
+        width={{ base: "94%", md: "70%", lg: "60%" }}
+      >
+        <Card.Header>
+          <HStack justifyContent="space-between">
+            <Button
+              onClick={() => navigate("/app")}
+              width="fit-content"
+              variant="outline"
+            >
+              <MdArrowBack /> Back
+            </Button>
+            <ShareGroupDialog groupData={decryptedGroup} />
+          </HStack>
+          <Center>
+            <Heading>{decryptedGroup?.name}</Heading>
+          </Center>
+        </Card.Header>
+        <Card.Body>
+          <VStack>
+            <Text marginBottom="3em">
+              Members:{" "}
+              {decryptedGroup?.members
+                .map((member) => member.username)
+                .join(", ")}
+            </Text>
 
-          {decryptedGroup?.transactions.length === 0 && (
-            <Text>🙅 No transactions yet.</Text>
-          )}
+            {decryptedGroup?.transactions.length === 0 && (
+              <Text>🙅 No transactions yet.</Text>
+            )}
 
-          <AddTransactionDialog groupData={decryptedGroup} />
+            <AddTransactionDialog groupData={decryptedGroup} />
 
-          {decryptedGroup?.transactions.map((transaction) => (
-            <Card.Root key={transaction.id} width="100%">
-              <Card.Body>
-                <Flex alignItems="center" justifyContent="space-between">
-                  <VStack alignItems="flex-start" gap="0">
-                    <Text fontWeight="bold">{transaction.name}</Text>
-                    <Text color="gray.600">
-                      Paid by {membersIndex[transaction.fromUserId].username}
-                    </Text>
-                    <Text color="gray.600">
-                      For{" "}
-                      {transaction.toUserIds
-                        .map((id) => membersIndex[id].username)
-                        .join(", ")}
-                    </Text>
-                  </VStack>
-                  <Text>{transaction.amount} €</Text>
-                </Flex>
-              </Card.Body>
-            </Card.Root>
-          ))}
-        </VStack>
-      </Card.Body>
-      <Card.Footer />
-    </Card.Root>
+            {decryptedGroup?.transactions.map((transaction) => (
+              <Card.Root key={transaction.id} width="100%">
+                <Card.Body>
+                  <Flex alignItems="center" justifyContent="space-between">
+                    <VStack alignItems="flex-start" gap="0">
+                      <Text fontWeight="bold">{transaction.name}</Text>
+                      <Text color="gray.600">
+                        Paid by {membersIndex[transaction.fromUserId].username}
+                      </Text>
+                      <Text color="gray.600">
+                        For{" "}
+                        {transaction.toUserIds
+                          .map((id) => membersIndex[id].username)
+                          .join(", ")}
+                      </Text>
+                    </VStack>
+                    <Text>{transaction.amount} €</Text>
+                  </Flex>
+                </Card.Body>
+              </Card.Root>
+            ))}
+          </VStack>
+        </Card.Body>
+        <Card.Footer />
+      </Card.Root>
+    </Center>
   );
 };

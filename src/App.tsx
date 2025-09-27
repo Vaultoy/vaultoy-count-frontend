@@ -9,11 +9,10 @@ import { Home } from "./pages/Home";
 import { LoginSignup } from "./pages/LoginSignup";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
-import { AppHomePage } from "./pages/app/AppHome";
-import { GroupPage } from "./pages/app/GroupPage/GroupPage";
 import { ErrorPage } from "./pages/ErrorPage";
 import { UserContextProvider } from "./contexts/UserContext";
 import { JoinInvitation } from "./pages/app/JoinInvitation";
+import { SCApp } from "./pages/app/SCApp";
 
 const queryClient = new QueryClient();
 
@@ -40,8 +39,7 @@ const App = () => {
               <Route path="/login" element={<LoginSignup isLogin />} />
               <Route path="/signup" element={<LoginSignup isLogin={false} />} />
 
-              <Route path="/app" element={<AppHomePage />} />
-              <Route path="/app/group/:groupId" element={<GroupPage />} />
+              <Route path="/app/*" element={<SCApp />} />
 
               <Route
                 path="/join/:groupId/:invitationLinkSecret"

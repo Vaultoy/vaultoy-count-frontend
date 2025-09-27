@@ -161,7 +161,9 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       <Card.Root padding="1em">
         <Card.Header>
           <HStack justifyContent="space-between">
-            <Heading>{isLogin ? "Log In" : "Sign Up"}</Heading>
+            <Heading whiteSpace="nowrap">
+              {isLogin ? "Log In" : "Sign Up"}
+            </Heading>
             <Link to={isLogin ? "/signup" : "/login"}>
               <Button variant="outline">
                 {isLogin ? "Sign up" : "Log in"} instead
