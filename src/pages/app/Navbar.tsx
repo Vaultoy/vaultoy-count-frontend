@@ -17,7 +17,7 @@ export const Navbar = () => {
             {user ? (
               <Button
                 onClick={() => {
-                  setUser(null);
+                  setUser(undefined);
                   // TODO: Disconnect server-side session as well
                   navigate("/login");
                 }}

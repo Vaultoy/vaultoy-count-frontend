@@ -35,23 +35,26 @@ const setToDB = async <T>(key: string, value: T): Promise<void> => {
 
 /**
  * Hook equivalent to useState but keeps the value in IndexedDB (async)
- * resetValue function is provided to reset the value to the default value
  *
- * Security remark: The value can be accessed by any user of the browser
- *
- * @param defaultValue Used if no value is stored in IndexedDB
  * @param stateKey Unique key identifying the value in IndexedDB
+ *
+ * @returns A tuple with:
+ *  - The current value (or undefined if not yet retrieved from IndexedDB)
+ *  - A setter function to update the value
+ *  - A boolean indicating whether the data has been retrieved from IndexedDB
  */
 export const usePersistentState = <T>(
-  defaultValue: T,
   stateKey: string
-): [T, Dispatch<SetStateAction<T>>, () => void] => {
-  const [value, setValue] = useState<T>(defaultValue);
+): [T | undefined, Dispatch<SetStateAction<T | undefined>>, boolean] => {
+  const [value, setValue] = useState<T | undefined>(undefined);
+  const [dataRetrieved, setDataRetrieved] = useState(false);
 
   useEffect(() => {
     (async () => {
       const storedValue = await getFromDB<T>(stateKey);
       if (storedValue !== null) setValue(storedValue);
+
+      setDataRetrieved(true);
     })();
     // Only run on mount
   }, [stateKey]);
@@ -62,9 +65,5 @@ export const usePersistentState = <T>(
     })();
   }, [value, stateKey]);
 
-  const resetValue = (): void => {
-    setValue(defaultValue);
-  };
-
-  return [value, setValue, resetValue];
+  return [value, setValue, dataRetrieved];
 };

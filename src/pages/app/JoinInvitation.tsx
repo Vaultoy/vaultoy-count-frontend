@@ -4,6 +4,7 @@ import {
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toaster";
+import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { UserContext } from "@/contexts/UserContext";
 import { atob_uri } from "@/utils/base64Uri";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
@@ -13,7 +14,7 @@ import {
 } from "@/utils/keyDerivation";
 import { AbsoluteCenter, Heading, ProgressCircle } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 
 export const JoinInvitation = () => {
@@ -29,7 +30,10 @@ export const JoinInvitation = () => {
 
   const navigate = useNavigate();
 
-  const { user } = useContext(UserContext);
+  const { user, userDataRetrievedFromLocalDB } = useContext(UserContext);
+  const { setPostLoginRedirectInfos } = useContext(PostLoginRedirectContext);
+
+  const hasExecuted = useRef(false);
 
   const firstMutation = useMutation({
     mutationFn: joinInvitationMutation,
@@ -156,13 +160,24 @@ export const JoinInvitation = () => {
       });
     };
 
-    if (!user) {
-      // Wait for user to be set in context
+    // Prevent multiple calls to joinGroup and wait for user data to be loaded from IndexedDB
+    if (hasExecuted.current || !userDataRetrievedFromLocalDB) {
       return;
     }
 
+    if (!user) {
+      setPostLoginRedirectInfos({
+        uri: `/join/${groupId}/${invitationLinkSecretTransformed}`,
+        type: "JOIN_INVITATION",
+      });
+
+      navigate("/login");
+      return;
+    }
+
+    hasExecuted.current = true;
     joinGroup();
-  }, [user, groupId, invitationLinkSecret]);
+  }, [userDataRetrievedFromLocalDB]);
 
   return (
     <AbsoluteCenter>

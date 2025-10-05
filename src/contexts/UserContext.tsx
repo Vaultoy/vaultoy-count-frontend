@@ -8,23 +8,26 @@ interface User {
 }
 
 interface UserContextType {
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  user: User | undefined;
+  setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
+  userDataRetrievedFromLocalDB: boolean;
 }
 
 export const UserContext = createContext<UserContextType>({
-  user: null,
+  user: undefined,
   setUser: () => {},
+  userDataRetrievedFromLocalDB: false,
 });
 
 export const UserContextProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = usePersistentState<User | null>(
-    null,
-    "secure-count-user"
-  );
+  const [user, setUser, userDataRetrievedFromLocalDB] = usePersistentState<
+    User | undefined
+  >("secure-count-user");
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider
+      value={{ user, setUser, userDataRetrievedFromLocalDB }}
+    >
       {children}
     </UserContext.Provider>
   );

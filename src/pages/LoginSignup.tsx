@@ -13,6 +13,7 @@ import {
   Input,
   Progress,
   Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -27,6 +28,7 @@ import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
+import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 
 export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const [passwordLength, setPasswordLength] = useState(0);
@@ -35,6 +37,9 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   >(undefined);
   const navigate = useNavigate();
   const user = useContext(UserContext);
+  const { postLoginRedirectInfos, setPostLoginRedirectInfos } = useContext(
+    PostLoginRedirectContext
+  );
 
   const formValuesSchema = z
     .object({
@@ -105,7 +110,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
           );
           toaster.create(UNKNOWN_ERROR_TOAST);
 
-          return null;
+          return undefined;
         }
 
         return {
@@ -119,7 +124,13 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         type: "success",
       });
 
-      // TODO: Redirect to the app and save keys
+      if (postLoginRedirectInfos) {
+        const uri = postLoginRedirectInfos.uri;
+        setPostLoginRedirectInfos(undefined);
+        await navigate(uri);
+        return;
+      }
+
       await navigate("/app");
     },
     onError: (error) => {
@@ -158,84 +169,100 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
 
   return (
     <AbsoluteCenter>
-      <Card.Root padding="1em">
-        <Card.Header>
-          <HStack justifyContent="space-between">
-            <Heading whiteSpace="nowrap">
-              {isLogin ? "Log In" : "Sign Up"}
-            </Heading>
-            <Link to={isLogin ? "/signup" : "/login"}>
-              <Button variant="outline">
-                {isLogin ? "Sign up" : "Log in"} instead
-              </Button>
-            </Link>
-          </HStack>
-        </Card.Header>
+      <VStack gap="1em" alignItems="stretch">
+        {postLoginRedirectInfos?.type === "JOIN_INVITATION" && (
+          <Card.Root padding="1em">
+            <Card.Header>
+              <Heading>Someone invited you to join a group!</Heading>
+            </Card.Header>
+            <Card.Body>Please log in or sign up to join it!</Card.Body>
+          </Card.Root>
+        )}
 
-        <Card.Body>
-          <form onSubmit={onSubmit}>
-            <Field.Root invalid={!!errors.username}>
-              <Field.Label>Username</Field.Label>
-              <Input {...register("username")} />
-              <Field.ErrorText>{errors.username?.message}</Field.ErrorText>
-            </Field.Root>
-            <Field.Root invalid={!!errors.password} marginTop="1em">
-              <Field.Label>Password</Field.Label>
-              <PasswordInput
-                {...register("password")}
-                onChange={(e) => setPasswordLength(e.target.value?.length ?? 0)}
-              />
-              <Field.ErrorText>{errors.password?.message}</Field.ErrorText>
-            </Field.Root>
-            {!isLogin && (
-              <>
-                <Field.Root invalid={!!errors.confirmPassword} marginTop="1em">
-                  <Field.Label>Confirm Password</Field.Label>
-                  <PasswordInput {...register("confirmPassword")} />
-                  <Field.ErrorText>
-                    {errors.confirmPassword?.message}
-                  </Field.ErrorText>
-                </Field.Root>
+        <Card.Root padding="1em">
+          <Card.Header>
+            <HStack justifyContent="space-between">
+              <Heading whiteSpace="nowrap">
+                {isLogin ? "Log In" : "Sign Up"}
+              </Heading>
+              <Link to={isLogin ? "/signup" : "/login"}>
+                <Button variant="outline">
+                  {isLogin ? "Sign up" : "Log in"} instead
+                </Button>
+              </Link>
+            </HStack>
+          </Card.Header>
 
-                <PasswordStrengthMeter
-                  marginTop="1em"
-                  value={passwordLength}
-                  max={21}
+          <Card.Body>
+            <form onSubmit={onSubmit}>
+              <Field.Root invalid={!!errors.username}>
+                <Field.Label>Username</Field.Label>
+                <Input {...register("username")} />
+                <Field.ErrorText>{errors.username?.message}</Field.ErrorText>
+              </Field.Root>
+              <Field.Root invalid={!!errors.password} marginTop="1em">
+                <Field.Label>Password</Field.Label>
+                <PasswordInput
+                  {...register("password")}
+                  onChange={(e) =>
+                    setPasswordLength(e.target.value?.length ?? 0)
+                  }
                 />
-                <Text marginTop="1em" color="gray">
-                  This password will be used as a key to encrypt your data.
-                  <br />
-                  Therefore, we recommend that you use a long and complex
-                  password that you don't use anywhere else.
-                  <br />A perfect password would be choosen randomly, 21
-                  characters long from a-z, A-Z, 0-9 and !@#$%^&*.
-                </Text>
-              </>
-            )}
-            <Button
-              type="submit"
-              marginTop="2em"
-              loading={keyDerivationProgress !== undefined}
-            >
-              {isLogin ? "Log in" : "Sign up"}
-            </Button>
-            {keyDerivationProgress !== undefined && (
-              <Progress.Root
-                value={100 * keyDerivationProgress}
-                maxW="sm"
-                marginTop="1em"
+                <Field.ErrorText>{errors.password?.message}</Field.ErrorText>
+              </Field.Root>
+              {!isLogin && (
+                <>
+                  <Field.Root
+                    invalid={!!errors.confirmPassword}
+                    marginTop="1em"
+                  >
+                    <Field.Label>Confirm Password</Field.Label>
+                    <PasswordInput {...register("confirmPassword")} />
+                    <Field.ErrorText>
+                      {errors.confirmPassword?.message}
+                    </Field.ErrorText>
+                  </Field.Root>
+
+                  <PasswordStrengthMeter
+                    marginTop="1em"
+                    value={passwordLength}
+                    max={21}
+                  />
+                  <Text marginTop="1em" color="gray">
+                    This password will be used as a key to encrypt your data.
+                    <br />
+                    Therefore, we recommend that you use a long and complex
+                    password that you don't use anywhere else.
+                    <br />A perfect password would be choosen randomly, 21
+                    characters long from a-z, A-Z, 0-9 and !@#$%^&*.
+                  </Text>
+                </>
+              )}
+              <Button
+                type="submit"
+                marginTop="2em"
+                loading={keyDerivationProgress !== undefined}
               >
-                <Progress.Label marginBottom="0.5em">
-                  Derivating encryption keys
-                </Progress.Label>
-                <Progress.Track flex="1">
-                  <Progress.Range />
-                </Progress.Track>
-              </Progress.Root>
-            )}
-          </form>
-        </Card.Body>
-      </Card.Root>
+                {isLogin ? "Log in" : "Sign up"}
+              </Button>
+              {keyDerivationProgress !== undefined && (
+                <Progress.Root
+                  value={100 * keyDerivationProgress}
+                  maxW="sm"
+                  marginTop="1em"
+                >
+                  <Progress.Label marginBottom="0.5em">
+                    Derivating encryption keys
+                  </Progress.Label>
+                  <Progress.Track flex="1">
+                    <Progress.Range />
+                  </Progress.Track>
+                </Progress.Root>
+              )}
+            </form>
+          </Card.Body>
+        </Card.Root>
+      </VStack>
     </AbsoluteCenter>
   );
 };
