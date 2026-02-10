@@ -68,6 +68,7 @@ export const AddTransactionDialog = ({
   const {
     register,
     handleSubmit,
+    reset,
     control,
     formState: { errors },
   } = useForm<
@@ -92,6 +93,7 @@ export const AddTransactionDialog = ({
       });
 
       setOpen(false);
+      reset();
       queryClient.invalidateQueries({ queryKey: ["getGroup", groupId] });
     },
     onError: (error) => {
@@ -111,7 +113,7 @@ export const AddTransactionDialog = ({
       groupId: groupId as string,
       transactionData: {
         name: await encryptString(data.name, groupData.groupEncryptionKey),
-        amount: await encryptNumber(data.amount, groupData.groupEncryptionKey),
+        amount: await encryptNumber(Math.round(data.amount * 100), groupData.groupEncryptionKey),
         fromUserId: await encryptNumber(
           data.fromUserId,
           groupData.groupEncryptionKey
@@ -160,7 +162,7 @@ export const AddTransactionDialog = ({
 
                   <Field.Root invalid={!!errors.amount}>
                     <Field.Label>Amount</Field.Label>
-                    <Input type="number" {...register("amount")} />
+                    <Input type="number" step="0.01" {...register("amount")} />
                     <Field.ErrorText>{errors.amount?.message}</Field.ErrorText>
                   </Field.Root>
 

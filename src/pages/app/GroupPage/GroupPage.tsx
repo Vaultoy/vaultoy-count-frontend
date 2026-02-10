@@ -10,14 +10,13 @@ import {
   Card,
   VStack,
   Text,
-  Flex,
   Heading,
   Button,
   Center,
   HStack,
+  Tabs,
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
-import { AddTransactionDialog } from "./AddTransactionDialog";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/contexts/UserContext";
 import {
@@ -27,6 +26,8 @@ import {
   decryptString,
 } from "@/utils/encryption";
 import { ShareGroupDialog } from "./ShareGroupDialog";
+import { TransactionList } from "./TransactionList";
+import { Equilibrium } from "./Equilibrium";
 
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -51,7 +52,7 @@ export const GroupPage = () => {
 
       const groupEncryptionKey = await decryptEncryptionKey(
         data.group.groupEncryptionKey,
-        user.user.encryptionKey
+        user.user.encryptionKey,
       );
 
       const group = {
@@ -67,13 +68,13 @@ export const GroupPage = () => {
             amount: await decryptNumber(transaction.amount, groupEncryptionKey),
             fromUserId: await decryptNumber(
               transaction.fromUserId,
-              groupEncryptionKey
+              groupEncryptionKey,
             ),
             toUserIds: await decryptNumberList(
               transaction.toUserIds,
-              groupEncryptionKey
+              groupEncryptionKey,
             ),
-          }))
+          })),
         ),
       };
 
@@ -100,10 +101,13 @@ export const GroupPage = () => {
   }
 
   const membersIndex =
-    data?.group.members.reduce((acc, member) => {
-      acc[member.userId] = member;
-      return acc;
-    }, {} as Record<number, GroupMember>) ?? {};
+    data?.group.members.reduce(
+      (acc, member) => {
+        acc[member.userId] = member;
+        return acc;
+      },
+      {} as Record<number, GroupMember>,
+    ) ?? {};
 
   return (
     <Center>
@@ -136,33 +140,25 @@ export const GroupPage = () => {
                 .join(", ")}
             </Text>
 
-            {decryptedGroup?.transactions.length === 0 && (
-              <Text>🙅 No transactions yet.</Text>
-            )}
-
-            <AddTransactionDialog groupData={decryptedGroup} />
-
-            {decryptedGroup?.transactions.map((transaction) => (
-              <Card.Root key={transaction.id} width="100%">
-                <Card.Body>
-                  <Flex alignItems="center" justifyContent="space-between">
-                    <VStack alignItems="flex-start" gap="0">
-                      <Text fontWeight="bold">{transaction.name}</Text>
-                      <Text color="gray.600">
-                        Paid by {membersIndex[transaction.fromUserId].username}
-                      </Text>
-                      <Text color="gray.600">
-                        For{" "}
-                        {transaction.toUserIds
-                          .map((id) => membersIndex[id].username)
-                          .join(", ")}
-                      </Text>
-                    </VStack>
-                    <Text>{transaction.amount} €</Text>
-                  </Flex>
-                </Card.Body>
-              </Card.Root>
-            ))}
+            <Tabs.Root
+              defaultValue="transactions"
+              width="100%"
+              variant="enclosed"
+            >
+              <Tabs.List width="100%" justifyContent="center">
+                <Tabs.Trigger value="transactions">Transactions</Tabs.Trigger>
+                <Tabs.Trigger value="equilibrium">Equilibrium</Tabs.Trigger>
+              </Tabs.List>
+              <Tabs.Content value="transactions">
+                <TransactionList
+                  groupData={decryptedGroup}
+                  membersIndex={membersIndex}
+                />
+              </Tabs.Content>
+              <Tabs.Content value="equilibrium">
+                <Equilibrium groupData={decryptedGroup} />
+              </Tabs.Content>
+            </Tabs.Root>
           </VStack>
         </Card.Body>
         <Card.Footer />

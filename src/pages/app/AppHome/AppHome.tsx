@@ -1,5 +1,5 @@
 import { getGroupsQuery } from "../../../api/group";
-import { Card, Center, Flex, Heading, VStack } from "@chakra-ui/react";
+import { Card, Center, Flex, Heading, VStack, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
@@ -56,6 +56,11 @@ export const AppHomePage = () => {
         <Heading fontSize="3xl" marginBottom="1em">
           Your groups
         </Heading>
+        {decryptedGroups.length === 0 && (
+          <Text>
+            🙅 You are not in any groups yet.
+          </Text>
+        )}
         {decryptedGroups.map((group) => (
           <NavLink
             to={`/app/group/${group.id}`}
