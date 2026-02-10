@@ -1,7 +1,10 @@
 import {
   getGroupQuery,
+  TRANSACTION_TYPES,
   type GroupExtended,
   type GroupMember,
+  type GroupTransaction,
+  type TransactionType,
 } from "@/api/group";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
@@ -55,26 +58,48 @@ export const GroupPage = () => {
         user.user.encryptionKey,
       );
 
-      const group = {
+      const group: GroupExtended<false> = {
         ...data.group,
         name: await decryptString(data.group.name, groupEncryptionKey),
         groupEncryptionKey,
         members: data.group.members,
         transactions: await Promise.all(
-          data.group.transactions.map(async (transaction) => ({
-            ...transaction,
-            date: await decryptNumber(transaction.date, groupEncryptionKey),
-            name: await decryptString(transaction.name, groupEncryptionKey),
-            amount: await decryptNumber(transaction.amount, groupEncryptionKey),
-            fromUserId: await decryptNumber(
-              transaction.fromUserId,
+          data.group.transactions.map(async (transaction) => {
+            let transactionType = (await decryptString(
+              transaction.transactionType,
               groupEncryptionKey,
-            ),
-            toUserIds: await decryptNumberList(
-              transaction.toUserIds,
-              groupEncryptionKey,
-            ),
-          })),
+            )) as TransactionType; // Verified after decryption
+
+            if (!TRANSACTION_TYPES.includes(transactionType)) {
+              console.error(
+                "Invalid transaction type after decryption:",
+                transactionType,
+              );
+              // Default to a valid type to prevent crashes, but this should not happen
+              transactionType = TRANSACTION_TYPES[0];
+            }
+
+            const decryptedTransaction: GroupTransaction<false> = {
+              ...transaction,
+              name: await decryptString(transaction.name, groupEncryptionKey),
+              amount: await decryptNumber(
+                transaction.amount,
+                groupEncryptionKey,
+              ),
+              fromUserId: await decryptNumber(
+                transaction.fromUserId,
+                groupEncryptionKey,
+              ),
+              toUserIds: await decryptNumberList(
+                transaction.toUserIds,
+                groupEncryptionKey,
+              ),
+              transactionType,
+              date: await decryptNumber(transaction.date, groupEncryptionKey),
+            };
+
+            return decryptedTransaction;
+          }),
         ),
       };
 

@@ -20,17 +20,25 @@ export interface GroupMember {
   rights: "admin" | "member";
 }
 
+export const EXPENSE = "expense";
+export const REPAYMENT = "repayment";
+export const REVENUE = "revenue";
+export const TRANSACTION_TYPES = [EXPENSE, REPAYMENT, REVENUE] as const;
+export type TransactionType = (typeof TRANSACTION_TYPES)[number];
+
 export interface GroupTransaction<isEncrypted extends boolean = true> {
   id: number;
   name: Encrypted<string, isEncrypted>;
   fromUserId: Encrypted<number, isEncrypted>;
   toUserIds: Encrypted<number, isEncrypted>[];
   amount: Encrypted<number, isEncrypted>;
+  transactionType: Encrypted<TransactionType, isEncrypted>;
   date: Encrypted<number, isEncrypted>;
 }
 
-export interface GroupExtended<isEncrypted extends boolean = true>
-  extends Group<isEncrypted> {
+export interface GroupExtended<
+  isEncrypted extends boolean = true,
+> extends Group<isEncrypted> {
   members: GroupMember[];
   transactions: GroupTransaction<isEncrypted>[];
 }
@@ -41,7 +49,7 @@ export const getGroupsQuery = async (): Promise<{ groups: Group[] }> => {
 };
 
 export const getGroupQuery = async (
-  groupId: string
+  groupId: string,
 ): Promise<{ group: GroupExtended }> => {
   const response = await fetchApi("GET", `/v1/group/${groupId}`);
   return response.json();
@@ -91,7 +99,7 @@ interface GroupInvitation {
 }
 
 export const getInvitationQuery = async (
-  groupId: string
+  groupId: string,
 ): Promise<GroupInvitation | null> => {
   return (await fetchApi("GET", `/v1/group/${groupId}/invitation`)).json();
 };

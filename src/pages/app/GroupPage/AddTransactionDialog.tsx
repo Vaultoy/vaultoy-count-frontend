@@ -1,5 +1,9 @@
 import {
+  EXPENSE,
   postAddTransactionMutation,
+  REPAYMENT,
+  REVENUE,
+  TRANSACTION_TYPES,
   type GroupExtended,
 } from "../../../api/group";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -35,10 +39,7 @@ import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
-
-const EXPENSE = "expense";
-const REPAYMENT = "repayment";
-const TRANSACTION_TYPES = [EXPENSE, REPAYMENT] as const;
+import { getForText, getPaidByText } from "./transactionTypeInfos";
 
 const formValuesSchema = z
   .object({
@@ -66,27 +67,31 @@ const formValuesSchema = z
     transaction_type: z.enum(TRANSACTION_TYPES),
   })
   .refine(
-    (data) => {
+    (data): boolean => {
       switch (data.transaction_type) {
         case EXPENSE:
           return true;
         case REPAYMENT:
           return data.toUserIds.length === 1;
+        case REVENUE:
+          return true;
       }
     },
     {
       message:
-        "Please select only one member to repay to, or switch to an expense instead",
+        "Please select only one member to repay, or create an expense or revenue instead",
       path: ["toUserIds"],
     },
   )
   .refine(
-    (data) => {
+    (data): boolean => {
       switch (data.transaction_type) {
         case EXPENSE:
           return data.name.length >= 3 && data.name.length <= 100;
         case REPAYMENT:
           return true;
+        case REVENUE:
+          return data.name.length >= 3 && data.name.length <= 100;
       }
     },
     {
@@ -158,15 +163,17 @@ export const AddTransactionDialog = ({
       return;
     }
 
+    const amountSign = transaction_type === REVENUE ? -1 : 1;
+
     mutation.mutate({
       groupId: groupId as string,
       transactionData: {
         name: await encryptString(
-          data.transaction_type === EXPENSE ? data.name : "Repayment",
+          data.transaction_type === REPAYMENT ? "Repayment" : data.name,
           groupData.groupEncryptionKey,
         ),
         amount: await encryptNumber(
-          Math.round(data.amount * 100),
+          Math.round(amountSign * data.amount * 100),
           groupData.groupEncryptionKey,
         ),
         fromUserId: await encryptNumber(
@@ -175,6 +182,10 @@ export const AddTransactionDialog = ({
         ),
         toUserIds: await encryptNumberList(
           data.toUserIds,
+          groupData.groupEncryptionKey,
+        ),
+        transactionType: await encryptString(
+          data.transaction_type,
           groupData.groupEncryptionKey,
         ),
         date: await encryptNumber(Date.now(), groupData.groupEncryptionKey),
@@ -251,9 +262,7 @@ export const AddTransactionDialog = ({
                   </Field.Root>
 
                   <Field.Root invalid={!!errors.fromUserId}>
-                    <Field.Label>
-                      {transaction_type === "expense" ? "Paid" : "Repaid"} by
-                    </Field.Label>
+                    <Field.Label>{getPaidByText(transaction_type)}</Field.Label>
                     <Controller
                       control={control}
                       name="fromUserId"
@@ -297,13 +306,16 @@ export const AddTransactionDialog = ({
 
                   <Fieldset.Root invalid={!!errors.toUserIds}>
                     <Fieldset.Legend>
-                      {transaction_type === EXPENSE ? "For" : "To"}
+                      {getForText(transaction_type)}
                     </Fieldset.Legend>
                     <Controller
                       control={control}
                       name="toUserIds"
                       render={({ field }) => {
-                        if (transaction_type === EXPENSE) {
+                        if (
+                          transaction_type === EXPENSE ||
+                          transaction_type === REVENUE
+                        ) {
                           return (
                             <CheckboxGroup
                               invalid={!!errors.toUserIds}
