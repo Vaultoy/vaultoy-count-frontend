@@ -153,7 +153,7 @@ export const GroupPage = () => {
             </Button>
             <ShareGroupDialog groupData={decryptedGroup} />
           </HStack>
-          <Center>
+          <Center marginTop="1em">
             {decryptedGroup ? (
               <Heading>📔 {decryptedGroup.name}</Heading>
             ) : (
