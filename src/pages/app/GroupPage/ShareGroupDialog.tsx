@@ -16,7 +16,7 @@ import {
   HStack,
   VStack,
 } from "@chakra-ui/react";
-import { toaster } from "@/components/ui/toaster";
+import { toaster } from "@/components/ui/toast-store";
 import { useContext, useEffect, useState } from "react";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
 import {
@@ -34,14 +34,14 @@ import { btoa_uri } from "@/utils/base64Uri";
 
 const urlFromInvitationLinkSecret = (
   groupId: string,
-  invitationLinkSecret: string
+  invitationLinkSecret: string,
 ) => {
   const url = new URL(
     window.location.origin +
       "/join/" +
       groupId +
       "/" +
-      btoa_uri(invitationLinkSecret)
+      btoa_uri(invitationLinkSecret),
   );
   return url.toString();
 };
@@ -75,16 +75,16 @@ export const ShareGroupDialog = ({
 
       const invitationLinkSecretKey = await decryptEncryptionKey(
         existingInvitation?.invitationLinkSecret,
-        groupData.groupEncryptionKey
+        groupData.groupEncryptionKey,
       );
 
       const invitationLinkSecret = await cryptoKeyToString(
-        invitationLinkSecretKey
+        invitationLinkSecretKey,
       );
 
       const url = urlFromInvitationLinkSecret(
         groupData.id.toString(),
-        invitationLinkSecret
+        invitationLinkSecret,
       );
 
       setUrl(url);
@@ -167,33 +167,36 @@ export const ShareGroupDialog = ({
   const createShareGroup = async () => {
     const invitationLinkSecretRaw = crypto.getRandomValues(new Uint8Array(32));
     const invitationLinkSecret = btoa(
-      String.fromCharCode(...invitationLinkSecretRaw)
+      String.fromCharCode(...invitationLinkSecretRaw),
     );
     const invitationVerificationToken =
       await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
 
     const encryptedInvitationLinkSecret = await encryptEncryptionKey(
       invitationLinkSecretRaw,
-      groupData!.groupEncryptionKey
+      groupData!.groupEncryptionKey,
     );
 
     const invitationLinkSecretKey = await decryptEncryptionKey(
       encryptedInvitationLinkSecret,
-      groupData!.groupEncryptionKey
+      groupData!.groupEncryptionKey,
     );
 
     const groupEncryptionKeyBuffer = new Uint8Array(
-      await window.crypto.subtle.exportKey("raw", groupData!.groupEncryptionKey)
+      await window.crypto.subtle.exportKey(
+        "raw",
+        groupData!.groupEncryptionKey,
+      ),
     );
 
     const invitationKey = await encryptEncryptionKey(
       groupEncryptionKeyBuffer,
-      invitationLinkSecretKey
+      invitationLinkSecretKey,
     );
 
     const url = urlFromInvitationLinkSecret(
       groupData!.id.toString(),
-      invitationLinkSecret
+      invitationLinkSecret,
     );
 
     setUrl(url);
@@ -210,7 +213,7 @@ export const ShareGroupDialog = ({
 
   const isGroupAdmin = user
     ? groupData?.members.find(
-        (member) => member.userId === user.id && member.rights === "admin"
+        (member) => member.userId === user.id && member.rights === "admin",
       ) !== undefined
     : false;
 

@@ -10,10 +10,10 @@ import { LoginSignup } from "./pages/LoginSignup";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
 import { ErrorPage } from "./pages/ErrorPage";
-import { UserContextProvider } from "./contexts/UserContext";
+import { UserContextProvider } from "./contexts/UserContextProvider";
 import { JoinInvitation } from "./pages/app/JoinInvitation";
 import { SCApp } from "./pages/app/SCApp";
-import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectContext";
+import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectContextProvider";
 
 const queryClient = new QueryClient();
 

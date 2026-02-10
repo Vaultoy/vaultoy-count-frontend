@@ -32,7 +32,13 @@ export const Equilibrium = ({
             <HStack justifyContent="space-between">
               <Text>{member.username}</Text>
               <Text
-                color={member.balance >= 0 ? "green.600" : "red.600"}
+                color={
+                  member.balance > 0
+                    ? "green.600"
+                    : member.balance == 0
+                      ? "gray.400"
+                      : "red.600"
+                }
                 fontWeight="bold"
               >
                 {(member.balance / 100) % 1 === 0

@@ -21,7 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState } from "react";
 import { derivateKeys } from "../utils/keyDerivation";
 import { useMutation } from "@tanstack/react-query";
-import { toaster } from "../components/ui/toaster";
+import { toaster } from "../components/ui/toast-store";
 import { postSignupLoginMutation } from "../api/auth";
 import { UserContext } from "@/contexts/UserContext";
 import {
@@ -38,7 +38,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const navigate = useNavigate();
   const user = useContext(UserContext);
   const { postLoginRedirectInfos, setPostLoginRedirectInfos } = useContext(
-    PostLoginRedirectContext
+    PostLoginRedirectContext,
   );
 
   const formValuesSchema = z
@@ -58,7 +58,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       {
         message: "Passwords do not match",
         path: ["confirmPassword"],
-      }
+      },
     );
 
   const {
@@ -67,7 +67,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     formState: { errors },
   } = useForm<
     z.input<typeof formValuesSchema>,
-    any,
+    unknown,
     z.output<typeof formValuesSchema>
   >({
     resolver: zodResolver(formValuesSchema),
@@ -106,7 +106,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       user.setUser((oldValue) => {
         if (!oldValue) {
           console.error(
-            "User context not set, yet it should have been set when user clicked login/signup"
+            "User context not set, yet it should have been set when user clicked login/signup",
           );
           toaster.create(UNKNOWN_ERROR_TOAST);
 
@@ -149,7 +149,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       normalizedPassword,
       (progress) => {
         setKeyDerivationProgress(progress);
-      }
+      },
     );
 
     setKeyDerivationProgress(undefined);

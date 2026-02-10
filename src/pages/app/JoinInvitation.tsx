@@ -3,7 +3,7 @@ import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
-import { toaster } from "@/components/ui/toaster";
+import { toaster } from "@/components/ui/toast-store";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { UserContext } from "@/contexts/UserContext";
 import { atob_uri } from "@/utils/base64Uri";
@@ -64,9 +64,8 @@ export const JoinInvitation = () => {
       const invitationVerificationToken =
         await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
 
-      const invitationLinkSecretKey = await stringToCryptoKey(
-        invitationLinkSecret
-      );
+      const invitationLinkSecretKey =
+        await stringToCryptoKey(invitationLinkSecret);
 
       const invitationKey = (await data.json()).invitationKey as string;
 
@@ -81,16 +80,16 @@ export const JoinInvitation = () => {
 
       const groupEncryptionKey = await decryptEncryptionKey(
         invitationKey,
-        invitationLinkSecretKey
+        invitationLinkSecretKey,
       );
 
       const groupEncryptionKeyRaw = new Uint8Array(
-        await crypto.subtle.exportKey("raw", groupEncryptionKey)
+        await crypto.subtle.exportKey("raw", groupEncryptionKey),
       );
 
       const encryptedGroupEncryptionKey = await encryptEncryptionKey(
         groupEncryptionKeyRaw,
-        user.encryptionKey
+        user.encryptionKey,
       );
 
       secondMutation.mutate({
@@ -177,6 +176,7 @@ export const JoinInvitation = () => {
 
     hasExecuted.current = true;
     joinGroup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userDataRetrievedFromLocalDB]);
 
   return (

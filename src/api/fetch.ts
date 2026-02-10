@@ -1,7 +1,7 @@
 export const fetchApi = (
   method: "GET" | "POST" | "PUT" | "DELETE",
   url: string,
-  body?: any,
+  body?: unknown,
   options?: RequestInit
 ) => {
   return fetch(import.meta.env.VITE_API_URL + url, {

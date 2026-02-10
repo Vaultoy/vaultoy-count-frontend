@@ -1,4 +1,4 @@
-import { toaster } from "../../../components/ui/toaster";
+import { toaster } from "../../../components/ui/toast-store";
 import { createGroupMutation } from "../../../api/group";
 import {
   Button,
@@ -40,7 +40,7 @@ export const CreateGroupDialog = () => {
     formState: { errors },
   } = useForm<
     z.input<typeof formValuesSchema>,
-    any,
+    unknown,
     z.output<typeof formValuesSchema>
   >({
     resolver: zodResolver(formValuesSchema),
@@ -78,12 +78,12 @@ export const CreateGroupDialog = () => {
 
     const encryptedGroupEncryptionKey = await encryptEncryptionKey(
       groupEncryptionKeyRaw,
-      user.user.encryptionKey
+      user.user.encryptionKey,
     );
 
     const groupEncryptionKey = await decryptEncryptionKey(
       encryptedGroupEncryptionKey,
-      user.user.encryptionKey
+      user.user.encryptionKey,
     );
 
     mutation.mutate({
