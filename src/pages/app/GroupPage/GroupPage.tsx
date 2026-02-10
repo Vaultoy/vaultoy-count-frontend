@@ -18,6 +18,7 @@ import {
   Center,
   HStack,
   Tabs,
+  Skeleton,
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
 import { useContext, useEffect, useState } from "react";
@@ -153,17 +154,34 @@ export const GroupPage = () => {
             <ShareGroupDialog groupData={decryptedGroup} />
           </HStack>
           <Center>
-            <Heading>{decryptedGroup?.name}</Heading>
+            {decryptedGroup ? (
+              <Heading>📔 {decryptedGroup.name}</Heading>
+            ) : (
+              <Skeleton height="2em" width="50%" />
+            )}
           </Center>
         </Card.Header>
         <Card.Body>
           <VStack>
-            <Text marginBottom="3em">
-              Members:{" "}
-              {decryptedGroup?.members
-                .map((member) => member.username)
-                .join(", ")}
-            </Text>
+            <HStack gap="0.5em" marginBottom="3em">
+              <Text>
+                👥 Members:{" "}
+                {decryptedGroup?.members
+                  .map((member) => member.username)
+                  .join(", ")}
+              </Text>
+              {!decryptedGroup &&
+                Array(3)
+                  .fill(0)
+                  .map((_, i) => (
+                    <Skeleton
+                      key={i}
+                      height="1em"
+                      width="5em"
+                      marginLeft="0.5em"
+                    />
+                  ))}
+            </HStack>
 
             <Tabs.Root
               defaultValue="transactions"

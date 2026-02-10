@@ -8,7 +8,7 @@ export const createGroupMutation = async (data: {
   return fetchApi("POST", "/v1/group", data);
 };
 
-interface Group<isEncrypted extends boolean = true> {
+export interface Group<isEncrypted extends boolean = true> {
   id: number;
   name: Encrypted<string, isEncrypted>; // encrypted with group encryption key
   groupEncryptionKey: Encrypted<CryptoKey, isEncrypted>; // encrypted with user's encryption key

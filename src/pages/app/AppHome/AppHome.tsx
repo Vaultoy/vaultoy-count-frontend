@@ -1,5 +1,15 @@
-import { getGroupsQuery } from "../../../api/group";
-import { Card, Center, Flex, Heading, VStack, Text } from "@chakra-ui/react";
+import { getGroupsQuery, type Group } from "../../../api/group";
+import {
+  Card,
+  Center,
+  Flex,
+  Heading,
+  VStack,
+  Text,
+  Skeleton,
+  HStack,
+  SkeletonCircle,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
@@ -17,8 +27,8 @@ export const AppHomePage = () => {
   });
 
   const [decryptedGroups, setDecryptedGroups] = useState<
-    { id: number; name: string; encryptionKey: CryptoKey }[]
-  >([]);
+    Group<false>[] | undefined
+  >(undefined);
 
   useEffect(() => {
     const decryptGroups = async () => {
@@ -28,15 +38,15 @@ export const AppHomePage = () => {
         data.groups.map(async (group) => {
           const groupEncryptionKey = await decryptEncryptionKey(
             group.groupEncryptionKey,
-            user.user?.encryptionKey as CryptoKey
+            user.user?.encryptionKey as CryptoKey,
           );
 
           return {
             id: group.id,
             name: await decryptString(group.name, groupEncryptionKey),
-            encryptionKey: groupEncryptionKey,
+            groupEncryptionKey,
           };
-        })
+        }),
       );
 
       if (!active) return;
@@ -54,14 +64,12 @@ export const AppHomePage = () => {
     <Center>
       <VStack marginTop="3em" width={{ base: "94%", md: "70%", lg: "60%" }}>
         <Heading fontSize="3xl" marginBottom="1em">
-          Your groups
+          📚 Your groups
         </Heading>
-        {decryptedGroups.length === 0 && (
-          <Text>
-            🙅 You are not in any groups yet.
-          </Text>
+        {decryptedGroups?.length === 0 && (
+          <Text>🙅 You are not in any groups yet.</Text>
         )}
-        {decryptedGroups.map((group) => (
+        {decryptedGroups?.map((group) => (
           <NavLink
             to={`/app/group/${group.id}`}
             key={group.id}
@@ -70,13 +78,29 @@ export const AppHomePage = () => {
             <Card.Root>
               <Card.Body>
                 <Flex alignItems="center" justifyContent="space-between">
-                  <Heading marginRight="1em">{group.name}</Heading>
+                  <Heading marginRight="1em">📔 {group.name}</Heading>
                   <FaAnglesRight size="1.6em" />
                 </Flex>
               </Card.Body>
             </Card.Root>
           </NavLink>
         ))}
+        {!decryptedGroups &&
+          Array(3)
+            .fill(0)
+            .map((_, i) => (
+              <Card.Root key={i} width="100%">
+                <Card.Body>
+                  <Flex alignItems="center" justifyContent="space-between">
+                    <HStack>
+                      <SkeletonCircle size="1.4em" marginRight="0.1em" />
+                      <Skeleton height="1.5em" width="15em" marginRight="1em" />
+                    </HStack>
+                    <Skeleton height="1.6em" width="1.6em" />
+                  </Flex>
+                </Card.Body>
+              </Card.Root>
+            ))}
         <CreateGroupDialog />
       </VStack>
     </Center>

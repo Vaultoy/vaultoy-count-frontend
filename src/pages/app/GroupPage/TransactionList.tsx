@@ -6,7 +6,15 @@ import {
   type GroupMember,
   type TransactionType,
 } from "@/api/group";
-import { Text, Card, VStack, Flex } from "@chakra-ui/react";
+import {
+  Text,
+  Card,
+  VStack,
+  Flex,
+  Skeleton,
+  SkeletonCircle,
+  HStack,
+} from "@chakra-ui/react";
 import { AddTransactionDialog } from "./AddTransactionDialog";
 import { getForText, getPaidByText } from "./transactionTypeInfos";
 
@@ -69,6 +77,35 @@ export const TransactionList = ({
           </Card.Root>
         );
       })}
+
+      {!groupData &&
+        Array(3)
+          .fill(0)
+          .map((_, i) => (
+            <Card.Root key={i} width="100%">
+              <Card.Body>
+                <Flex alignItems="center" justifyContent="space-between">
+                  <VStack alignItems="flex-start" gap="0.5em">
+                    <Text fontWeight="bold">
+                      <HStack>
+                        <SkeletonCircle size="1.1em" />{" "}
+                        <Skeleton height="1.1em" width="10em" />
+                      </HStack>
+                    </Text>
+                    <Text color="gray.600">
+                      <Skeleton height="0.8em" width="8em" />
+                    </Text>
+                    <Text color="gray.600">
+                      <Skeleton height="0.8em" width="14em" />
+                    </Text>
+                  </VStack>
+                  <Text>
+                    <Skeleton height="0.8em" width="3em" />
+                  </Text>
+                </Flex>
+              </Card.Body>
+            </Card.Root>
+          ))}
     </VStack>
   );
 };
