@@ -1,5 +1,9 @@
 import { type GroupExtended } from "@/api/group";
 import { Text, Card, VStack, HStack } from "@chakra-ui/react";
+import {
+  CURRENCY_SYMBOL,
+  floatCentsToString,
+} from "../../../utils/textGeneration";
 
 export const Equilibrium = ({
   groupData,
@@ -12,11 +16,32 @@ export const Equilibrium = ({
       balance: groupData.transactions.reduce((balance, transaction) => {
         let newBalance = balance;
 
+        const totalShares = transaction.toUsers.reduce(
+          (sum, toUser) => sum + toUser.share,
+          0,
+        );
+
+        if (isNaN(totalShares) || !isFinite(totalShares) || totalShares <= 0) {
+          // This shouldn't happen
+          console.error(
+            "Transaction with incorrect total shares found. Transaction ID:",
+            transaction.id,
+            "Total Shares:",
+            totalShares,
+          );
+          return balance;
+        }
+
         if (transaction.fromUserId === member.userId) {
           newBalance += transaction.amount;
         }
-        if (transaction.toUserIds.includes(member.userId)) {
-          newBalance -= transaction.amount / transaction.toUserIds.length;
+
+        const toUserShare =
+          transaction.toUsers.find((toUser) => toUser.id === member.userId)
+            ?.share ?? 0;
+
+        if (toUserShare > 0) {
+          newBalance -= transaction.amount * (toUserShare / totalShares);
         }
 
         return newBalance;
@@ -41,10 +66,7 @@ export const Equilibrium = ({
                 }
                 fontWeight="bold"
               >
-                {(member.balance / 100) % 1 === 0
-                  ? (member.balance / 100).toFixed(0)
-                  : (member.balance / 100).toFixed(2)}{" "}
-                €
+                {floatCentsToString(member.balance)} {CURRENCY_SYMBOL}
               </Text>
             </HStack>
           </Card.Body>

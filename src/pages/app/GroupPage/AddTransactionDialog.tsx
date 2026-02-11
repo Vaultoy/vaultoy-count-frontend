@@ -23,23 +23,28 @@ import {
   CheckboxGroup,
   Checkbox,
   SegmentGroup,
+  HStack,
+  Text,
+  IconButton,
+  InputGroup,
 } from "@chakra-ui/react";
 import { toaster } from "../../../components/ui/toast-store";
 import * as z from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import {
-  encryptNumber,
-  encryptNumberList,
-  encryptString,
-} from "@/utils/encryption";
+import { FaMinus, FaPlus } from "react-icons/fa";
+import { encryptNumber, encryptString } from "@/utils/encryption";
 import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
-import { getForText, getPaidByText } from "./transactionTypeInfos";
+import {
+  CURRENCY_SYMBOL,
+  floatCentsToString,
+  getForText,
+  getPaidByText,
+} from "../../../utils/textGeneration";
 
 const formValuesSchema = z
   .object({
@@ -50,10 +55,12 @@ const formValuesSchema = z
       .min(1, "Select exactly one member")
       .max(1, "Select exactly one member")
       .transform((val) => Number(val[0])),
-    toUserIds: z
-      .array(z.string())
+    toUsers: z
+      .array(z.object({ id: z.string(), share: z.number() }))
       .min(1, "Select at least one member")
-      .transform((vals) => vals.map((val) => Number(val))),
+      .transform((vals) =>
+        vals.map((val) => ({ id: Number(val.id), share: val.share })),
+      ),
     amount: z
       .string()
       .transform((val) => Number(val))
@@ -72,7 +79,7 @@ const formValuesSchema = z
         case EXPENSE:
           return true;
         case REPAYMENT:
-          return data.toUserIds.length === 1;
+          return data.toUsers.length === 1;
         case REVENUE:
           return true;
       }
@@ -80,7 +87,7 @@ const formValuesSchema = z
     {
       message:
         "Please select only one member to repay, or create an expense or revenue instead",
-      path: ["toUserIds"],
+      path: ["toUsers"],
     },
   )
   .refine(
@@ -125,13 +132,18 @@ export const AddTransactionDialog = ({
     defaultValues: {
       name: "",
       fromUserId: undefined,
-      toUserIds: [],
+      toUsers: [],
       amount: "",
       transaction_type: EXPENSE,
     },
   });
 
   const transaction_type = watch("transaction_type");
+  const totalShares = watch("toUsers").reduce(
+    (acc, curr) => acc + curr.share,
+    0,
+  );
+  const amount = watch("amount");
 
   const mutation = useMutation({
     mutationFn: postAddTransactionMutation,
@@ -180,10 +192,16 @@ export const AddTransactionDialog = ({
           data.fromUserId,
           groupData.groupEncryptionKey,
         ),
-        toUserIds: await encryptNumberList(
-          data.toUserIds,
-          groupData.groupEncryptionKey,
+        toUsers: await Promise.all(
+          data.toUsers.map(async (toUser) => ({
+            id: await encryptNumber(toUser.id, groupData.groupEncryptionKey),
+            share: await encryptNumber(
+              toUser.share,
+              groupData.groupEncryptionKey,
+            ),
+          })),
         ),
+
         transactionType: await encryptString(
           data.transaction_type,
           groupData.groupEncryptionKey,
@@ -250,6 +268,7 @@ export const AddTransactionDialog = ({
                   {transaction_type !== REPAYMENT && (
                     <Field.Root invalid={!!errors.name}>
                       <Field.Label>Title</Field.Label>
+
                       <Input {...register("name")} />
                       <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
                     </Field.Root>
@@ -257,7 +276,13 @@ export const AddTransactionDialog = ({
 
                   <Field.Root invalid={!!errors.amount}>
                     <Field.Label>Amount</Field.Label>
-                    <Input type="number" step="0.01" {...register("amount")} />
+                    <InputGroup endAddon={CURRENCY_SYMBOL}>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...register("amount")}
+                      />
+                    </InputGroup>
                     <Field.ErrorText>{errors.amount?.message}</Field.ErrorText>
                   </Field.Root>
 
@@ -304,13 +329,16 @@ export const AddTransactionDialog = ({
                     </Field.ErrorText>
                   </Field.Root>
 
-                  <Fieldset.Root invalid={!!errors.toUserIds}>
-                    <Fieldset.Legend>
-                      {getForText(transaction_type)}
-                    </Fieldset.Legend>
+                  <Fieldset.Root invalid={!!errors.toUsers}>
+                    <HStack alignItems="center" justifyContent="space-between">
+                      <Text>{getForText(transaction_type)}</Text>
+
+                      {transaction_type !== REPAYMENT && <Text>Shares</Text>}
+                    </HStack>
+
                     <Controller
                       control={control}
-                      name="toUserIds"
+                      name="toUsers"
                       render={({ field }) => {
                         if (
                           transaction_type === EXPENSE ||
@@ -318,24 +346,133 @@ export const AddTransactionDialog = ({
                         ) {
                           return (
                             <CheckboxGroup
-                              invalid={!!errors.toUserIds}
-                              value={field.value}
-                              onValueChange={field.onChange}
+                              invalid={!!errors.toUsers}
+                              value={field.value.map((val) => val.id)}
+                              onValueChange={(value) =>
+                                field.onChange(
+                                  value.map((val) => {
+                                    const existing = field.value.find(
+                                      (v) => v.id === val,
+                                    );
+                                    return {
+                                      id: val,
+                                      share: existing ? existing.share : 1,
+                                    };
+                                  }),
+                                )
+                              }
                               name={field.name}
                               marginTop="0.5em"
                             >
                               <Fieldset.Content>
                                 {membersSelector.items.map((item) => (
-                                  <Checkbox.Root
+                                  <HStack
                                     key={item.value}
-                                    value={item.value}
+                                    justifyContent="space-between"
                                   >
-                                    <Checkbox.HiddenInput />
-                                    <Checkbox.Control />
-                                    <Checkbox.Label>
-                                      {item.label}
-                                    </Checkbox.Label>
-                                  </Checkbox.Root>
+                                    <Checkbox.Root value={item.value}>
+                                      <Checkbox.HiddenInput />
+                                      <Checkbox.Control />
+                                      <Checkbox.Label>
+                                        {item.label}
+                                      </Checkbox.Label>
+                                    </Checkbox.Root>
+                                    <HStack gap="0.2em">
+                                      <VStack
+                                        gap="0"
+                                        marginRight="0.5em"
+                                        alignItems="flex-end"
+                                      >
+                                        <Text
+                                          fontSize="sm"
+                                          marginBottom="-0.2em"
+                                        >
+                                          {field.value.find(
+                                            (v) => v.id === item.value,
+                                          )?.share ?? 0}
+                                          x
+                                        </Text>
+                                        <Text
+                                          fontSize="sm"
+                                          color="gray.500"
+                                          marginTop="-0.2em"
+                                        >
+                                          {floatCentsToString(
+                                            totalShares === 0
+                                              ? 0
+                                              : ((field.value.find(
+                                                  (v) => v.id === item.value,
+                                                )?.share ?? 0) /
+                                                  totalShares) *
+                                                  100 *
+                                                  Number(amount),
+                                          )}{" "}
+                                          {CURRENCY_SYMBOL}
+                                        </Text>
+                                      </VStack>
+                                      <IconButton
+                                        size="xs"
+                                        type="button"
+                                        variant="outline"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          const existing = field.value.find(
+                                            (v) => v.id === item.value,
+                                          );
+                                          if (!existing) {
+                                            field.onChange([
+                                              ...field.value,
+                                              {
+                                                id: item.value,
+                                                share: 1,
+                                              },
+                                            ]);
+                                            return;
+                                          }
+                                          const newShare = existing.share + 1;
+                                          field.onChange(
+                                            field.value.map((v) =>
+                                              v.id === item.value
+                                                ? { ...v, share: newShare }
+                                                : v,
+                                            ),
+                                          );
+                                        }}
+                                      >
+                                        <FaPlus />
+                                      </IconButton>
+                                      <IconButton
+                                        size="xs"
+                                        type="button"
+                                        variant="outline"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          const existing = field.value.find(
+                                            (v) => v.id === item.value,
+                                          );
+                                          if (!existing) return;
+                                          const newShare = existing.share - 1;
+                                          if (newShare <= 0) {
+                                            field.onChange(
+                                              field.value.filter(
+                                                (v) => v.id !== item.value,
+                                              ),
+                                            );
+                                          } else {
+                                            field.onChange(
+                                              field.value.map((v) =>
+                                                v.id === item.value
+                                                  ? { ...v, share: newShare }
+                                                  : v,
+                                              ),
+                                            );
+                                          }
+                                        }}
+                                      >
+                                        <FaMinus />
+                                      </IconButton>
+                                    </HStack>
+                                  </HStack>
                                 ))}
                               </Fieldset.Content>
                             </CheckboxGroup>
@@ -344,9 +481,19 @@ export const AddTransactionDialog = ({
                           return (
                             <Select.Root
                               name={field.name}
-                              value={field.value}
+                              value={field.value.map((val) => val.id)}
                               onValueChange={({ value }) =>
-                                field.onChange(value)
+                                field.onChange(
+                                  value.map((val) => {
+                                    const existing = field.value.find(
+                                      (v) => v.id === val,
+                                    );
+                                    return {
+                                      id: val,
+                                      share: existing ? existing.share : 1,
+                                    };
+                                  }),
+                                )
                               }
                               onInteractOutside={() => field.onBlur()}
                               collection={membersSelector}
@@ -383,7 +530,7 @@ export const AddTransactionDialog = ({
                     />
 
                     <Fieldset.ErrorText>
-                      {errors.toUserIds?.message}
+                      {errors.toUsers?.message}
                     </Fieldset.ErrorText>
                   </Fieldset.Root>
                 </VStack>

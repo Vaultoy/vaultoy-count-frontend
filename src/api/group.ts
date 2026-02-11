@@ -26,11 +26,16 @@ export const REVENUE = "revenue";
 export const TRANSACTION_TYPES = [EXPENSE, REPAYMENT, REVENUE] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
+interface GroupTransactionToUser<isEncrypted extends boolean = true> {
+  id: Encrypted<number, isEncrypted>;
+  share: Encrypted<number, isEncrypted>;
+}
+
 export interface GroupTransaction<isEncrypted extends boolean = true> {
   id: number;
   name: Encrypted<string, isEncrypted>;
   fromUserId: Encrypted<number, isEncrypted>;
-  toUserIds: Encrypted<number, isEncrypted>[];
+  toUsers: GroupTransactionToUser<isEncrypted>[];
   amount: Encrypted<number, isEncrypted>;
   transactionType: Encrypted<TransactionType, isEncrypted>;
   date: Encrypted<number, isEncrypted>;

@@ -16,7 +16,12 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { AddTransactionDialog } from "./AddTransactionDialog";
-import { getForText, getPaidByText } from "./transactionTypeInfos";
+import {
+  CURRENCY_SYMBOL,
+  floatCentsToString,
+  getForText,
+  getPaidByText,
+} from "../../../utils/textGeneration";
 
 const getTransactionEmoji = (transactionType: TransactionType) => {
   switch (transactionType) {
@@ -61,16 +66,14 @@ export const TransactionList = ({
                   </Text>
                   <Text color="gray.600">
                     {getForText(transaction.transactionType)}{" "}
-                    {transaction.toUserIds
-                      .map((id) => membersIndex[id].username)
+                    {transaction.toUsers
+                      .map(({ id }) => membersIndex[id].username)
                       .join(", ")}
                   </Text>
                 </VStack>
                 <Text>
-                  {(transaction.amount / 100) % 1 === 0
-                    ? ((amountSign * transaction.amount) / 100).toFixed(0)
-                    : ((amountSign * transaction.amount) / 100).toFixed(2)}{" "}
-                  €
+                  {floatCentsToString(amountSign * transaction.amount)}{" "}
+                  {CURRENCY_SYMBOL}
                 </Text>
               </Flex>
             </Card.Body>

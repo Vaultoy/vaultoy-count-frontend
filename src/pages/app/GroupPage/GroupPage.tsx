@@ -26,7 +26,6 @@ import { UserContext } from "@/contexts/UserContext";
 import {
   decryptEncryptionKey,
   decryptNumber,
-  decryptNumberList,
   decryptString,
 } from "@/utils/encryption";
 import { ShareGroupDialog } from "./ShareGroupDialog";
@@ -91,9 +90,11 @@ export const GroupPage = () => {
                 transaction.fromUserId,
                 groupEncryptionKey,
               ),
-              toUserIds: await decryptNumberList(
-                transaction.toUserIds,
-                groupEncryptionKey,
+              toUsers: await Promise.all(
+                transaction.toUsers.map(async (toUser) => ({
+                  id: await decryptNumber(toUser.id, groupEncryptionKey),
+                  share: await decryptNumber(toUser.share, groupEncryptionKey),
+                })),
               ),
               transactionType,
               date: await decryptNumber(transaction.date, groupEncryptionKey),

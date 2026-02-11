@@ -15,6 +15,7 @@ import {
   Card,
   HStack,
   VStack,
+  QrCode,
 } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toast-store";
 import { useContext, useEffect, useState } from "react";
@@ -243,6 +244,11 @@ export const ShareGroupDialog = ({
               )}
               {isGroupAdmin && url && (
                 <VStack>
+                  <QrCode.Root value={url} size="lg" marginBottom="1em">
+                    <QrCode.Frame>
+                      <QrCode.Pattern />
+                    </QrCode.Frame>
+                  </QrCode.Root>
                   <Card.Root marginBottom="1em">
                     <Card.Body>
                       <Text wordBreak="break-all" marginRight="1em">
