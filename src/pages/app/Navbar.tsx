@@ -4,6 +4,7 @@ import { UserContext } from "@/contexts/UserContext";
 import { useNavigate } from "react-router";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { Logo } from "@/components/Logo";
+import { Link } from "react-router";
 
 export const Navbar = () => {
   const { user, setUser, userDataRetrievedFromLocalDB } =
@@ -15,7 +16,9 @@ export const Navbar = () => {
       <Card.Root width={{ base: "94%", md: "70%", lg: "60%" }} marginTop="2em">
         <Card.Body>
           <HStack justifyContent="space-between" alignItems="center">
-            <Logo size="small" />
+            <Link to="/">
+              <Logo size="small" />
+            </Link>
             <HStack justifyContent="flex-end">
               <Text marginRight="1em">{user?.username}</Text>
               {userDataRetrievedFromLocalDB && user && (
