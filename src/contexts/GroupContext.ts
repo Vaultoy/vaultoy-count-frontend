@@ -55,7 +55,12 @@ export const useDecryptAndSaveGroupToContext = (
 
   useEffect(() => {
     const doDecryptAndCompute = async () => {
-      if (!user || !user.user || !encryptedGroup) return;
+      if (!encryptedGroup) {
+        setGroup(undefined);
+        setGroupMembersIndex(undefined);
+        return;
+      }
+      if (!user || !user.user) return;
 
       const decryptedGroup = await decryptGroup(
         encryptedGroup,

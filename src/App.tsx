@@ -14,6 +14,7 @@ import { UserContextProvider } from "./contexts/UserContextProvider";
 import { JoinInvitation } from "./pages/app/JoinInvitation";
 import { SCApp } from "./pages/app/SCApp";
 import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectContextProvider";
+import { GroupContextProvider } from "./contexts/GroupContextProvider";
 
 const queryClient = new QueryClient();
 
@@ -32,37 +33,39 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ChakraProvider value={system}>
         <UserContextProvider>
-          <PostLoginRedirectContextProvider>
-            <Toaster />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Home />} />
+          <GroupContextProvider>
+            <PostLoginRedirectContextProvider>
+              <Toaster />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Home />} />
 
-                <Route path="/login" element={<LoginSignup isLogin />} />
-                <Route
-                  path="/signup"
-                  element={<LoginSignup isLogin={false} />}
-                />
+                  <Route path="/login" element={<LoginSignup isLogin />} />
+                  <Route
+                    path="/signup"
+                    element={<LoginSignup isLogin={false} />}
+                  />
 
-                <Route path="/app/*" element={<SCApp />} />
+                  <Route path="/app/*" element={<SCApp />} />
 
-                <Route
-                  path="/join/:groupId/:invitationLinkSecret"
-                  element={<JoinInvitation />}
-                />
+                  <Route
+                    path="/join/:groupId/:invitationLinkSecret"
+                    element={<JoinInvitation />}
+                  />
 
-                <Route
-                  path="*"
-                  element={
-                    <ErrorPage
-                      title="404 - Page Not Found"
-                      description="Unfortunately, the page you were looking for was not found."
-                    />
-                  }
-                />
-              </Routes>
-            </BrowserRouter>
-          </PostLoginRedirectContextProvider>
+                  <Route
+                    path="*"
+                    element={
+                      <ErrorPage
+                        title="404 - Page Not Found"
+                        description="Unfortunately, the page you were looking for was not found."
+                      />
+                    }
+                  />
+                </Routes>
+              </BrowserRouter>
+            </PostLoginRedirectContextProvider>
+          </GroupContextProvider>
         </UserContextProvider>
       </ChakraProvider>
     </QueryClientProvider>
