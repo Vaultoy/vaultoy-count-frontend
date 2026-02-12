@@ -25,6 +25,18 @@ export const EquilibriumRepaymentsDialog = () => {
 
   const [open, setOpen] = useState(false);
 
+  const othersRepayments = group
+    ? group.members
+        .filter((member) => member.userId !== user?.id)
+        .flatMap((member) =>
+          member.repaymentsToMake.map((repayment) => ({
+            fromUserId: member.userId,
+            toUserId: repayment.toUserId,
+            amount: repayment.amount,
+          })),
+        )
+    : undefined;
+
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild marginTop="1em">
@@ -78,29 +90,28 @@ export const EquilibriumRepaymentsDialog = () => {
               <Heading size="md" marginBottom="0.5em">
                 Others
               </Heading>
+              {othersRepayments?.length === 0 && (
+                <Text>✅ Others have no repayments to make!</Text>
+              )}
               <VStack alignItems="flex-start" marginBottom="1em">
-                {group?.members
-                  .filter((member) => member.userId !== user?.id)
-                  .map((member) =>
-                    member.repaymentsToMake.map((repayment) => (
-                      <EquilibriumRepayment
-                        key={repayment.toUserId}
-                        fromUsername={
-                          groupMembersIndex
-                            ? groupMembersIndex[member.userId]?.username ||
-                              "Unknown User"
-                            : "Unknown User"
-                        }
-                        toUsername={
-                          groupMembersIndex
-                            ? groupMembersIndex[repayment.toUserId]?.username ||
-                              "Unknown User"
-                            : "Unknown User"
-                        }
-                        amount={repayment.amount}
-                      />
-                    )),
-                  )}
+                {othersRepayments?.map((repayment) => (
+                  <EquilibriumRepayment
+                    key={repayment.toUserId}
+                    fromUsername={
+                      groupMembersIndex
+                        ? groupMembersIndex[repayment.fromUserId]?.username ||
+                          "Unknown User"
+                        : "Unknown User"
+                    }
+                    toUsername={
+                      groupMembersIndex
+                        ? groupMembersIndex[repayment.toUserId]?.username ||
+                          "Unknown User"
+                        : "Unknown User"
+                    }
+                    amount={repayment.amount}
+                  />
+                ))}
               </VStack>
             </Dialog.Body>
             <Dialog.Footer>
