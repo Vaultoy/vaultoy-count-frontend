@@ -5,8 +5,7 @@ export interface MasterKeys {
   encryptionKey: CryptoKey;
 }
 
-// TODO: Choose parameters (I changed N for dev, the default was: 2 ** 16)
-const scryptParams = { N: 2 ** 10, r: 8, p: 1, dkLen: 32 };
+const scryptParams = { N: 2 ** 17, r: 8, p: 1, dkLen: 32 };
 
 export const derivateKeys = async (
   username: string,
