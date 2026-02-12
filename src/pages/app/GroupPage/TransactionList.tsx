@@ -89,22 +89,15 @@ export const TransactionList = ({
               <Card.Body>
                 <Flex alignItems="center" justifyContent="space-between">
                   <VStack alignItems="flex-start" gap="0.5em">
-                    <Text fontWeight="bold">
-                      <HStack>
-                        <SkeletonCircle size="1.1em" />{" "}
-                        <Skeleton height="1.1em" width="10em" />
-                      </HStack>
-                    </Text>
-                    <Text color="gray.600">
-                      <Skeleton height="0.8em" width="8em" />
-                    </Text>
-                    <Text color="gray.600">
-                      <Skeleton height="0.8em" width="14em" />
-                    </Text>
+                    <HStack>
+                      <SkeletonCircle size="1.1em" />{" "}
+                      <Skeleton height="1.1em" width="10em" />
+                    </HStack>
+
+                    <Skeleton height="0.8em" width="8em" />
+                    <Skeleton height="0.8em" width="14em" />
                   </VStack>
-                  <Text>
-                    <Skeleton height="0.8em" width="3em" />
-                  </Text>
+                  <Skeleton height="0.8em" width="3em" />
                 </Flex>
               </Card.Body>
             </Card.Root>
