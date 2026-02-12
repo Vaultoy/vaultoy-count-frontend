@@ -1,0 +1,73 @@
+import type { MemberComputed, RepaymentsToMake } from "@/types";
+import {
+  Button,
+  Dialog,
+  Portal,
+  CloseButton,
+  Heading,
+  VStack,
+  Flex,
+  Card,
+  Text,
+} from "@chakra-ui/react";
+import { useState } from "react";
+import { FaAnglesRight } from "react-icons/fa6";
+
+export const EquilibriumRepaymentsDialog = ({
+  membersComputed,
+  userRepayments,
+}: {
+  membersComputed: MemberComputed[] | undefined;
+  userRepayments: RepaymentsToMake[] | undefined;
+}) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
+      <Dialog.Trigger asChild marginTop="1em">
+        <Card.Root width="100%" marginBottom="1em" cursor="pointer">
+          <Card.Body>
+            <Flex alignItems="center" justifyContent="space-between">
+              <VStack alignItems="flex-start">
+                <Heading size="lg">
+                  {userRepayments?.length === 0
+                    ? "✅ You have no repayments to make!"
+                    : "🤝 See which repayments to make"}
+                </Heading>
+                {userRepayments?.length === 0 && (
+                  <Text>See all repayments</Text>
+                )}
+              </VStack>
+              <FaAnglesRight size="1.6em" />
+            </Flex>
+          </Card.Body>
+        </Card.Root>
+      </Dialog.Trigger>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header>
+              <Dialog.Title>Repayments</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <Heading size="md" marginBottom="0.5em">
+                Your repayments
+              </Heading>
+              Work in progress.
+              <VStack alignItems="flex-start"></VStack>
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Dialog.ActionTrigger asChild>
+                <Button variant="outline">Cancel</Button>
+              </Dialog.ActionTrigger>
+            </Dialog.Footer>
+            <Dialog.CloseTrigger asChild>
+              <CloseButton size="sm" />
+            </Dialog.CloseTrigger>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
+  );
+};

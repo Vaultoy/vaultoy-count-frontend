@@ -4,54 +4,100 @@ import {
   CURRENCY_SYMBOL,
   floatCentsToString,
 } from "../../../utils/textGeneration";
+import { useContext, useMemo } from "react";
+import { computeEquilibriumRepayments } from "@/utils/equilibriumAlgorithm";
+import { UserContext } from "@/contexts/UserContext";
+import type { MemberComputed, RepaymentsToMake } from "@/types";
+import { EquilibriumRepaymentsDialog } from "./EquilibriumRepaymentsDialog";
 
 export const Equilibrium = ({
   groupData,
 }: {
   groupData: GroupExtended<false> | undefined;
 }) => {
-  const memberComputed = groupData?.members
-    .map((member) => ({
-      ...member,
-      balance: groupData.transactions.reduce((balance, transaction) => {
-        let newBalance = balance;
+  const { user } = useContext(UserContext);
 
-        const totalShares = transaction.toUsers.reduce(
-          (sum, toUser) => sum + toUser.share,
-          0,
-        );
+  const {
+    membersComputed,
+    userRepayments,
+  }: {
+    membersComputed: MemberComputed[] | undefined;
+    userRepayments: RepaymentsToMake[] | undefined;
+  } = useMemo(() => {
+    const membersComputedMemo = groupData?.members
+      .map((member) => ({
+        ...member,
+        balance: groupData.transactions.reduce((balance, transaction) => {
+          let newBalance = balance;
 
-        if (isNaN(totalShares) || !isFinite(totalShares) || totalShares <= 0) {
-          // This shouldn't happen
-          console.error(
-            "Transaction with incorrect total shares found. Transaction ID:",
-            transaction.id,
-            "Total Shares:",
-            totalShares,
+          const totalShares = transaction.toUsers.reduce(
+            (sum, toUser) => sum + toUser.share,
+            0,
           );
-          return balance;
-        }
 
-        if (transaction.fromUserId === member.userId) {
-          newBalance += transaction.amount;
-        }
+          if (
+            isNaN(totalShares) ||
+            !isFinite(totalShares) ||
+            totalShares <= 0
+          ) {
+            // This shouldn't happen
+            console.error(
+              "Transaction with incorrect total shares found. Transaction ID:",
+              transaction.id,
+              "Total Shares:",
+              totalShares,
+            );
+            return balance;
+          }
 
-        const toUserShare =
-          transaction.toUsers.find((toUser) => toUser.id === member.userId)
-            ?.share ?? 0;
+          if (transaction.fromUserId === member.userId) {
+            newBalance += transaction.amount;
+          }
 
-        if (toUserShare > 0) {
-          newBalance -= transaction.amount * (toUserShare / totalShares);
-        }
+          const toUserShare =
+            transaction.toUsers.find((toUser) => toUser.id === member.userId)
+              ?.share ?? 0;
 
-        return newBalance;
-      }, 0),
-    }))
-    .sort((a, b) => b.balance - a.balance);
+          if (toUserShare > 0) {
+            newBalance -= transaction.amount * (toUserShare / totalShares);
+          }
+
+          return newBalance;
+        }, 0),
+      }))
+      .sort((a, b) => b.balance - a.balance);
+
+    if (!membersComputedMemo) {
+      return { membersComputed: undefined, userRepayments: undefined };
+    }
+
+    const membersBalances: Record<number, number> = {};
+
+    for (const member of membersComputedMemo) {
+      membersBalances[member.userId] = member.balance;
+    }
+
+    const equilibriumRepaymentsMemo =
+      computeEquilibriumRepayments(membersBalances);
+
+    const membersComputedWithRepayments = membersComputedMemo.map((member) => ({
+      ...member,
+      repaymentsToMake: equilibriumRepaymentsMemo[member.userId] || [],
+    }));
+
+    return {
+      membersComputed: membersComputedWithRepayments,
+      userRepayments: user?.id ? equilibriumRepaymentsMemo[user.id] : undefined,
+    };
+  }, [groupData?.members, groupData?.transactions, user?.id]);
 
   return (
     <VStack>
-      {memberComputed?.map((member) => (
+      <EquilibriumRepaymentsDialog
+        membersComputed={membersComputed}
+        userRepayments={userRepayments}
+      />
+      {membersComputed?.map((member) => (
         <Card.Root key={member.userId} width="100%">
           <Card.Body>
             <HStack justifyContent="space-between">
