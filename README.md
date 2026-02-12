@@ -1,4 +1,4 @@
-# Secure Count Frontend
+# Vaultoy Count Frontend
 
 ## Installation
 

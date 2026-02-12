@@ -11,21 +11,21 @@ const scryptParams = { N: 2 ** 10, r: 8, p: 1, dkLen: 32 };
 export const derivateKeys = async (
   username: string,
   password: string,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
 ): Promise<MasterKeys> => {
   const passwordString = password;
   const passwordBuffer = new Uint8Array(
-    Array.from(passwordString).map((c) => c.charCodeAt(0))
+    Array.from(passwordString).map((c) => c.charCodeAt(0)),
   );
 
-  const authSaltString = "secure_count_authentification" + username;
+  const authSaltString = "vaultoy_count_authentification" + username;
   const authSaltBuffer = new Uint8Array(
-    Array.from(authSaltString).map((c) => c.charCodeAt(0))
+    Array.from(authSaltString).map((c) => c.charCodeAt(0)),
   );
 
-  const encryptionSaltString = "secure_count_encryption" + username;
+  const encryptionSaltString = "vaultoy_count_encryption" + username;
   const encryptionSaltBuffer = new Uint8Array(
-    Array.from(encryptionSaltString).map((c) => c.charCodeAt(0))
+    Array.from(encryptionSaltString).map((c) => c.charCodeAt(0)),
   );
 
   // For onProgress, we assume that the two calls have the same approximate speed
@@ -36,7 +36,7 @@ export const derivateKeys = async (
     scryptParams.r,
     scryptParams.p,
     scryptParams.dkLen,
-    onProgress
+    onProgress,
   );
 
   const encryptionKeyPromise = scrypt(
@@ -45,7 +45,7 @@ export const derivateKeys = async (
     scryptParams.N,
     scryptParams.r,
     scryptParams.p,
-    scryptParams.dkLen
+    scryptParams.dkLen,
   );
 
   const [authentificationKeyRaw, encryptionKeyRaw] = await Promise.all([
@@ -58,42 +58,42 @@ export const derivateKeys = async (
     Uint8Array.from(encryptionKeyRaw),
     "AES-GCM",
     false,
-    ["encrypt", "decrypt"]
+    ["encrypt", "decrypt"],
   );
 
   // Transform Uint8Array to base64 string
   const authentificationKey = btoa(
-    String.fromCharCode(...authentificationKeyRaw)
+    String.fromCharCode(...authentificationKeyRaw),
   );
 
   return { authentificationKey, encryptionKey };
 };
 
 export const deriveVerificationTokenFromLinkSecret = async (
-  invitationLinkSecret: string
+  invitationLinkSecret: string,
 ): Promise<string> => {
   const invitationValidationSaltString =
-    "secure_count_invitation_validation_salt";
+    "vaultoy_count_invitation_validation_salt";
 
   const invitationVerificationTokenBuffer = await window.crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(
-      invitationLinkSecret + invitationValidationSaltString
-    )
+      invitationLinkSecret + invitationValidationSaltString,
+    ),
   );
 
   const invitationVerificationToken = btoa(
-    String.fromCharCode(...new Uint8Array(invitationVerificationTokenBuffer))
+    String.fromCharCode(...new Uint8Array(invitationVerificationTokenBuffer)),
   );
 
   return invitationVerificationToken;
 };
 
 export const stringToCryptoKey = async (
-  keyString: string
+  keyString: string,
 ): Promise<CryptoKey> => {
   const keyBuffer = new Uint8Array(
-    Array.from(atob(keyString)).map((c) => c.charCodeAt(0))
+    Array.from(atob(keyString)).map((c) => c.charCodeAt(0)),
   );
 
   return crypto.subtle.importKey("raw", keyBuffer, "AES-GCM", false, [
@@ -109,7 +109,7 @@ export const cryptoKeyToString = async (key: CryptoKey): Promise<string> => {
   }
 
   const keyBuffer = new Uint8Array(
-    await window.crypto.subtle.exportKey("raw", key)
+    await window.crypto.subtle.exportKey("raw", key),
   );
   return btoa(String.fromCharCode(...keyBuffer));
 };

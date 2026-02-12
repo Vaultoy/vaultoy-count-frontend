@@ -4,8 +4,8 @@ export const Logo = ({ size }: { size: "small" | "large" }) => {
   return (
     <HStack alignItems="center" justifyContent="center">
       <Image
-        src="/secure_count_logo.svg"
-        alt="Secure Count Logo"
+        src="/vaultoy_count_logo.svg"
+        alt="Vaultoy Count Logo"
         height={size === "small" ? "2.2em" : "3em"}
       />
       <Heading
@@ -13,7 +13,7 @@ export const Logo = ({ size }: { size: "small" | "large" }) => {
         fontWeight="normal"
         ml="0.2em"
       >
-        Secure Count
+        Vaultoy Count
       </Heading>
     </HStack>
   );

@@ -5,7 +5,7 @@ import { UserContext, type User } from "./UserContext";
 export const UserContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser, userDataRetrievedFromLocalDB] = usePersistentState<
     User | undefined
-  >("secure-count-user");
+  >("vaultoy-count-user");
 
   return (
     <UserContext.Provider
