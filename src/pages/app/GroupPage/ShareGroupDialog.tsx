@@ -2,7 +2,6 @@ import {
   createInvitationMutation,
   deleteInvitationMutation,
   getInvitationQuery,
-  type GroupExtended,
 } from "@/api/group";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -32,6 +31,7 @@ import {
 import { UserContext } from "@/contexts/UserContext";
 import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
 import { btoa_uri } from "@/utils/base64Uri";
+import { GroupContext } from "@/contexts/GroupContext";
 
 const urlFromInvitationLinkSecret = (
   groupId: string,
@@ -47,36 +47,34 @@ const urlFromInvitationLinkSecret = (
   return url.toString();
 };
 
-export const ShareGroupDialog = ({
-  groupData,
-}: {
-  groupData: GroupExtended<false> | undefined;
-}) => {
+export const ShareGroupDialog = () => {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
   const { user } = useContext(UserContext);
+  const { group } = useContext(GroupContext);
+
   const queryClient = useQueryClient();
 
   const { data: existingInvitation, isLoading: isLoadingExistingInvitation } =
     useQuery({
-      queryKey: ["getInvitation", groupData?.id],
+      queryKey: ["getInvitation", group?.id],
       queryFn: () =>
-        groupData?.id && !isNaN(Number(groupData?.id))
-          ? getInvitationQuery(groupData?.id.toString())
+        group?.id && !isNaN(Number(group?.id))
+          ? getInvitationQuery(group?.id.toString())
           : Promise.resolve(null),
     });
 
   useEffect(() => {
     const existingInvitationDecrypt = async () => {
-      if (!existingInvitation?.invitationLinkSecret || !groupData) {
+      if (!existingInvitation?.invitationLinkSecret || !group) {
         return;
       }
 
       const invitationLinkSecretKey = await decryptEncryptionKey(
         existingInvitation?.invitationLinkSecret,
-        groupData.groupEncryptionKey,
+        group.groupEncryptionKey,
       );
 
       const invitationLinkSecret = await cryptoKeyToString(
@@ -84,7 +82,7 @@ export const ShareGroupDialog = ({
       );
 
       const url = urlFromInvitationLinkSecret(
-        groupData.id.toString(),
+        group.id.toString(),
         invitationLinkSecret,
       );
 
@@ -92,7 +90,7 @@ export const ShareGroupDialog = ({
     };
 
     existingInvitationDecrypt();
-  }, [existingInvitation, groupData]);
+  }, [existingInvitation, group]);
 
   const createMutation = useMutation({
     mutationFn: createInvitationMutation,
@@ -118,7 +116,7 @@ export const ShareGroupDialog = ({
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["getInvitation", groupData?.id],
+        queryKey: ["getInvitation", group?.id],
       });
     },
     onError: (error) => {
@@ -155,7 +153,7 @@ export const ShareGroupDialog = ({
       setCopiedToClipboard(false);
 
       queryClient.invalidateQueries({
-        queryKey: ["getInvitation", groupData?.id],
+        queryKey: ["getInvitation", group?.id],
       });
     },
     onError: (error) => {
@@ -175,19 +173,16 @@ export const ShareGroupDialog = ({
 
     const encryptedInvitationLinkSecret = await encryptEncryptionKey(
       invitationLinkSecretRaw,
-      groupData!.groupEncryptionKey,
+      group!.groupEncryptionKey,
     );
 
     const invitationLinkSecretKey = await decryptEncryptionKey(
       encryptedInvitationLinkSecret,
-      groupData!.groupEncryptionKey,
+      group!.groupEncryptionKey,
     );
 
     const groupEncryptionKeyBuffer = new Uint8Array(
-      await window.crypto.subtle.exportKey(
-        "raw",
-        groupData!.groupEncryptionKey,
-      ),
+      await window.crypto.subtle.exportKey("raw", group!.groupEncryptionKey),
     );
 
     const invitationKey = await encryptEncryptionKey(
@@ -196,14 +191,14 @@ export const ShareGroupDialog = ({
     );
 
     const url = urlFromInvitationLinkSecret(
-      groupData!.id.toString(),
+      group!.id.toString(),
       invitationLinkSecret,
     );
 
     setUrl(url);
 
     createMutation.mutate({
-      groupId: groupData!.id.toString(),
+      groupId: group!.id.toString(),
       invitationData: {
         invitationVerificationToken,
         invitationKey,
@@ -213,7 +208,7 @@ export const ShareGroupDialog = ({
   };
 
   const isGroupAdmin = user
-    ? groupData?.members.find(
+    ? group?.members.find(
         (member) => member.userId === user.id && member.rights === "admin",
       ) !== undefined
     : false;
@@ -222,7 +217,7 @@ export const ShareGroupDialog = ({
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild>
         <Center>
-          <Button variant="outline" width="fit-content" disabled={!groupData}>
+          <Button variant="outline" width="fit-content" disabled={!group}>
             <FaShareNodes /> Share Group
           </Button>
         </Center>
@@ -277,7 +272,7 @@ export const ShareGroupDialog = ({
                     <Button
                       onClick={() => {
                         deleteMutation.mutate({
-                          groupId: groupData!.id.toString(),
+                          groupId: group!.id.toString(),
                         });
                       }}
                       colorScheme="red"

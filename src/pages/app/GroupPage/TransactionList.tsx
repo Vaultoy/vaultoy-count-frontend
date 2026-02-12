@@ -1,11 +1,4 @@
-import {
-  EXPENSE,
-  REPAYMENT,
-  REVENUE,
-  type GroupExtended,
-  type GroupMember,
-  type TransactionType,
-} from "@/api/group";
+import { EXPENSE, REPAYMENT, REVENUE, type TransactionType } from "@/api/group";
 import {
   Text,
   Card,
@@ -22,6 +15,8 @@ import {
   getForText,
   getPaidByText,
 } from "../../../utils/textGeneration";
+import { GroupContext } from "@/contexts/GroupContext";
+import { useContext } from "react";
 
 const getTransactionEmoji = (transactionType: TransactionType) => {
   switch (transactionType) {
@@ -33,22 +28,16 @@ const getTransactionEmoji = (transactionType: TransactionType) => {
       return "💸";
   }
 };
-export const TransactionList = ({
-  groupData,
-  membersIndex,
-}: {
-  groupData: GroupExtended<false> | undefined;
-  membersIndex: Record<number, GroupMember>;
-}) => {
+export const TransactionList = () => {
+  const { group, groupMembersIndex } = useContext(GroupContext);
+
   return (
     <VStack>
-      <AddTransactionDialog groupData={groupData} />
+      <AddTransactionDialog groupData={group} />
 
-      {groupData?.transactions.length === 0 && (
-        <Text>🙅 No transactions yet.</Text>
-      )}
+      {group?.transactions.length === 0 && <Text>🙅 No transactions yet.</Text>}
 
-      {groupData?.transactions.map((transaction) => {
+      {group?.transactions.map((transaction) => {
         const amountSign = transaction.transactionType === REVENUE ? -1 : 1;
 
         return (
@@ -62,12 +51,16 @@ export const TransactionList = ({
                   </Text>
                   <Text color="gray.600">
                     {getPaidByText(transaction.transactionType)}{" "}
-                    {membersIndex[transaction.fromUserId].username}
+                    {groupMembersIndex &&
+                      groupMembersIndex[transaction.fromUserId].username}
                   </Text>
                   <Text color="gray.600">
                     {getForText(transaction.transactionType)}{" "}
                     {transaction.toUsers
-                      .map(({ id }) => membersIndex[id].username)
+                      .map(
+                        ({ id }) =>
+                          groupMembersIndex && groupMembersIndex[id].username,
+                      )
                       .join(", ")}
                   </Text>
                 </VStack>
@@ -81,7 +74,7 @@ export const TransactionList = ({
         );
       })}
 
-      {!groupData &&
+      {!group &&
         Array(3)
           .fill(0)
           .map((_, i) => (

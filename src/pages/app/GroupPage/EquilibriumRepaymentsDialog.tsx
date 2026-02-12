@@ -1,4 +1,5 @@
-import type { MemberComputed, RepaymentsToMake } from "@/types";
+import { GroupContext } from "@/contexts/GroupContext";
+import { UserContext } from "@/contexts/UserContext";
 import {
   Button,
   Dialog,
@@ -10,16 +11,17 @@ import {
   Card,
   Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
 
-export const EquilibriumRepaymentsDialog = ({
-  membersComputed,
-  userRepayments,
-}: {
-  membersComputed: MemberComputed[] | undefined;
-  userRepayments: RepaymentsToMake[] | undefined;
-}) => {
+export const EquilibriumRepaymentsDialog = () => {
+  const { user } = useContext(UserContext);
+  const { groupMembersIndex } = useContext(GroupContext);
+  const userRepayments =
+    groupMembersIndex && user
+      ? groupMembersIndex[user.id]?.repaymentsToMake
+      : undefined;
+
   const [open, setOpen] = useState(false);
 
   return (

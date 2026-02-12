@@ -1,11 +1,4 @@
-import {
-  getGroupQuery,
-  TRANSACTION_TYPES,
-  type GroupExtended,
-  type GroupMember,
-  type GroupTransaction,
-  type TransactionType,
-} from "@/api/group";
+import { getGroupQuery } from "@/api/group";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import { ErrorPage } from "../../ErrorPage";
@@ -21,21 +14,18 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
-import { useContext, useEffect, useState } from "react";
-import { UserContext } from "@/contexts/UserContext";
-import {
-  decryptEncryptionKey,
-  decryptNumber,
-  decryptString,
-} from "@/utils/encryption";
+import { useContext } from "react";
 import { ShareGroupDialog } from "./ShareGroupDialog";
 import { TransactionList } from "./TransactionList";
 import { Equilibrium } from "./Equilibrium";
+import {
+  GroupContext,
+  useDecryptAndSaveGroupToContext,
+} from "@/contexts/GroupContext";
 
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
-  const user = useContext(UserContext);
 
   const { data } = useQuery({
     queryKey: ["getGroup", groupId],
@@ -45,78 +35,8 @@ export const GroupPage = () => {
         : Promise.resolve(null),
   });
 
-  const [decryptedGroup, setDecryptedGroup] = useState<
-    GroupExtended<false> | undefined
-  >(undefined);
-
-  useEffect(() => {
-    const decryptGroup = async () => {
-      if (!user || !user.user || !data || !data.group) return;
-
-      const groupEncryptionKey = await decryptEncryptionKey(
-        data.group.groupEncryptionKey,
-        user.user.encryptionKey,
-      );
-
-      const group: GroupExtended<false> = {
-        ...data.group,
-        name: await decryptString(data.group.name, groupEncryptionKey),
-        groupEncryptionKey,
-        members: data.group.members,
-        transactions: await Promise.all(
-          data.group.transactions.map(async (transaction) => {
-            let transactionType = (await decryptString(
-              transaction.transactionType,
-              groupEncryptionKey,
-            )) as TransactionType; // Verified after decryption
-
-            if (!TRANSACTION_TYPES.includes(transactionType)) {
-              console.error(
-                "Invalid transaction type after decryption:",
-                transactionType,
-              );
-              // Default to a valid type to prevent crashes, but this should not happen
-              transactionType = TRANSACTION_TYPES[0];
-            }
-
-            const decryptedTransaction: GroupTransaction<false> = {
-              ...transaction,
-              name: await decryptString(transaction.name, groupEncryptionKey),
-              amount: await decryptNumber(
-                transaction.amount,
-                groupEncryptionKey,
-              ),
-              fromUserId: await decryptNumber(
-                transaction.fromUserId,
-                groupEncryptionKey,
-              ),
-              toUsers: await Promise.all(
-                transaction.toUsers.map(async (toUser) => ({
-                  id: await decryptNumber(toUser.id, groupEncryptionKey),
-                  share: await decryptNumber(toUser.share, groupEncryptionKey),
-                })),
-              ),
-              transactionType,
-              date: await decryptNumber(transaction.date, groupEncryptionKey),
-            };
-
-            return decryptedTransaction;
-          }),
-        ),
-      };
-
-      group.transactions.sort((a, b) => b.date - a.date);
-
-      if (!active) return;
-      setDecryptedGroup(group);
-    };
-
-    let active = true;
-    decryptGroup();
-    return () => {
-      active = false;
-    };
-  }, [user, data]);
+  useDecryptAndSaveGroupToContext(data?.group);
+  const { group } = useContext(GroupContext);
 
   if (!groupId || isNaN(Number(groupId))) {
     return (
@@ -126,15 +46,6 @@ export const GroupPage = () => {
       />
     );
   }
-
-  const membersIndex =
-    data?.group.members.reduce(
-      (acc, member) => {
-        acc[member.userId] = member;
-        return acc;
-      },
-      {} as Record<number, GroupMember>,
-    ) ?? {};
 
   return (
     <Center>
@@ -152,11 +63,11 @@ export const GroupPage = () => {
             >
               <MdArrowBack /> Back
             </Button>
-            <ShareGroupDialog groupData={decryptedGroup} />
+            <ShareGroupDialog />
           </HStack>
           <Center marginTop="1em">
-            {decryptedGroup ? (
-              <Heading>📔 {decryptedGroup.name}</Heading>
+            {group ? (
+              <Heading>📔 {group.name}</Heading>
             ) : (
               <Skeleton height="2em" width="50%" />
             )}
@@ -167,11 +78,9 @@ export const GroupPage = () => {
             <HStack gap="0.5em" marginBottom="3em">
               <Text>
                 👥 Members:{" "}
-                {decryptedGroup?.members
-                  .map((member) => member.username)
-                  .join(", ")}
+                {group?.members.map((member) => member.username).join(", ")}
               </Text>
-              {!decryptedGroup &&
+              {!group &&
                 Array(3)
                   .fill(0)
                   .map((_, i) => (
@@ -194,13 +103,10 @@ export const GroupPage = () => {
                 <Tabs.Trigger value="equilibrium">Equilibrium</Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="transactions">
-                <TransactionList
-                  groupData={decryptedGroup}
-                  membersIndex={membersIndex}
-                />
+                <TransactionList />
               </Tabs.Content>
               <Tabs.Content value="equilibrium">
-                <Equilibrium groupData={decryptedGroup} />
+                <Equilibrium />
               </Tabs.Content>
             </Tabs.Root>
           </VStack>

@@ -1,8 +1,14 @@
+import {
+  TRANSACTION_TYPES,
+  type GroupExtended,
+  type GroupTransaction,
+  type TransactionType,
+} from "@/api/group";
 import type { Encrypted } from "@/types";
 
 const encrypt = async (
   data: Uint8Array<ArrayBuffer>,
-  key: CryptoKey
+  key: CryptoKey,
 ): Promise<string> => {
   const iv = crypto.getRandomValues(new Uint8Array(12));
 
@@ -12,7 +18,7 @@ const encrypt = async (
       iv: iv,
     },
     key,
-    data
+    data,
   );
 
   // Combine iv and encrypted data for storage/transmission
@@ -26,10 +32,10 @@ const encrypt = async (
 
 const decrypt = async (
   encryptedDataBase64: string,
-  key: CryptoKey
+  key: CryptoKey,
 ): Promise<Uint8Array<ArrayBuffer>> => {
   const combined = Uint8Array.from(atob(encryptedDataBase64), (c) =>
-    c.charCodeAt(0)
+    c.charCodeAt(0),
   );
 
   const iv = combined.slice(0, 12);
@@ -41,14 +47,14 @@ const decrypt = async (
       iv: iv,
     },
     key,
-    encryptedData
+    encryptedData,
   );
 
   return new Uint8Array(decryptedData);
 };
 
 const encodeAndEncryptGenerator = <T>(
-  encoder: (data: T) => Uint8Array<ArrayBuffer>
+  encoder: (data: T) => Uint8Array<ArrayBuffer>,
 ): ((data: T, key: CryptoKey) => Promise<Encrypted<T, true>>) => {
   return async (data: T, key: CryptoKey): Promise<Encrypted<T, true>> => {
     const dataBuffer = encoder(data);
@@ -57,14 +63,14 @@ const encodeAndEncryptGenerator = <T>(
 };
 
 const decryptAndDecodeGenerator = <T>(
-  decoder: (data: Uint8Array<ArrayBuffer>) => T
+  decoder: (data: Uint8Array<ArrayBuffer>) => T,
 ): ((
   encryptedData: Encrypted<T, true>,
-  key: CryptoKey
+  key: CryptoKey,
 ) => Promise<Encrypted<T, false>>) => {
   return async (
     encryptedData: Encrypted<T, true>,
-    key: CryptoKey
+    key: CryptoKey,
   ): Promise<Encrypted<T, false>> => {
     const decryptedBuffer = await decrypt(encryptedData, key);
     return decoder(decryptedBuffer);
@@ -72,7 +78,7 @@ const decryptAndDecodeGenerator = <T>(
 };
 
 const encryptListGenerator = <T>(
-  encryptSingle: (data: T, key: CryptoKey) => Promise<string>
+  encryptSingle: (data: T, key: CryptoKey) => Promise<string>,
 ): ((data: T[], key: CryptoKey) => Promise<Encrypted<T, true>[]>) => {
   return async (data: T[], key: CryptoKey): Promise<Encrypted<T, true>[]> => {
     return Promise.all(data.map((value) => encryptSingle(value, key)));
@@ -80,31 +86,31 @@ const encryptListGenerator = <T>(
 };
 
 const decryptListGenerator = <T>(
-  decryptSingle: (data: Encrypted<T, true>, key: CryptoKey) => Promise<T>
+  decryptSingle: (data: Encrypted<T, true>, key: CryptoKey) => Promise<T>,
 ): ((
   data: Encrypted<T, true>[],
-  key: CryptoKey
+  key: CryptoKey,
 ) => Promise<Encrypted<T, false>[]>) => {
   return async (
     data: Encrypted<T, true>[],
-    key: CryptoKey
+    key: CryptoKey,
   ): Promise<Encrypted<T, false>[]> => {
     return Promise.all(data.map((value) => decryptSingle(value, key)));
   };
 };
 
 export const encryptString = encodeAndEncryptGenerator<string>((data) =>
-  new TextEncoder().encode(data)
+  new TextEncoder().encode(data),
 );
 export const decryptString = decryptAndDecodeGenerator<string>((data) =>
-  new TextDecoder().decode(data)
+  new TextDecoder().decode(data),
 );
 
 export const encryptNumber = encodeAndEncryptGenerator<number>((data) =>
-  new TextEncoder().encode(data.toString())
+  new TextEncoder().encode(data.toString()),
 );
 export const decryptNumber = decryptAndDecodeGenerator<number>((data) =>
-  parseInt(new TextDecoder().decode(data))
+  parseInt(new TextDecoder().decode(data)),
 );
 
 export const encryptNumberList = encryptListGenerator<number>(encryptNumber);
@@ -115,17 +121,17 @@ export const decryptStringList = decryptListGenerator<string>(decryptString);
 
 export const encryptEncryptionKey = async (
   groupEncryptionKey: Uint8Array<ArrayBuffer>,
-  userEncryptionKey: CryptoKey
+  userEncryptionKey: CryptoKey,
 ): Promise<string> => {
   return encrypt(groupEncryptionKey, userEncryptionKey);
 };
 export const decryptEncryptionKey = async (
   encryptedGroupEncryptionKey: string,
-  userEncryptionKey: CryptoKey
+  userEncryptionKey: CryptoKey,
 ): Promise<CryptoKey> => {
   const decryptedKeyRaw = await decrypt(
     encryptedGroupEncryptionKey,
-    userEncryptionKey
+    userEncryptionKey,
   );
 
   // Exportable is required to create a shareable link, TODO: Find a better way
@@ -133,4 +139,66 @@ export const decryptEncryptionKey = async (
     "encrypt",
     "decrypt",
   ]);
+};
+
+/**
+ * Decrypts an entire group object, including all nested transactions and members, using the provided user encryption key. This is a comprehensive function that handles the decryption of all relevant fields in the group data structure.
+ *
+ */
+export const decryptGroup = async (
+  encryptedGroup: GroupExtended<true>,
+  userEncryptionKey: CryptoKey,
+): Promise<GroupExtended<false>> => {
+  const groupEncryptionKey = await decryptEncryptionKey(
+    encryptedGroup.groupEncryptionKey,
+    userEncryptionKey,
+  );
+
+  const decryptedGroup: GroupExtended<false> = {
+    ...encryptedGroup,
+    name: await decryptString(encryptedGroup.name, groupEncryptionKey),
+    groupEncryptionKey,
+    members: encryptedGroup.members,
+    transactions: await Promise.all(
+      encryptedGroup.transactions.map(async (transaction) => {
+        let transactionType = (await decryptString(
+          transaction.transactionType,
+          groupEncryptionKey,
+        )) as TransactionType; // Verified after decryption
+
+        if (!TRANSACTION_TYPES.includes(transactionType)) {
+          console.error(
+            "Invalid transaction type after decryption:",
+            transactionType,
+          );
+          // Default to a valid type to prevent crashes, but this should not happen
+          transactionType = TRANSACTION_TYPES[0];
+        }
+
+        const decryptedTransaction: GroupTransaction<false> = {
+          ...transaction,
+          name: await decryptString(transaction.name, groupEncryptionKey),
+          amount: await decryptNumber(transaction.amount, groupEncryptionKey),
+          fromUserId: await decryptNumber(
+            transaction.fromUserId,
+            groupEncryptionKey,
+          ),
+          toUsers: await Promise.all(
+            transaction.toUsers.map(async (toUser) => ({
+              id: await decryptNumber(toUser.id, groupEncryptionKey),
+              share: await decryptNumber(toUser.share, groupEncryptionKey),
+            })),
+          ),
+          transactionType,
+          date: await decryptNumber(transaction.date, groupEncryptionKey),
+        };
+
+        return decryptedTransaction;
+      }),
+    ),
+  };
+
+  decryptedGroup.transactions.sort((a, b) => b.date - a.date);
+
+  return decryptedGroup;
 };
