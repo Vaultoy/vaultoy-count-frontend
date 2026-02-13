@@ -4,10 +4,10 @@ import {
   PasswordStrengthMeter,
 } from "../components/ui/password-input";
 import {
-  AbsoluteCenter,
   Button,
   Card,
   Field,
+  Flex,
   Heading,
   HStack,
   Input,
@@ -168,8 +168,12 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   });
 
   return (
-    <AbsoluteCenter>
-      <VStack gap="1em" alignItems="stretch">
+    <Flex minH="100vh" align="center" justify="center" marginY="1em">
+      <VStack
+        gap="1em"
+        alignItems="stretch"
+        width={{ base: "94vw", sm: "auto" }}
+      >
         {postLoginRedirectInfos?.type === "JOIN_INVITATION" && (
           <Card.Root padding="1em">
             <Card.Header>
@@ -226,7 +230,6 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                   <PasswordStrengthMeter
                     marginTop="1em"
                     value={passwordLength}
-                    max={21}
                   />
                   <Text marginTop="1em" color="gray">
                     This password will be used as a key to encrypt your data.
@@ -263,6 +266,6 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
           </Card.Body>
         </Card.Root>
       </VStack>
-    </AbsoluteCenter>
+    </Flex>
   );
 };

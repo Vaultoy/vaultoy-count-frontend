@@ -39,8 +39,7 @@ export interface PasswordVisibilityProps {
 }
 
 export interface PasswordInputProps
-  extends InputProps,
-    PasswordVisibilityProps {
+  extends InputProps, PasswordVisibilityProps {
   rootProps?: GroupProps;
 }
 
@@ -106,31 +105,32 @@ const VisibilityTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 interface PasswordStrengthMeterProps extends StackProps {
-  max?: number;
   value: number;
 }
+
+const PERFECT_PASSWORD_LENGTH = 21;
 
 export const PasswordStrengthMeter = React.forwardRef<
   HTMLDivElement,
   PasswordStrengthMeterProps
 >(function PasswordStrengthMeter(props, ref) {
-  const { max = 4, value, ...rest } = props;
-  const { label, colorPalette } = getColorPalette(value);
+  const { value, ...rest } = props;
+  const { label, colorPalette, numberOfFilledBlocks } = getColorPalette(value);
 
   return (
     <Stack align="flex-end" gap="1" ref={ref} {...rest}>
       <HStack width="full" {...rest}>
-        {Array.from({ length: max }).map((_, index) => (
+        {Array.from({ length: 4 }).map((_, index) => (
           <Box
             key={index}
             height="1"
             flex="1"
             rounded="sm"
-            data-selected={index < value ? "" : undefined}
+            data-selected={index < numberOfFilledBlocks ? "" : undefined}
             layerStyle="fill.subtle"
             colorPalette="gray"
             _selected={{
@@ -147,13 +147,31 @@ export const PasswordStrengthMeter = React.forwardRef<
 
 function getColorPalette(value: number) {
   switch (true) {
+    case value === 0:
+      return {
+        label: "Too short",
+        colorPalette: "gray",
+        numberOfFilledBlocks: 0,
+      };
     case value < 8:
-      return { label: "Too short", colorPalette: "red" };
+      return {
+        label: "Too short",
+        colorPalette: "red",
+        numberOfFilledBlocks: 1,
+      };
     case value < 14:
-      return { label: "Short", colorPalette: "orange" };
-    case value >= 21:
-      return { label: "Very long", colorPalette: "green" };
+      return {
+        label: "Short",
+        colorPalette: "orange",
+        numberOfFilledBlocks: 2,
+      };
+    case value < PERFECT_PASSWORD_LENGTH:
+      return { label: "Long", colorPalette: "green", numberOfFilledBlocks: 3 };
     default:
-      return { label: "Long", colorPalette: "green" };
+      return {
+        label: "Very long",
+        colorPalette: "green",
+        numberOfFilledBlocks: 4,
+      };
   }
 }
