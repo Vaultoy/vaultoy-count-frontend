@@ -44,7 +44,7 @@ export const computeMembersBalanceAndRepayments = (
           newBalance -= transaction.amount * (toUserShare / totalShares);
         }
 
-        return newBalance;
+        return Math.round(newBalance);
       }, 0),
     }))
     .sort((a, b) => b.balance - a.balance);
