@@ -1,6 +1,19 @@
-# Vaultoy Count Frontend
+<h1 align="center">
+    <img src="./public/vaultoy_count_logo_with_bg.svg" alt="Vaultoy Count Logo" width="80" />
+    <br />
+    Vaultoy Count
+</h1>
+<h3 align="center">
+    <a href="https://count.vaultoy.com">count.vaultoy.com</a>
+</h3>
 
-## Installation
+<p align="center">
+Vaultoy Count is a <strong>group expense splitting app</strong> with <strong>end-to-end encryption</strong>, built as an alternative to apps like Tricount and Splitwise.
+</p>
+
+## Development setup
+
+### Installation
 
 - Install [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
 
@@ -18,7 +31,11 @@ npm install
 
 - Create a `.env` file and copy the content of `.env.example` to it.
 
-## Usage
+```sh
+cp .env.example .env
+```
+
+### Usage
 
 - Start development server
 
@@ -26,9 +43,7 @@ npm install
 npm run dev
 ```
 
-- Open https://localhost:5173
-
-- Accept the eventual warning about the self-signed HTTPS certificate
+- Open http://localhost:5173
 
 ## Logo
 

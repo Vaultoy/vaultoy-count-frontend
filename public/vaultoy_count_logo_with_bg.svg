@@ -1,0 +1,18 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1">
+
+ <g>
+  <title>Layer 1</title>
+  <rect rx="21" stroke-width="0" id="svg_1" height="194" width="194" y="3" x="3" stroke="#000" fill="#ffffff"/>
+  <g id="layer1"  >
+   <g stroke-width="0" stroke="currentColor" fill="currentColor" transform="matrix(0.18909813,0,0,0.18909813,7.608862,0.55900816)" id="g1">
+    <path stroke-width="0" id="path1" d="m490.07815,50.49488l-407.67781,135.8926l0,407.67782c0,225.17829 182.49952,407.6778 407.67781,407.6778c225.17829,0 407.67781,-182.49951 407.67781,-407.6778l0,-407.67782l-407.67781,-135.8926zm331.23822,543.57042c0,182.92418 -148.31404,331.23822 -331.23822,331.23822c-182.92418,0 -331.23822,-148.31404 -331.23822,-331.23822l0,-350.34812l331.23822,-116.78271l331.23822,116.78271l0,350.34812z"/>
+    <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" stroke="currentColor" fill="none" transform="matrix(27.128449,0,0,27.128449,163.09196,250.87176)" id="g2">
+     <path id="path1-3" d="m16,3l5,0l0,5"/>
+     <path id="path2" d="m8,3l-5,0l0,5"/>
+     <path id="path3" d="m12,22l0,-8.3a4,4 0 0 0 -1.172,-2.872l-7.828,-7.828"/>
+     <path id="path4" d="m15,9l6,-6"/>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>
