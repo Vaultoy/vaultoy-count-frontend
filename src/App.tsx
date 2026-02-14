@@ -15,6 +15,7 @@ import { JoinInvitation } from "./pages/app/JoinInvitation";
 import { SCApp } from "./pages/app/SCApp";
 import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectContextProvider";
 import { GroupContextProvider } from "./contexts/GroupContextProvider";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,10 @@ const config = defineConfig({
 const system = createSystem(defaultConfig, config);
 
 const App = () => {
+  useEffect(() => {
+    console.info(`Welcome to Vaultoy Count | Version: ${COMMIT_HASH}`);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ChakraProvider value={system}>
