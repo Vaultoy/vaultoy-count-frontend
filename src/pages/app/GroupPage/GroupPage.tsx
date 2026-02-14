@@ -33,7 +33,7 @@ export const GroupPage = () => {
     queryFn: () =>
       groupId && !isNaN(Number(groupId))
         ? getGroupQuery(groupId)
-        : Promise.resolve(undefined),
+        : Promise.resolve(null),
   });
 
   useDecryptAndSaveGroupToContext(body?.group, isQueryError);

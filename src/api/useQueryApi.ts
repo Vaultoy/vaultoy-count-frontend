@@ -16,8 +16,8 @@ import {
 } from "@/components/toastMessages";
 
 export type UseQueryApiResult<TBody, TError> = {
-  body: TBody | undefined;
-} & UseQueryResult<ApiResponse<TBody> | undefined, TError>;
+  body: TBody | null;
+} & UseQueryResult<ApiResponse<TBody> | null, TError>;
 
 export const useQueryApi = <
   TBody,
@@ -25,12 +25,12 @@ export const useQueryApi = <
   TQueryKey extends QueryKey = QueryKey,
 >(
   queryOptions: UseQueryOptions<
-    ApiResponse<TBody> | undefined,
+    ApiResponse<TBody> | null,
     TError,
-    ApiResponse<TBody> | undefined,
+    ApiResponse<TBody> | null,
     TQueryKey
   >,
-): UseQueryApiResult<TBody, TError> => {
+): UseQueryApiResult<TBody | undefined, TError> => {
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 

@@ -58,13 +58,18 @@ export const ShareGroupDialog = () => {
 
   const queryClient = useQueryClient();
 
+  const userMember = group?.members.find(
+    (member) => member.userId === user?.id,
+  );
+
   const { body: existingInvitation, isLoading: isLoadingExistingInvitation } =
     useQueryApi({
       queryKey: ["getInvitation", group?.id],
       queryFn: () =>
-        group?.id && !isNaN(Number(group?.id))
+        // Only fetch invitation if user is an admin
+        group?.id && !isNaN(Number(group?.id)) && userMember?.rights === "admin"
           ? getInvitationQuery(group?.id.toString())
-          : Promise.resolve(undefined),
+          : Promise.resolve(null),
     });
 
   useEffect(() => {
