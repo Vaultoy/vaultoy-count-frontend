@@ -3,6 +3,8 @@ FROM node:24.13-alpine3.22 AS build
 
 WORKDIR /app
 
+RUN apk add --no-cache git
+
 COPY package.json package-lock.json ./
 RUN npm ci
 
