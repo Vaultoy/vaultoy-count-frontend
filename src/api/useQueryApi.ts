@@ -1,5 +1,6 @@
 import {
   useQuery,
+  useQueryClient,
   type DefaultError,
   type QueryKey,
   type UseQueryOptions,
@@ -33,6 +34,7 @@ export const useQueryApi = <
 ): UseQueryApiResult<TBody | undefined, TError> => {
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const queryResult = useQuery(queryOptions);
 
@@ -64,25 +66,40 @@ export const useQueryApi = <
       toaster.create(UNKNOWN_ERROR_TOAST);
     }
 
-    // Session expired
-    if (queryResult.data?.status === 401) {
+    // Session expired.
+    // !isFetching is required in the following scenario:
+    // 1. User makes a request with an expired session -> server responds with 401
+    // 2. User tries to log in
+    // 3. After log in, the user is instantly logged out again because the previous 401 response
+    //   is still in memory by tanstack query
+    if (queryResult.data?.status === 401 && !queryResult.isFetching) {
       toaster.create({
         title: "You are not logged in or your session expired",
         description: "Please log in or sign up.",
         type: "warning",
       });
+
+      queryClient.invalidateQueries();
       setUser(undefined);
       navigate("/login");
+
       // Other non-success status codes
-    } else if (queryResult.data?.status && queryResult.data.status >= 400) {
+    } else if (
+      queryResult.data?.status &&
+      queryResult.data.status >= 400 &&
+      !queryResult.isFetching
+    ) {
       toaster.create(unknownErrorToastWithStatus(queryResult.data.status));
     }
   }, [
     queryResult.data,
-    setUser,
-    navigate,
     queryResult.error,
     queryResult.isError,
+    queryOptions.queryKey,
+    queryResult.isFetching,
+    queryClient,
+    setUser,
+    navigate,
   ]);
 
   return {
