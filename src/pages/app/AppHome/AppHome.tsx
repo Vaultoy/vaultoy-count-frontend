@@ -10,18 +10,18 @@ import {
   HStack,
   SkeletonCircle,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
 import { NavLink } from "react-router";
 import { decryptEncryptionKey, decryptString } from "@/utils/encryption";
 import { UserContext } from "@/contexts/UserContext";
 import { CreateGroupDialog } from "./CreateGroupDialog";
+import { useQueryApi } from "@/api/useQueryApi";
 
 export const AppHomePage = () => {
   const user = useContext(UserContext);
 
-  const { data, isError } = useQuery({
+  const { body, isError } = useQueryApi({
     queryKey: ["getGroupsAll"],
     queryFn: getGroupsQuery,
   });
@@ -32,10 +32,10 @@ export const AppHomePage = () => {
 
   useEffect(() => {
     const decryptGroups = async () => {
-      if (!user || !user.user || !data || !data.groups) return;
+      if (!user || !user.user || !body || !body.groups) return;
 
       const groups = await Promise.all(
-        data.groups.map(async (group) => {
+        body.groups.map(async (group) => {
           const groupEncryptionKey = await decryptEncryptionKey(
             group.groupEncryptionKey,
             user.user?.encryptionKey as CryptoKey,
@@ -58,7 +58,7 @@ export const AppHomePage = () => {
     return () => {
       active = false;
     };
-  }, [user, data]);
+  }, [user, body]);
 
   return (
     <Center>

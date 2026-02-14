@@ -2,7 +2,7 @@ export const fetchApi = (
   method: "GET" | "POST" | "PUT" | "DELETE",
   url: string,
   body?: unknown,
-  options?: RequestInit
+  options?: RequestInit,
 ) => {
   return fetch(import.meta.env.VITE_API_URL + url, {
     ...options,
@@ -15,3 +15,7 @@ export const fetchApi = (
     body: JSON.stringify(body),
   });
 };
+
+export interface ApiResponse<T> extends Response {
+  bodyJson: T;
+}

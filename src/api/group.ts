@@ -1,5 +1,5 @@
 import type { Encrypted } from "@/types";
-import { fetchApi } from "./fetch";
+import { fetchApi, type ApiResponse } from "./fetch";
 
 export const createGroupMutation = async (data: {
   name: string;
@@ -48,16 +48,20 @@ export interface GroupExtended<
   transactions: GroupTransaction<isEncrypted>[];
 }
 
-export const getGroupsQuery = async (): Promise<{ groups: Group[] }> => {
+export const getGroupsQuery = async (): Promise<
+  ApiResponse<{ groups: Group[] }>
+> => {
   const response = await fetchApi("GET", "/v1/group/all");
-  return response.json();
+  const bodyJson = await response.json();
+  return Object.assign(response, { bodyJson });
 };
 
 export const getGroupQuery = async (
   groupId: string,
-): Promise<{ group: GroupExtended }> => {
+): Promise<ApiResponse<{ group: GroupExtended }>> => {
   const response = await fetchApi("GET", `/v1/group/${groupId}`);
-  return response.json();
+  const bodyJson = await response.json();
+  return Object.assign(response, { bodyJson });
 };
 
 type NewGroupTransaction = Omit<GroupTransaction, "id">;
@@ -105,8 +109,10 @@ interface GroupInvitation {
 
 export const getInvitationQuery = async (
   groupId: string,
-): Promise<GroupInvitation | null> => {
-  return (await fetchApi("GET", `/v1/group/${groupId}/invitation`)).json();
+): Promise<ApiResponse<GroupInvitation | null>> => {
+  const response = await fetchApi("GET", `/v1/group/${groupId}/invitation`);
+  const bodyJson = await response.json();
+  return Object.assign(response, { bodyJson });
 };
 
 export const deleteInvitationMutation = async ({

@@ -3,7 +3,7 @@ import {
   deleteInvitationMutation,
   getInvitationQuery,
 } from "@/api/group";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Center,
@@ -32,6 +32,7 @@ import { UserContext } from "@/contexts/UserContext";
 import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
 import { btoa_uri } from "@/utils/base64Uri";
 import { GroupContext } from "@/contexts/GroupContext";
+import { useQueryApi } from "@/api/useQueryApi";
 
 const urlFromInvitationLinkSecret = (
   groupId: string,
@@ -57,13 +58,13 @@ export const ShareGroupDialog = () => {
 
   const queryClient = useQueryClient();
 
-  const { data: existingInvitation, isLoading: isLoadingExistingInvitation } =
-    useQuery({
+  const { body: existingInvitation, isLoading: isLoadingExistingInvitation } =
+    useQueryApi({
       queryKey: ["getInvitation", group?.id],
       queryFn: () =>
         group?.id && !isNaN(Number(group?.id))
           ? getInvitationQuery(group?.id.toString())
-          : Promise.resolve(null),
+          : Promise.resolve(undefined),
     });
 
   useEffect(() => {

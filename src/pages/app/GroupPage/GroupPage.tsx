@@ -1,5 +1,4 @@
 import { getGroupQuery } from "@/api/group";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
 import { ErrorPage } from "../../ErrorPage";
 import {
@@ -23,20 +22,21 @@ import {
   GroupContext,
   useDecryptAndSaveGroupToContext,
 } from "@/contexts/GroupContext";
+import { useQueryApi } from "@/api/useQueryApi";
 
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
 
-  const { data, isError: isQueryError } = useQuery({
+  const { body, isError: isQueryError } = useQueryApi({
     queryKey: ["getGroup", groupId],
     queryFn: () =>
       groupId && !isNaN(Number(groupId))
         ? getGroupQuery(groupId)
-        : Promise.resolve(null),
+        : Promise.resolve(undefined),
   });
 
-  useDecryptAndSaveGroupToContext(data?.group, isQueryError);
+  useDecryptAndSaveGroupToContext(body?.group, isQueryError);
   const { group, isError } = useContext(GroupContext);
 
   if (!groupId || isNaN(Number(groupId))) {
