@@ -38,6 +38,8 @@ export interface GroupContextType {
   setGroupMembersIndex: React.Dispatch<
     React.SetStateAction<Record<number, GroupMemberComputed> | undefined>
   >;
+  isError: boolean;
+  setIsError: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const GroupContext = createContext<GroupContextType>({
@@ -45,12 +47,16 @@ export const GroupContext = createContext<GroupContextType>({
   setGroup: () => {},
   groupMembersIndex: undefined,
   setGroupMembersIndex: () => {},
+  isError: false,
+  setIsError: () => {},
 });
 
 export const useDecryptAndSaveGroupToContext = (
   encryptedGroup: GroupExtended<true> | undefined,
+  isQueryError: boolean,
 ) => {
-  const { setGroup, setGroupMembersIndex } = useContext(GroupContext);
+  const { setGroup, setGroupMembersIndex, setIsError } =
+    useContext(GroupContext);
   const user = useContext(UserContext);
 
   useEffect(() => {
@@ -58,6 +64,7 @@ export const useDecryptAndSaveGroupToContext = (
       if (!encryptedGroup) {
         setGroup(undefined);
         setGroupMembersIndex(undefined);
+        setIsError(isQueryError);
         return;
       }
       if (!user || !user.user) return;
@@ -77,6 +84,7 @@ export const useDecryptAndSaveGroupToContext = (
       if (!active) return;
       setGroup(decryptedComputedGroup);
       setGroupMembersIndex(groupMembersIndex);
+      setIsError(isQueryError);
     };
 
     let active = true;
@@ -84,5 +92,12 @@ export const useDecryptAndSaveGroupToContext = (
     return () => {
       active = false;
     };
-  }, [user, encryptedGroup, setGroup, setGroupMembersIndex]);
+  }, [
+    user,
+    encryptedGroup,
+    setGroup,
+    setGroupMembersIndex,
+    isQueryError,
+    setIsError,
+  ]);
 };

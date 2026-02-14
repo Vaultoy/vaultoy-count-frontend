@@ -29,7 +29,7 @@ const getTransactionEmoji = (transactionType: TransactionType) => {
   }
 };
 export const TransactionList = () => {
-  const { group, groupMembersIndex } = useContext(GroupContext);
+  const { group, groupMembersIndex, isError } = useContext(GroupContext);
 
   return (
     <VStack>
@@ -74,7 +74,8 @@ export const TransactionList = () => {
         );
       })}
 
-      {!group &&
+      {!isError &&
+        !group &&
         Array(3)
           .fill(0)
           .map((_, i) => (

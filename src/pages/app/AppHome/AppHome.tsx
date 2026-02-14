@@ -21,7 +21,7 @@ import { CreateGroupDialog } from "./CreateGroupDialog";
 export const AppHomePage = () => {
   const user = useContext(UserContext);
 
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ["getGroupsAll"],
     queryFn: getGroupsQuery,
   });
@@ -85,7 +85,8 @@ export const AppHomePage = () => {
             </Card.Root>
           </NavLink>
         ))}
-        {!decryptedGroups &&
+        {!isError &&
+          !decryptedGroups &&
           Array(3)
             .fill(0)
             .map((_, i) => (
@@ -101,6 +102,12 @@ export const AppHomePage = () => {
                 </Card.Body>
               </Card.Root>
             ))}
+        {isError && (
+          <Text>
+            ❌ An unknown error occurred while loading groups. Please try again
+            later.
+          </Text>
+        )}
         <CreateGroupDialog />
       </VStack>
     </Center>

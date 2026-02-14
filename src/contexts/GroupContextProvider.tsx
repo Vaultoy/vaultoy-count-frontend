@@ -14,9 +14,18 @@ export const GroupContextProvider = ({ children }: { children: ReactNode }) => {
     GroupMembersComputedIndex | undefined
   >(undefined);
 
+  const [isError, setIsError] = useState(false);
+
   return (
     <GroupContext.Provider
-      value={{ group, setGroup, groupMembersIndex, setGroupMembersIndex }}
+      value={{
+        group,
+        setGroup,
+        groupMembersIndex,
+        setGroupMembersIndex,
+        isError,
+        setIsError,
+      }}
     >
       {children}
     </GroupContext.Provider>

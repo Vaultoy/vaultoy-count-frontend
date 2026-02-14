@@ -28,7 +28,7 @@ export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
 
-  const { data } = useQuery({
+  const { data, isError: isQueryError } = useQuery({
     queryKey: ["getGroup", groupId],
     queryFn: () =>
       groupId && !isNaN(Number(groupId))
@@ -36,8 +36,8 @@ export const GroupPage = () => {
         : Promise.resolve(null),
   });
 
-  useDecryptAndSaveGroupToContext(data?.group);
-  const { group } = useContext(GroupContext);
+  useDecryptAndSaveGroupToContext(data?.group, isQueryError);
+  const { group, isError } = useContext(GroupContext);
 
   if (!groupId || isNaN(Number(groupId))) {
     return (
@@ -67,10 +67,13 @@ export const GroupPage = () => {
             <ShareGroupDialog />
           </HStack>
           <Center marginTop="1em">
-            {group ? (
-              <Heading>📔 {group.name}</Heading>
-            ) : (
-              <Skeleton height="2em" width="50%" />
+            {group && <Heading>📔 {group.name}</Heading>}{" "}
+            {!isError && !group && <Skeleton height="2em" width="50%" />}
+            {isError && (
+              <Text marginBottom="1em">
+                ❌ An unknown error occurred while loading the group. Please try
+                again later.
+              </Text>
             )}
           </Center>
         </Card.Header>
@@ -83,11 +86,12 @@ export const GroupPage = () => {
               alignItems="center"
             >
               <Text flexShrink={0} maxWidth="100%">
-                👥 Members:{" "}
+                {!isError && "👥 Members: "}
                 {group?.members.map((member) => member.username).join(", ")}
               </Text>
 
-              {!group &&
+              {!isError &&
+                !group &&
                 Array(2)
                   .fill(0)
                   .map((_, i) => (
