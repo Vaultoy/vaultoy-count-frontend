@@ -1,34 +1,11 @@
-const equilibriumAlgorithm = (equilibrium_vect: number[]) => {
-  const paymentMatrix: number[][] = new Array(equilibrium_vect.length)
-    .fill(0)
-    .map(() => new Array(equilibrium_vect.length).fill(0));
-
-  while (equilibrium_vect.some((balance) => balance != 0)) {
-    const maxIndex = equilibrium_vect.reduce(
-      (maxIdx, value, idx, arr) => (value > arr[maxIdx] ? idx : maxIdx),
-      0,
-    );
-    const minIndex = equilibrium_vect.reduce(
-      (minIdx, value, idx, arr) => (value < arr[minIdx] ? idx : minIdx),
-      0,
-    );
-
-    const amountToPay = Math.min(
-      equilibrium_vect[maxIndex],
-      -equilibrium_vect[minIndex],
-    );
-
-    paymentMatrix[minIndex][maxIndex] += amountToPay;
-    equilibrium_vect[maxIndex] -= amountToPay;
-    equilibrium_vect[minIndex] += amountToPay;
-  }
-
-  return paymentMatrix;
-};
-
 export interface RepaymentsToMake {
   toUserId: number;
   amount: number;
+}
+
+interface MemberWithBalance {
+  userId: number;
+  balance: number;
 }
 
 /**
@@ -38,14 +15,45 @@ export interface RepaymentsToMake {
  * @returns A mapping of userId to a list of repayments they should make (toUserId and amount).
  */
 export const computeEquilibriumRepayments = (
-  membersBalances: Record<number, number>,
+  membersBalances: MemberWithBalance[],
 ): Record<number, RepaymentsToMake[]> => {
-  const balances = Object.values(membersBalances);
+  const userIds = membersBalances.map((member) => member.userId);
+  const balances = membersBalances.map((member) => member.balance);
+  const paymentMatrix: number[][] = new Array(balances.length)
+    .fill(0)
+    .map(() => new Array(balances.length).fill(0));
 
-  const paymentMatrix = equilibriumAlgorithm(balances);
+  // Compute repayments until all balances are zero
+  let iterationCount = 0;
+  while (balances.some((balance) => balance != 0)) {
+    const maxIndex = balances.reduce(
+      (maxIdx, value, idx, arr) => (value > arr[maxIdx] ? idx : maxIdx),
+      0,
+    );
+    const minIndex = balances.reduce(
+      (minIdx, value, idx, arr) => (value < arr[minIdx] ? idx : minIdx),
+      0,
+    );
 
-  const userIds = Object.keys(membersBalances).map((id) => parseInt(id));
+    const amountToPay = Math.min(balances[maxIndex], -balances[minIndex]);
 
+    paymentMatrix[minIndex][maxIndex] += amountToPay;
+    balances[maxIndex] -= amountToPay;
+    balances[minIndex] += amountToPay;
+
+    iterationCount++;
+    if (iterationCount > balances.length) {
+      console.error(
+        "Equilibrium repayments algorithm is taking too long to converge, possible infinite loop. Input balances:",
+        membersBalances,
+        "Current balances:",
+        balances,
+      );
+      return {};
+    }
+  }
+
+  // Convert the payment matrix back to a list of repayments for each user
   const repayments: Record<number, RepaymentsToMake[]> = {};
 
   for (let i = 0; i < paymentMatrix.length; i++) {

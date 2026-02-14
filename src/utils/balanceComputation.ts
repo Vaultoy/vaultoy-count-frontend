@@ -10,7 +10,7 @@ export const computeMembersBalanceAndRepayments = (
 ): GroupExtendedComputed | undefined => {
   if (!decryptedGroup) return undefined;
 
-  const membersComputedMemo = decryptedGroup.members
+  const membersComputed = decryptedGroup.members
     .map((member) => ({
       ...member,
       balance: decryptedGroup.transactions.reduce((balance, transaction) => {
@@ -49,18 +49,11 @@ export const computeMembersBalanceAndRepayments = (
     }))
     .sort((a, b) => b.balance - a.balance);
 
-  const membersBalances: Record<number, number> = {};
+  const equilibriumRepayments = computeEquilibriumRepayments(membersComputed);
 
-  for (const member of membersComputedMemo) {
-    membersBalances[member.userId] = member.balance;
-  }
-
-  const equilibriumRepaymentsMemo =
-    computeEquilibriumRepayments(membersBalances);
-
-  const membersComputedWithRepayments = membersComputedMemo.map((member) => ({
+  const membersComputedWithRepayments = membersComputed.map((member) => ({
     ...member,
-    repaymentsToMake: equilibriumRepaymentsMemo[member.userId] || [],
+    repaymentsToMake: equilibriumRepayments[member.userId] || [],
   }));
 
   return {
