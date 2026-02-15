@@ -87,7 +87,7 @@ export const CreateGroupDialog = () => {
     );
 
     mutation.mutate({
-      name: await encryptString(data.name, groupEncryptionKey),
+      name: await encryptString(data.name, groupEncryptionKey, "group name"),
       encryptedGroupEncryptionKey,
     });
   });

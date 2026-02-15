@@ -182,31 +182,44 @@ export const AddTransactionDialog = ({
       transactionData: {
         name: await encryptString(
           data.transaction_type === REPAYMENT ? "Repayment" : data.name,
-          groupData.groupEncryptionKey,
+          groupData.encryptionKey,
+          "group transaction name",
         ),
         amount: await encryptNumber(
           Math.round(amountSign * data.amount * 100),
-          groupData.groupEncryptionKey,
+          groupData.encryptionKey,
+          "group transaction amount",
         ),
         fromUserId: await encryptNumber(
           data.fromUserId,
-          groupData.groupEncryptionKey,
+          groupData.encryptionKey,
+          "group transaction from user id",
         ),
         toUsers: await Promise.all(
           data.toUsers.map(async (toUser) => ({
-            id: await encryptNumber(toUser.id, groupData.groupEncryptionKey),
+            id: await encryptNumber(
+              toUser.id,
+              groupData.encryptionKey,
+              "group transaction to user id",
+            ),
             share: await encryptNumber(
               toUser.share,
-              groupData.groupEncryptionKey,
+              groupData.encryptionKey,
+              "group transaction to user share",
             ),
           })),
         ),
 
         transactionType: await encryptString(
           data.transaction_type,
-          groupData.groupEncryptionKey,
+          groupData.encryptionKey,
+          "group transaction type",
         ),
-        date: await encryptNumber(Date.now(), groupData.groupEncryptionKey),
+        date: await encryptNumber(
+          Date.now(),
+          groupData.encryptionKey,
+          "group transaction date",
+        ),
       },
     });
   });

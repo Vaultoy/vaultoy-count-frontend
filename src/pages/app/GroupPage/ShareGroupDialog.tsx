@@ -80,7 +80,7 @@ export const ShareGroupDialog = () => {
 
       const invitationLinkSecretKey = await decryptEncryptionKey(
         existingInvitation?.invitationLinkSecret,
-        group.groupEncryptionKey,
+        group.encryptionKey,
       );
 
       const invitationLinkSecret = await cryptoKeyToString(
@@ -179,16 +179,16 @@ export const ShareGroupDialog = () => {
 
     const encryptedInvitationLinkSecret = await encryptEncryptionKey(
       invitationLinkSecretRaw,
-      group!.groupEncryptionKey,
+      group!.encryptionKey,
     );
 
     const invitationLinkSecretKey = await decryptEncryptionKey(
       encryptedInvitationLinkSecret,
-      group!.groupEncryptionKey,
+      group!.encryptionKey,
     );
 
     const groupEncryptionKeyBuffer = new Uint8Array(
-      await window.crypto.subtle.exportKey("raw", group!.groupEncryptionKey),
+      await window.crypto.subtle.exportKey("raw", group!.encryptionKey),
     );
 
     const invitationKey = await encryptEncryptionKey(

@@ -11,7 +11,7 @@ export const createGroupMutation = async (data: {
 export interface Group<isEncrypted extends boolean = true> {
   id: number;
   name: Encrypted<string, isEncrypted>; // encrypted with group encryption key
-  groupEncryptionKey: Encrypted<CryptoKey, isEncrypted>; // encrypted with user's encryption key
+  encryptionKey: Encrypted<CryptoKey, isEncrypted>; // encrypted with user's encryption key
 }
 
 export interface GroupMember {

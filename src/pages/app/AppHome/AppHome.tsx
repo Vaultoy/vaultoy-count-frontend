@@ -37,14 +37,18 @@ export const AppHomePage = () => {
       const groups = await Promise.all(
         body.groups.map(async (group) => {
           const groupEncryptionKey = await decryptEncryptionKey(
-            group.groupEncryptionKey,
+            group.encryptionKey,
             user.user?.encryptionKey as CryptoKey,
           );
 
           return {
             id: group.id,
-            name: await decryptString(group.name, groupEncryptionKey),
-            groupEncryptionKey,
+            name: await decryptString(
+              group.name,
+              groupEncryptionKey,
+              "a group name of the group list",
+            ),
+            encryptionKey: groupEncryptionKey,
           };
         }),
       );
