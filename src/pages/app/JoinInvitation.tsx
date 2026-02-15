@@ -14,7 +14,7 @@ import {
 } from "@/utils/keyDerivation";
 import { AbsoluteCenter, Heading, ProgressCircle } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
 export const JoinInvitation = () => {
@@ -33,6 +33,8 @@ export const JoinInvitation = () => {
   const { user, userDataRetrievedFromLocalDB } = useContext(UserContext);
   const { setPostLoginRedirectInfos } = useContext(PostLoginRedirectContext);
 
+  const [isStatusError, setIsStatusError] = useState(false);
+
   const hasExecuted = useRef(false);
 
   const firstMutation = useMutation({
@@ -40,6 +42,7 @@ export const JoinInvitation = () => {
     onSuccess: async (data) => {
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
+        setIsStatusError(true);
         return;
       }
 
@@ -120,6 +123,7 @@ export const JoinInvitation = () => {
 
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
+        setIsStatusError(true);
         return;
       }
 
@@ -150,6 +154,7 @@ export const JoinInvitation = () => {
       const invitationVerificationToken =
         await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
 
+      setIsStatusError(false);
       firstMutation.mutate({
         groupId,
         invitationData: {
@@ -189,12 +194,12 @@ export const JoinInvitation = () => {
           </ProgressCircle.Circle>
         </ProgressCircle.Root>
       )}
-      {(firstMutation.isSuccess && secondMutation.isSuccess) ||
-        ((firstMutation.isError || secondMutation.isError) && (
-          <Heading size="xl">
-            There was an error joining the group. Please try again later.
-          </Heading>
-        ))}
+
+      {(firstMutation.isError || secondMutation.isError || isStatusError) && (
+        <Heading size="xl">
+          ❌ There was an error while joining the group. Please try again later.
+        </Heading>
+      )}
     </AbsoluteCenter>
   );
 };
