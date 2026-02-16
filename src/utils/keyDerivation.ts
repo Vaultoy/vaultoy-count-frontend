@@ -1,56 +1,50 @@
-import { scrypt } from "scrypt-js";
+import { argon2id } from "hash-wasm";
 
 export interface MasterKeys {
   authentificationKey: string;
   encryptionKey: CryptoKey;
 }
 
-const scryptParams = { N: 2 ** 13, r: 8, p: 1, dkLen: 32 };
+// `parallelism` doesn't impact security as much, just client derivation time.
+// `iterations` increases derivation time linearly and security
+// `memorySize` increases memory usage and security
+//
+// see:
+// - https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-argon2-04#section-4
+// - https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
+// - https://bitwarden.com/help/kdf-algorithms/#argon2id
+const argon2idParams = {
+  parallelism: 1, // Hash WASM doesn't support multi-threading, so this would be inefficient
+  iterations: 5,
+  memorySize: 64 * 1024, // KB
+};
 
 export const derivateKeys = async (
   username: string,
   password: string,
-  onProgress?: (progress: number) => void,
 ): Promise<MasterKeys> => {
-  const passwordString = password;
-  const passwordBuffer = new Uint8Array(
-    Array.from(passwordString).map((c) => c.charCodeAt(0)),
+  const saltString = "vaultoy_count_authentification_and_encryption" + username;
+  const salt = new Uint8Array(
+    await window.crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(saltString),
+    ),
   );
 
-  const authSaltString = "vaultoy_count_authentification" + username;
-  const authSaltBuffer = new Uint8Array(
-    Array.from(authSaltString).map((c) => c.charCodeAt(0)),
-  );
+  const startTime = performance.now();
+  const key = await argon2id({
+    ...argon2idParams,
+    password,
+    salt,
+    hashLength: 64, // output size
+    outputType: "binary",
+  });
+  const endTime = performance.now();
 
-  const encryptionSaltString = "vaultoy_count_encryption" + username;
-  const encryptionSaltBuffer = new Uint8Array(
-    Array.from(encryptionSaltString).map((c) => c.charCodeAt(0)),
-  );
+  console.info(`Key derivation took: ${(endTime - startTime).toFixed(2)} ms`);
 
-  // For onProgress, we assume that the two calls have the same approximate speed
-  const authentificationKeyPromise = scrypt(
-    passwordBuffer,
-    authSaltBuffer,
-    scryptParams.N,
-    scryptParams.r,
-    scryptParams.p,
-    scryptParams.dkLen,
-    onProgress,
-  );
-
-  const encryptionKeyPromise = scrypt(
-    passwordBuffer,
-    encryptionSaltBuffer,
-    scryptParams.N,
-    scryptParams.r,
-    scryptParams.p,
-    scryptParams.dkLen,
-  );
-
-  const [authentificationKeyRaw, encryptionKeyRaw] = await Promise.all([
-    authentificationKeyPromise,
-    encryptionKeyPromise,
-  ]);
+  const authentificationKeyRaw = key.slice(0, 32);
+  const encryptionKeyRaw = key.slice(32, 64);
 
   const encryptionKey = await crypto.subtle.importKey(
     "raw",

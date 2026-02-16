@@ -11,7 +11,6 @@ import {
   Heading,
   HStack,
   Input,
-  Progress,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -32,9 +31,8 @@ import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 
 export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const [passwordLength, setPasswordLength] = useState(0);
-  const [keyDerivationProgress, setKeyDerivationProgress] = useState<
-    number | undefined
-  >(undefined);
+  const [keyDerivationInProgress, setKeyDerivationInProgress] = useState(false);
+
   const navigate = useNavigate();
   const user = useContext(UserContext);
   const { postLoginRedirectInfos, setPostLoginRedirectInfos } = useContext(
@@ -143,16 +141,9 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     const normalizedUsername = data.username.normalize("NFKC");
     const normalizedPassword = data.password.normalize("NFKC");
 
-    setKeyDerivationProgress(0);
-    const keys = await derivateKeys(
-      normalizedUsername,
-      normalizedPassword,
-      (progress) => {
-        setKeyDerivationProgress(progress);
-      },
-    );
-
-    setKeyDerivationProgress(undefined);
+    setKeyDerivationInProgress(true);
+    const keys = await derivateKeys(normalizedUsername, normalizedPassword);
+    setKeyDerivationInProgress(false);
 
     user.setUser({
       id: -1, // This is updated upon successful login/signup
@@ -241,27 +232,18 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                   </Text>
                 </>
               )}
-              <Button
-                type="submit"
-                marginTop="2em"
-                loading={keyDerivationProgress !== undefined}
-              >
-                {isLogin ? "Log in" : "Sign up"}
-              </Button>
-              {keyDerivationProgress !== undefined && (
-                <Progress.Root
-                  value={100 * keyDerivationProgress}
-                  maxW="sm"
-                  marginTop="1em"
+              <HStack alignItems="center" marginTop="2em">
+                <Button
+                  type="submit"
+                  loading={keyDerivationInProgress || mutation.isPending}
                 >
-                  <Progress.Label marginBottom="0.5em">
-                    Derivating encryption keys
-                  </Progress.Label>
-                  <Progress.Track flex="1">
-                    <Progress.Range />
-                  </Progress.Track>
-                </Progress.Root>
-              )}
+                  {isLogin ? "Log in" : "Sign up"}
+                </Button>
+                <Text fontSize="lg" marginLeft="1em">
+                  {keyDerivationInProgress && "🔐..."}
+                  {mutation.isPending && "🖥️..."}
+                </Text>
+              </HStack>
             </form>
           </Card.Body>
         </Card.Root>
