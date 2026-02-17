@@ -18,7 +18,6 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState } from "react";
-import { derivateKeys } from "../utils/keyDerivation";
 import { useMutation } from "@tanstack/react-query";
 import { toaster } from "../components/ui/toast-store";
 import { postSignupLoginMutation } from "../api/auth";
@@ -28,6 +27,7 @@ import {
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
+import { useDerivateKeys } from "@/utils/keyDerivation";
 
 export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const [passwordLength, setPasswordLength] = useState(0);
@@ -38,6 +38,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const { postLoginRedirectInfos, setPostLoginRedirectInfos } = useContext(
     PostLoginRedirectContext,
   );
+  const derivateKeys = useDerivateKeys();
 
   const formValuesSchema = z
     .object({
@@ -142,20 +143,26 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     const normalizedPassword = data.password.normalize("NFKC");
 
     setKeyDerivationInProgress(true);
-    const keys = await derivateKeys(normalizedUsername, normalizedPassword);
-    setKeyDerivationInProgress(false);
+    try {
+      const keys = await derivateKeys(normalizedUsername, normalizedPassword);
+      setKeyDerivationInProgress(false);
 
-    user.setUser({
-      id: -1, // This is updated upon successful login/signup
-      username: normalizedUsername,
-      encryptionKey: keys.encryptionKey,
-    });
+      user.setUser({
+        id: -1, // This is updated upon successful login/signup
+        username: normalizedUsername,
+        encryptionKey: keys.encryptionKey,
+      });
 
-    mutation.mutate({
-      username: normalizedUsername,
-      hashedPassword: keys.authentificationKey,
-      isLogin,
-    });
+      mutation.mutate({
+        username: normalizedUsername,
+        hashedPassword: keys.authentificationKey,
+        isLogin,
+      });
+    } catch (error) {
+      setKeyDerivationInProgress(false);
+      console.error("Key derivation failed", error);
+      toaster.create(UNKNOWN_ERROR_TOAST);
+    }
   });
 
   return (

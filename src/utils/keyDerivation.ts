@@ -1,65 +1,43 @@
-import { argon2id } from "hash-wasm";
+import { useArgon2idWorker } from "./useArgon2idWorker";
 
 export interface MasterKeys {
   authentificationKey: string;
   encryptionKey: CryptoKey;
 }
 
-// `parallelism` doesn't impact security as much, just client derivation time.
-// `iterations` increases derivation time linearly and security
-// `memorySize` increases memory usage and security
-//
-// see:
-// - https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-argon2-04#section-4
-// - https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
-// - https://bitwarden.com/help/kdf-algorithms/#argon2id
-const argon2idParams = {
-  parallelism: 1, // Hash WASM doesn't support multi-threading, so this would be inefficient
-  iterations: 5,
-  memorySize: 64 * 1024, // KB
-};
+export const useDerivateKeys = () => {
+  // argon2id is ran in a web worker to avoid blocking the main thread
+  // during the key derivation process
+  const argon2id = useArgon2idWorker();
 
-export const derivateKeys = async (
-  username: string,
-  password: string,
-): Promise<MasterKeys> => {
-  const saltString = "vaultoy_count_authentification_and_encryption" + username;
-  const salt = new Uint8Array(
-    await window.crypto.subtle.digest(
-      "SHA-256",
-      new TextEncoder().encode(saltString),
-    ),
-  );
+  const derivateKeys = async (
+    username: string,
+    password: string,
+  ): Promise<MasterKeys> => {
+    const salt = "vaultoy_count_authentification_and_encryption" + username;
 
-  const startTime = performance.now();
-  const key = await argon2id({
-    ...argon2idParams,
-    password,
-    salt,
-    hashLength: 64, // output size
-    outputType: "binary",
-  });
-  const endTime = performance.now();
+    const { key } = await argon2id(salt, password);
 
-  console.info(`Key derivation took: ${(endTime - startTime).toFixed(2)} ms`);
+    const authentificationKeyRaw = key.slice(0, 32);
+    const encryptionKeyRaw = key.slice(32, 64);
 
-  const authentificationKeyRaw = key.slice(0, 32);
-  const encryptionKeyRaw = key.slice(32, 64);
+    const encryptionKey = await crypto.subtle.importKey(
+      "raw",
+      Uint8Array.from(encryptionKeyRaw),
+      "AES-GCM",
+      false,
+      ["encrypt", "decrypt"],
+    );
 
-  const encryptionKey = await crypto.subtle.importKey(
-    "raw",
-    Uint8Array.from(encryptionKeyRaw),
-    "AES-GCM",
-    false,
-    ["encrypt", "decrypt"],
-  );
+    // Transform Uint8Array to base64 string
+    const authentificationKey = btoa(
+      String.fromCharCode(...authentificationKeyRaw),
+    );
 
-  // Transform Uint8Array to base64 string
-  const authentificationKey = btoa(
-    String.fromCharCode(...authentificationKeyRaw),
-  );
+    return { authentificationKey, encryptionKey };
+  };
 
-  return { authentificationKey, encryptionKey };
+  return derivateKeys;
 };
 
 export const deriveVerificationTokenFromLinkSecret = async (
