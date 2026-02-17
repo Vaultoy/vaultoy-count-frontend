@@ -1,3 +1,4 @@
+import { useLogoutMutation } from "@/api/auth";
 import { Logo } from "@/components/Logo";
 import { UserContext } from "@/contexts/UserContext";
 import { Button, Card, HStack, VStack, Text } from "@chakra-ui/react";
@@ -7,7 +8,11 @@ import { FiLogOut } from "react-icons/fi";
 import { Link } from "react-router";
 
 export const Home = () => {
-  const { user, setUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
+  const logoutMutation = useLogoutMutation({
+    showSuccessToast: true,
+    navigateToAfterLogout: "/",
+  });
 
   return (
     <VStack marginTop="5em">
@@ -34,9 +39,9 @@ export const Home = () => {
             </Link>
             <Button
               variant="outline"
+              loading={logoutMutation.isPending}
               onClick={() => {
-                setUser(undefined);
-                // TODO: Disconnect server-side session as well
+                logoutMutation.mutate();
               }}
             >
               Logout <FiLogOut />

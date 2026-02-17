@@ -1,20 +1,18 @@
 import {
   useQuery,
-  useQueryClient,
   type DefaultError,
   type QueryKey,
   type UseQueryOptions,
   type UseQueryResult,
 } from "@tanstack/react-query";
 import type { ApiResponse } from "./fetch";
-import { useContext, useEffect } from "react";
-import { UserContext } from "@/contexts/UserContext";
-import { useNavigate } from "react-router";
+import { useEffect } from "react";
 import { toaster } from "@/components/ui/toast-store";
 import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
+import { useLogoutMutation } from "./auth";
 
 export type UseQueryApiResult<TBody, TError> = {
   body: TBody | null;
@@ -32,9 +30,10 @@ export const useQueryApi = <
     TQueryKey
   >,
 ): UseQueryApiResult<TBody | undefined, TError> => {
-  const { setUser } = useContext(UserContext);
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const logoutMutation = useLogoutMutation({
+    showSuccessToast: false,
+    navigateToAfterLogout: "/login",
+  });
 
   const queryResult = useQuery(queryOptions);
 
@@ -67,11 +66,6 @@ export const useQueryApi = <
     }
 
     // Session expired.
-    // !isFetching is required in the following scenario:
-    // 1. User makes a request with an expired session -> server responds with 401
-    // 2. User tries to log in
-    // 3. After log in, the user is instantly logged out again because the previous 401 response
-    //   is still in memory by tanstack query
     if (queryResult.data?.status === 401 && !queryResult.isFetching) {
       toaster.create({
         title: "You are not logged in or your session expired",
@@ -79,9 +73,7 @@ export const useQueryApi = <
         type: "warning",
       });
 
-      queryClient.invalidateQueries();
-      setUser(undefined);
-      navigate("/login");
+      logoutMutation.mutate();
 
       // Other non-success status codes
     } else if (
@@ -91,16 +83,8 @@ export const useQueryApi = <
     ) {
       toaster.create(unknownErrorToastWithStatus(queryResult.data.status));
     }
-  }, [
-    queryResult.data,
-    queryResult.error,
-    queryResult.isError,
-    queryOptions.queryKey,
-    queryResult.isFetching,
-    queryClient,
-    setUser,
-    navigate,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryResult.data?.status, queryResult.isError]);
 
   return {
     ...queryResult,

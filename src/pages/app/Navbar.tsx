@@ -5,11 +5,16 @@ import { useNavigate } from "react-router";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { Logo } from "@/components/Logo";
 import { Link } from "react-router";
+import { useLogoutMutation } from "@/api/auth";
 
 export const Navbar = () => {
-  const { user, setUser, userDataRetrievedFromLocalDB } =
-    useContext(UserContext);
+  const { user, userDataRetrievedFromLocalDB } = useContext(UserContext);
   const navigate = useNavigate();
+
+  const logoutMutation = useLogoutMutation({
+    showSuccessToast: true,
+    navigateToAfterLogout: "/",
+  });
 
   return (
     <Center>
@@ -23,10 +28,9 @@ export const Navbar = () => {
               <Text marginRight="1em">{user?.username}</Text>
               {userDataRetrievedFromLocalDB && user && (
                 <Button
+                  loading={logoutMutation.isPending}
                   onClick={() => {
-                    setUser(undefined);
-                    // TODO: Disconnect server-side session as well
-                    navigate("/login");
+                    logoutMutation.mutate();
                   }}
                 >
                   Logout <FiLogOut />
