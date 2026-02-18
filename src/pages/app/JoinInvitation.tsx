@@ -99,7 +99,7 @@ export const JoinInvitation = () => {
         groupId,
         invitationData: {
           invitationVerificationToken,
-          encryptionKey: encryptedGroupEncryptionKey,
+          groupEncryptionKey: encryptedGroupEncryptionKey,
         },
       });
     },
@@ -159,7 +159,7 @@ export const JoinInvitation = () => {
         groupId,
         invitationData: {
           invitationVerificationToken,
-          encryptionKey: undefined,
+          groupEncryptionKey: undefined,
         },
       });
     };

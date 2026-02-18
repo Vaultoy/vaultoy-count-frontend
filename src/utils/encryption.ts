@@ -191,7 +191,7 @@ export const decryptGroup = async (
   userEncryptionKey: CryptoKey,
 ): Promise<GroupExtended<false>> => {
   const groupEncryptionKey = await decryptEncryptionKey(
-    encryptedGroup.encryptionKey,
+    encryptedGroup.groupEncryptionKey,
     userEncryptionKey,
   );
 
@@ -202,7 +202,7 @@ export const decryptGroup = async (
       groupEncryptionKey,
       "group name",
     ),
-    encryptionKey: groupEncryptionKey,
+    groupEncryptionKey: groupEncryptionKey,
     members: encryptedGroup.members,
     transactions: await Promise.all(
       encryptedGroup.transactions.map(async (transaction) => {
