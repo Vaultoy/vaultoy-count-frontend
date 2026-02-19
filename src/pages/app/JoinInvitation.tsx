@@ -11,7 +11,7 @@ import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
 import {
   deriveVerificationTokenFromLinkSecret,
   stringToCryptoKey,
-} from "@/utils/keyDerivation";
+} from "@/utils/groupInvitationDerivation";
 import { AbsoluteCenter, Heading, ProgressCircle } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";

@@ -1,17 +1,22 @@
 import { useCallback, useRef } from "react";
 
-export const useArgon2idWorker = () => {
+export interface DerivatedFromPasswordSecrets {
+  passwordEncryptionKey: CryptoKey;
+  authenticationToken: string;
+}
+
+export const useKeyDerivation = () => {
   const workerRef = useRef<Worker | null>(null);
 
-  const argon2id = useCallback(
+  const keyDerivation = useCallback(
     (
-      salt: string,
+      username: string,
       password: string,
-    ): Promise<{ key: Uint8Array<ArrayBufferLike> }> => {
+    ): Promise<DerivatedFromPasswordSecrets> => {
       return new Promise((resolve, reject) => {
         if (!workerRef.current) {
           workerRef.current = new Worker(
-            new URL("./argon2id.worker.ts", import.meta.url),
+            new URL("./keyDerivation.worker.ts", import.meta.url),
             { type: "module" },
           );
         }
@@ -19,7 +24,8 @@ export const useArgon2idWorker = () => {
         const worker = workerRef.current;
 
         const handleMessage = (event: MessageEvent) => {
-          const { key, error } = event.data;
+          const { passwordEncryptionKey, authenticationToken, error } =
+            event.data;
 
           if (error) {
             worker.removeEventListener("message", handleMessage);
@@ -29,15 +35,15 @@ export const useArgon2idWorker = () => {
 
           worker.removeEventListener("message", handleMessage);
 
-          resolve({ key });
+          resolve({ passwordEncryptionKey, authenticationToken });
         };
 
         worker.addEventListener("message", handleMessage);
-        worker.postMessage({ salt, password });
+        worker.postMessage({ username, password });
       });
     },
     [],
   );
 
-  return argon2id;
+  return keyDerivation;
 };

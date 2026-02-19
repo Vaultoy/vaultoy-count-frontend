@@ -27,7 +27,7 @@ import {
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
-import { useDerivateKeys } from "@/utils/keyDerivation";
+import { useKeyDerivation } from "@/utils/useKeyDerivation";
 
 export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const [passwordLength, setPasswordLength] = useState(0);
@@ -38,7 +38,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const { postLoginRedirectInfos, setPostLoginRedirectInfos } = useContext(
     PostLoginRedirectContext,
   );
-  const derivateKeys = useDerivateKeys();
+  const keyDerivation = useKeyDerivation();
 
   const formValuesSchema = z
     .object({
@@ -144,18 +144,19 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
 
     setKeyDerivationInProgress(true);
     try {
-      const keys = await derivateKeys(normalizedUsername, normalizedPassword);
+      const { passwordEncryptionKey, authenticationToken } =
+        await keyDerivation(normalizedUsername, normalizedPassword);
       setKeyDerivationInProgress(false);
 
       user.setUser({
         id: -1, // This is updated upon successful login/signup
         username: normalizedUsername,
-        encryptionKey: keys.passwordEncryptionKey,
+        encryptionKey: passwordEncryptionKey,
       });
 
       mutation.mutate({
         username: normalizedUsername,
-        authenticationToken: keys.authenticationToken,
+        authenticationToken,
         isLogin,
       });
     } catch (error) {

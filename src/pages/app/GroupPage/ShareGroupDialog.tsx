@@ -27,7 +27,7 @@ import { FaShareNodes } from "react-icons/fa6";
 import {
   cryptoKeyToString,
   deriveVerificationTokenFromLinkSecret,
-} from "@/utils/keyDerivation";
+} from "@/utils/groupInvitationDerivation";
 import { UserContext } from "@/contexts/UserContext";
 import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
 import { btoa_uri } from "@/utils/base64Uri";
