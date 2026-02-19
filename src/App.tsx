@@ -31,6 +31,34 @@ const config = defineConfig({
 
 const system = createSystem(defaultConfig, config);
 
+const RoutesWithNavbar = () => (
+  <>
+    <Navbar />
+    <Routes>
+      <Route path="/" element={<Home />} />
+
+      <Route path="/app/*" element={<SCApp />} />
+
+      <Route
+        path="/join/:groupId/:invitationLinkSecret"
+        element={<JoinInvitation />}
+      />
+
+      <Route path="/whitepaper" element={<WhitepaperPage />} />
+
+      <Route
+        path="*"
+        element={
+          <ErrorPage
+            title="404 - Page Not Found"
+            description="Unfortunately, the page you were looking for was not found."
+          />
+        }
+      />
+    </Routes>
+  </>
+);
+
 const App = () => {
   useEffect(() => {
     console.info(`Welcome to Vaultoy Count | Version: ${COMMIT_HASH}`);
@@ -44,34 +72,13 @@ const App = () => {
             <PostLoginRedirectContextProvider>
               <Toaster />
               <BrowserRouter>
-                <Navbar />
                 <Routes>
-                  <Route path="/" element={<Home />} />
-
                   <Route path="/login" element={<LoginSignup isLogin />} />
                   <Route
                     path="/signup"
                     element={<LoginSignup isLogin={false} />}
                   />
-
-                  <Route path="/app/*" element={<SCApp />} />
-
-                  <Route
-                    path="/join/:groupId/:invitationLinkSecret"
-                    element={<JoinInvitation />}
-                  />
-
-                  <Route path="/whitepaper" element={<WhitepaperPage />} />
-
-                  <Route
-                    path="*"
-                    element={
-                      <ErrorPage
-                        title="404 - Page Not Found"
-                        description="Unfortunately, the page you were looking for was not found."
-                      />
-                    }
-                  />
+                  <Route path="*" element={<RoutesWithNavbar />} />
                 </Routes>
               </BrowserRouter>
             </PostLoginRedirectContextProvider>

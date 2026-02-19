@@ -70,7 +70,7 @@ export const WhitepaperPage = () => (
           <Image
             src="/vaultoy_count_login_flow.png"
             alt="Vaultoy Count Login Flow"
-            width={{ base: "100%", md: "40%" }}
+            width={{ base: "100%", md: "50%" }}
             alignSelf="center"
           />
           <Heading as="h3" textAlign="left" marginTop="2em">
@@ -106,17 +106,15 @@ export const WhitepaperPage = () => (
             . This process is computationally expensive on purpose to make
             brute-force attacks more difficult. The parameters used for argon2id
             are as follows:
-            <List.Root
-              marginLeft="1.5em"
-              marginTop="0.5em"
-              marginBottom="0.5em"
-            >
-              <List.Item>Parallelism: {argon2idParams.parallelism}</List.Item>
-              <List.Item>Iterations: {argon2idParams.iterations}</List.Item>
-              <List.Item>
-                Memory Size: {argon2idParams.memorySize / 1024} MiB
-              </List.Item>
-            </List.Root>
+          </Text>
+          <List.Root marginLeft="1.5em" marginTop="0.5em" marginBottom="0.5em">
+            <List.Item>Parallelism: {argon2idParams.parallelism}</List.Item>
+            <List.Item>Iterations: {argon2idParams.iterations}</List.Item>
+            <List.Item>
+              Memory Size: {argon2idParams.memorySize / 1024} MiB
+            </List.Item>
+          </List.Root>
+          <Text textAlign="justify">
             Those parameters are chosen to strike a balance between security and
             performance, ensuring that the key derivation process is
             sufficiently slow to deter brute-force attacks while still providing
