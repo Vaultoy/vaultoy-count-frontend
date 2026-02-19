@@ -11,22 +11,22 @@ import { useNavigate } from "react-router";
 
 export const postSignupLoginMutation = async ({
   username,
-  hashedPassword,
+  authenticationToken,
   isLogin,
 }: {
   username: string;
-  hashedPassword: string;
+  authenticationToken: string;
   isLogin: boolean;
 }) => {
   if (isLogin) {
     return fetchApi("POST", "/v1/login", {
       username,
-      password: hashedPassword,
+      authenticationToken,
     });
   } else {
     return fetchApi("POST", "/v1/signup", {
       username,
-      password: hashedPassword,
+      authenticationToken,
     });
   }
 };
@@ -69,7 +69,7 @@ export const useLogoutMutation = ({
       queryClient.removeQueries();
     },
     onError: (error) => {
-      console.error("Login failed", error);
+      console.error("Logout failed:", error);
       toaster.create(UNKNOWN_ERROR_TOAST);
     },
   });

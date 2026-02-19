@@ -1,7 +1,7 @@
 import { useArgon2idWorker } from "./useArgon2idWorker";
 
 export interface MasterKeys {
-  authentificationKey: string;
+  authenticationToken: string;
   encryptionKey: CryptoKey;
 }
 
@@ -18,7 +18,7 @@ export const useDerivateKeys = () => {
 
     const { key } = await argon2id(salt, password);
 
-    const authentificationKeyRaw = key.slice(0, 32);
+    const authenticationTokenRaw = key.slice(0, 32);
     const encryptionKeyRaw = key.slice(32, 64);
 
     const encryptionKey = await crypto.subtle.importKey(
@@ -30,11 +30,11 @@ export const useDerivateKeys = () => {
     );
 
     // Transform Uint8Array to base64 string
-    const authentificationKey = btoa(
-      String.fromCharCode(...authentificationKeyRaw),
+    const authenticationToken = btoa(
+      String.fromCharCode(...authenticationTokenRaw),
     );
 
-    return { authentificationKey, encryptionKey };
+    return { authenticationToken, encryptionKey };
   };
 
   return derivateKeys;

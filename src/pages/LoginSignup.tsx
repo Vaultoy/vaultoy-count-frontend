@@ -155,7 +155,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
 
       mutation.mutate({
         username: normalizedUsername,
-        hashedPassword: keys.authentificationKey,
+        authenticationToken: keys.authenticationToken,
         isLogin,
       });
     } catch (error) {
