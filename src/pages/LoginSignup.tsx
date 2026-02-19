@@ -150,7 +150,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       user.setUser({
         id: -1, // This is updated upon successful login/signup
         username: normalizedUsername,
-        encryptionKey: keys.encryptionKey,
+        encryptionKey: keys.passwordEncryptionKey,
       });
 
       mutation.mutate({

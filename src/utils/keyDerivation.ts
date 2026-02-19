@@ -1,8 +1,8 @@
 import { useArgon2idWorker } from "./useArgon2idWorker";
 
-export interface MasterKeys {
+export interface DerivatedFromPasswordSecrets {
   authenticationToken: string;
-  encryptionKey: CryptoKey;
+  passwordEncryptionKey: CryptoKey;
 }
 
 export const useDerivateKeys = () => {
@@ -13,17 +13,17 @@ export const useDerivateKeys = () => {
   const derivateKeys = async (
     username: string,
     password: string,
-  ): Promise<MasterKeys> => {
+  ): Promise<DerivatedFromPasswordSecrets> => {
     const salt = "vaultoy_count_authentification_and_encryption" + username;
 
     const { key } = await argon2id(salt, password);
 
     const authenticationTokenRaw = key.slice(0, 32);
-    const encryptionKeyRaw = key.slice(32, 64);
+    const passwordEncryptionKeyRaw = key.slice(32, 64);
 
-    const encryptionKey = await crypto.subtle.importKey(
+    const passwordEncryptionKey = await crypto.subtle.importKey(
       "raw",
-      Uint8Array.from(encryptionKeyRaw),
+      Uint8Array.from(passwordEncryptionKeyRaw),
       "AES-GCM",
       false,
       ["encrypt", "decrypt"],
@@ -34,7 +34,7 @@ export const useDerivateKeys = () => {
       String.fromCharCode(...authenticationTokenRaw),
     );
 
-    return { authenticationToken, encryptionKey };
+    return { authenticationToken, passwordEncryptionKey };
   };
 
   return derivateKeys;
