@@ -102,8 +102,8 @@ export const WhitepaperPage = () => (
             Next, the <strong>argon2id</strong> key derivation function is
             applied to the user's password, using the aforementioned salt to
             obtain the{" "}
-            <span style={{ fontStyle: "italic" }}>derived password secret</span>
-            . This process is computationally expensive on purpose to make
+            <span style={{ fontStyle: "italic" }}>input key material</span>.
+            This process is computationally expensive on purpose to make
             brute-force attacks more difficult. The parameters used for argon2id
             are as follows:
           </Text>
@@ -137,16 +137,18 @@ export const WhitepaperPage = () => (
             <br />
             <br />
             The resulting{" "}
-            <span style={{ fontStyle: "italic" }}>
-              derived password secret
-            </span>{" "}
-            is of 64 bytes length. The first 32 bytes are used to create the{" "}
-            <span style={{ fontStyle: "italic" }}>password key</span>, which is
-            used for encryption and decryption of sensitive data. The remaining
-            32 bytes are used to create the
-            <span style={{ fontStyle: "italic" }}>authentication token</span>,
-            which is sent to the server to authenticate the user. This way, the
-            server can{" "}
+            <span style={{ fontStyle: "italic" }}>input key material</span> is
+            used to derive two secrets: the{" "}
+            <span style={{ fontStyle: "italic" }}>password key</span> and the{" "}
+            <span style={{ fontStyle: "italic" }}>authentication token</span>.
+            This is done using a HKDF key derivation function based on{" "}
+            <span style={{ fontStyle: "italic" }}>sha256</span>. The two HKDF
+            operations use a different{" "}
+            <span style={{ fontStyle: "italic" }}>information</span> parameter.
+            This ensures that the knownledge of the authentication token does
+            not allow an attacker to derive the{" "}
+            <span style={{ fontStyle: "italic" }}>password key</span>. This way,
+            the server can{" "}
             <strong>
               authenticate the user without ever having access to the{" "}
               <span style={{ fontStyle: "italic" }}>password key</span> or the
@@ -155,13 +157,14 @@ export const WhitepaperPage = () => (
             .
             <br />
             <br />
-            The authentication token is sent to the server in the login request.
-            It is hashed once again on the server side using argon2id with a
-            random salt and the same parameters as above. While the
-            confidentiality of the user's data does not rely on the protection
-            of the authentication token, hashing it one more time on the server
-            side adds an additional layer of security on the protection of the
-            user's account and password.
+            The{" "}
+            <span style={{ fontStyle: "italic" }}>authentication token</span> is
+            sent to the server in the login request. It is hashed once again on
+            the server side using argon2id with a random salt and the same
+            parameters as above. While the confidentiality of the user's data
+            does not rely on the protection of the authentication token, hashing
+            it one more time on the server side adds an additional layer of
+            security to protect the user's account and password.
           </Text>
         </VStack>
       </Card.Body>
