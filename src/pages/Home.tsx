@@ -1,65 +1,70 @@
-import { useLogoutMutation } from "@/api/auth";
-import { Logo } from "@/components/Logo";
 import { UserContext } from "@/contexts/UserContext";
-import { Button, Card, HStack, VStack, Text } from "@chakra-ui/react";
+import { Button, Card, HStack, VStack, Text, Center } from "@chakra-ui/react";
 import { useContext } from "react";
-import { FaArrowRight } from "react-icons/fa";
-import { FiLogOut } from "react-icons/fi";
+import { FaArrowRight, FaGithub } from "react-icons/fa";
 import { Link } from "react-router";
 
 export const Home = () => {
   const { user } = useContext(UserContext);
-  const logoutMutation = useLogoutMutation({
-    showSuccessToast: true,
-    navigateToAfterLogout: "/",
-  });
 
   return (
-    <VStack marginTop="5em">
-      <Card.Root variant="outline" padding="1em">
-        <Logo size="large" />
-      </Card.Root>
-      <HStack>
-        {!user && (
-          <>
-            <Link to="/login">
-              <Button>Log In</Button>
-            </Link>
-            <Link to="/signup">
-              <Button variant="outline">Sign Up</Button>
-            </Link>
-          </>
-        )}
-        {user && (
-          <>
+    <Center>
+      <VStack marginTop="1em" width={{ base: "94%", md: "70%", lg: "60%" }}>
+        <Card.Root margin="1em" width="100%">
+          <Card.Body>
+            <Text>
+              ⚠️ This is a very early prototype. Feel free to play around with
+              it. However, be aware that until the project reaches a more mature
+              state, I intent to <strong>regularly delete all data</strong> such
+              as accounts and groups.
+            </Text>
+          </Card.Body>
+        </Card.Root>
+        <HStack>
+          {!user && (
+            <>
+              <Link to="/login">
+                <Button>Log In</Button>
+              </Link>
+              <Link to="/signup">
+                <Button variant="outline">Sign Up</Button>
+              </Link>
+            </>
+          )}
+          {user && (
             <Link to="/app">
               <Button>
                 Welcome back, {user.username} <FaArrowRight width="0.6em" />
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              loading={logoutMutation.isPending}
-              onClick={() => {
-                logoutMutation.mutate();
-              }}
-            >
-              Logout <FiLogOut />
-            </Button>
-          </>
-        )}
-      </HStack>
+          )}
+        </HStack>
+        <Card.Root margin="1em 1em 0 1em" width="100%">
+          <Card.Body textAlign="center">
+            <Text>The source code can be found on</Text>
 
-      <Card.Root margin="2em 1em 1em 1em">
-        <Card.Body>
-          <Text>
-            ⚠️ This is a very early prototype. Feel free to play around with it.
-            However, be aware that until the project reaches a more mature
-            state, I intent to <strong>regularly delete all data</strong> such
-            as accounts and groups.
-          </Text>
-        </Card.Body>
-      </Card.Root>
-    </VStack>
+            <Link to="https://github.com/Vaultoy">
+              <Button marginTop="1em" variant="outline">
+                <FaGithub />
+                GitHub
+              </Button>
+            </Link>
+          </Card.Body>
+        </Card.Root>
+        <Card.Root margin="1em" width="100%">
+          <Card.Body textAlign="center">
+            <Text>
+              The whitepaper describes the security and cryptographic design of
+              the app
+            </Text>
+            <Link to="/whitepaper">
+              <Button marginTop="1em" variant="outline">
+                Whitepaper
+              </Button>
+            </Link>
+          </Card.Body>
+        </Card.Root>
+      </VStack>
+    </Center>
   );
 };

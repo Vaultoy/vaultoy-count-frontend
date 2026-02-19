@@ -16,6 +16,8 @@ import { SCApp } from "./pages/app/SCApp";
 import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectContextProvider";
 import { GroupContextProvider } from "./contexts/GroupContextProvider";
 import { useEffect } from "react";
+import { WhitepaperPage } from "./pages/Whitepaper";
+import { Navbar } from "./pages/Navbar";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,7 @@ const App = () => {
             <PostLoginRedirectContextProvider>
               <Toaster />
               <BrowserRouter>
+                <Navbar />
                 <Routes>
                   <Route path="/" element={<Home />} />
 
@@ -57,6 +60,8 @@ const App = () => {
                     path="/join/:groupId/:invitationLinkSecret"
                     element={<JoinInvitation />}
                   />
+
+                  <Route path="/whitepaper" element={<WhitepaperPage />} />
 
                   <Route
                     path="*"

@@ -1,0 +1,163 @@
+import { argon2idParams } from "@/utils/argon2idParams";
+import {
+  Card,
+  Center,
+  Heading,
+  Image,
+  Link,
+  List,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+
+export const WhitepaperPage = () => (
+  <Center>
+    <Card.Root
+      marginTop="2em"
+      marginBottom="4em"
+      width={{ base: "94%", md: "70%", lg: "60%" }}
+    >
+      <Card.Header>
+        <Heading marginTop="1em" textAlign="center" size="2xl">
+          Vaultoy Count Security Whitepaper
+        </Heading>
+      </Card.Header>
+      <Card.Body>
+        <VStack margin={{ base: "0", md: "2em" }} alignItems="start">
+          <Text textAlign="justify">
+            This document describes the design security and cryptographic
+            concepts behind the end-to-end encrypted Vaultoy Count application.
+          </Text>
+          <Heading as="h2" textAlign="left" marginTop="2em">
+            Summary
+          </Heading>
+          <Text textAlign="justify">
+            Most importantly, Vaultoy Count is designed in a way that the server{" "}
+            <strong>never has access to any sensitive data</strong> such as
+            group names, transactions, etc. Instead, all sensitive data is{" "}
+            <strong>encrypted on the client side</strong> before it is sent to
+            the server. This means that even if an attacker was able to
+            compromise the server and gain access to the database, they would
+            not be able to read any sensitive data.
+            <br />
+            <br />
+            The encryption and decryption of data is done using a key that is{" "}
+            <strong>derived from the user's password</strong> using a key
+            derivation function. The{" "}
+            <strong>
+              user password and the decryption keys are never sent to the server
+            </strong>
+            .
+          </Text>
+
+          <Heading as="h2" textAlign="left" marginTop="2em">
+            Encryption and Decryption Flow
+          </Heading>
+          <Text textAlign="justify">
+            Figure 1 below illustrates how the encryption keys are derived, and
+            how group data is decrypted on the client side.
+          </Text>
+
+          <Text
+            color="gray.500"
+            fontStyle="italic"
+            textAlign="center"
+            marginTop="1em"
+            alignSelf="center"
+          >
+            Figure 1: Login and decryption flow of Vaultoy Count
+          </Text>
+          <Image
+            src="/vaultoy_count_login_flow.png"
+            alt="Vaultoy Count Login Flow"
+            width={{ base: "100%", md: "40%" }}
+            alignSelf="center"
+          />
+          <Heading as="h3" textAlign="left" marginTop="2em">
+            Key derivation
+          </Heading>
+          <Text textAlign="justify">
+            In this section, we discuss how the{" "}
+            <span style={{ fontStyle: "italic" }}>password key</span> and the{" "}
+            <span style={{ fontStyle: "italic" }}>authentication token</span>{" "}
+            shown in Figure 1 are derived from the user's username and password.
+            This process is critical as the{" "}
+            <span style={{ fontStyle: "italic" }}>password key</span> is used
+            (indirectly) to encrypt and decrypt all sensitive data, while the{" "}
+            <span style={{ fontStyle: "italic" }}>authentication token</span> is
+            used to authenticate the user to the server.
+            <br />
+            <br />
+            First, a salt is derived by applying a hash function (
+            <span style={{ fontStyle: "italic" }}>sha256</span>) to a
+            combination of a static string common to all users of this
+            application and the user's username. While a random salt is
+            generally recommended, it doesn't apply well to end-to-end encrypted
+            applications as the salt needs to be stored on the backend. As such,
+            the backend could perform a downgrade attack by providing a known
+            salt to the client. By deriving the salt from the username, we
+            ensure that the client is safe from such attacks.
+            <br />
+            <br />
+            Next, the <strong>argon2id</strong> key derivation function is
+            applied to the user's password, using the aforementioned salt to
+            obtain the{" "}
+            <span style={{ fontStyle: "italic" }}>derived password secret</span>
+            . This process is computationally expensive on purpose to make
+            brute-force attacks more difficult. The parameters used for argon2id
+            are as follows:
+            <List.Root
+              marginLeft="1.5em"
+              marginTop="0.5em"
+              marginBottom="0.5em"
+            >
+              <List.Item>Parallelism: {argon2idParams.parallelism}</List.Item>
+              <List.Item>Iterations: {argon2idParams.iterations}</List.Item>
+              <List.Item>
+                Memory Size: {argon2idParams.memorySize / 1024} MiB
+              </List.Item>
+            </List.Root>
+            Those parameters are chosen to strike a balance between security and
+            performance, ensuring that the key derivation process is
+            sufficiently slow to deter brute-force attacks while still providing
+            a good user experience. Those parameters offer a stronger security
+            than the{" "}
+            <Link
+              href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id"
+              variant="underline"
+            >
+              OWASP recommendation
+            </Link>{" "}
+            and the{" "}
+            <Link
+              href="https://bitwarden.com/help/kdf-algorithms/#argon2id"
+              variant="underline"
+            >
+              Bitwarden defaults
+            </Link>
+            .
+            <br />
+            <br />
+            The resulting{" "}
+            <span style={{ fontStyle: "italic" }}>
+              derived password secret
+            </span>{" "}
+            is of 64 bytes length. The first 32 bytes are used to create the{" "}
+            <span style={{ fontStyle: "italic" }}>password key</span>, which is
+            used for encryption and decryption of sensitive data. The remaining
+            32 bytes are used to create the
+            <span style={{ fontStyle: "italic" }}>authentication token</span>,
+            which is sent to the server to authenticate the user. This way, the
+            server can{" "}
+            <strong>
+              authenticate the user without ever having access to the{" "}
+              <span style={{ fontStyle: "italic" }}>password key</span> or the
+              user's password
+            </strong>
+            .
+          </Text>
+        </VStack>
+      </Card.Body>
+    </Card.Root>
+  </Center>
+);
