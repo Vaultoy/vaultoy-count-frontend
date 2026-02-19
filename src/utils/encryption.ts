@@ -175,7 +175,7 @@ export const decryptEncryptionKey = async (
     "group encryption key",
   );
 
-  // Exportable is required to create a shareable link, TODO: Find a better way
+  // TODO: Exportable is required to create a shareable link, Find a better way
   return crypto.subtle.importKey("raw", decryptedKeyRaw, "AES-GCM", true, [
     "encrypt",
     "decrypt",

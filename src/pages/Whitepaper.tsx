@@ -153,6 +153,15 @@ export const WhitepaperPage = () => (
               user's password
             </strong>
             .
+            <br />
+            <br />
+            The authentication token is sent to the server in the login request.
+            It is hashed once again on the server side using argon2id with a
+            random salt and the same parameters as above. While the
+            confidentiality of the user's data does not rely on the protection
+            of the authentication token, hashing it one more time on the server
+            side adds an additional layer of security on the protection of the
+            user's account and password.
           </Text>
         </VStack>
       </Card.Body>
