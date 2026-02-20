@@ -1,5 +1,5 @@
 import { argon2id } from "hash-wasm";
-import { argon2idParams } from "./argon2idParams";
+import { argon2idParams } from "./passwordParams";
 
 interface KeyDerivationRequest {
   username: string;

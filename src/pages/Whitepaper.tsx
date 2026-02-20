@@ -1,4 +1,4 @@
-import { argon2idParams } from "@/utils/argon2idParams";
+import { argon2idParams } from "@/utils/passwordParams";
 import {
   Card,
   Center,

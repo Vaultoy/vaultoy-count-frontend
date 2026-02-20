@@ -93,3 +93,12 @@ export const useLogoutMutation = ({
     },
   });
 };
+
+export const postChangePasswordMutation = async (body: {
+  username: string;
+  oldAuthenticationToken: string;
+  newAuthenticationToken: string;
+  newUserEncryptionKey: string;
+}) => {
+  return fetchApi("POST", "/v1/change-password", body);
+};

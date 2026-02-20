@@ -29,6 +29,7 @@ import {
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { useKeyDerivation } from "@/utils/useKeyDerivation";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
+import { MINIMUM_PASSWORD_LENGTH } from "@/utils/passwordParams";
 
 interface TemporaryUserWaitingForServerResponse {
   username: string;
@@ -52,7 +53,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const formValuesSchema = z
     .object({
       username: z.string().min(3).max(100),
-      password: z.string().min(8),
+      password: z.string().min(MINIMUM_PASSWORD_LENGTH),
       confirmPassword: isLogin ? z.string().optional() : z.string(),
     })
     .refine(
@@ -124,7 +125,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       const userEncryptionKey = await decryptEncryptionKey(
         responseData.userEncryptionKey,
         tmpUserWaiting.passwordEncryptionKey,
-        false,
+        true, // TODO: Extractability is required for password change. We should change this
         "user key",
       );
 

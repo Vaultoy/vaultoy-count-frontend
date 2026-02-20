@@ -8,13 +8,11 @@ export const Logo = ({ size }: { size: "small" | "large" }) => {
         alt="Vaultoy Count Logo"
         height={size === "small" ? "2.2em" : "3em"}
       />
-      <Heading
-        size={size === "small" ? "xl" : "3xl"}
-        fontWeight="normal"
-        ml="0.2em"
-      >
-        Vaultoy Count
-      </Heading>
+      {size === "large" && (
+        <Heading size="3xl" fontWeight="normal" ml="0.2em">
+          Vaultoy Count
+        </Heading>
+      )}
     </HStack>
   );
 };

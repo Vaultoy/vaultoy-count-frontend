@@ -6,6 +6,8 @@ import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { Logo } from "@/components/Logo";
 import { Link } from "react-router";
 import { useLogoutMutation } from "@/api/auth";
+import { FaRegUser } from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
 
 export const Navbar = () => {
   const { user, userDataRetrievedFromLocalDB } = useContext(UserContext);
@@ -25,7 +27,13 @@ export const Navbar = () => {
               <Logo size="small" />
             </Link>
             <HStack justifyContent="flex-end">
-              <Text marginRight="1em">{user?.username}</Text>
+              {userDataRetrievedFromLocalDB && user && (
+                <Button variant="ghost" onClick={() => navigate("/settings")}>
+                  <FaRegUser />
+                  <Text>{user?.username}</Text>
+                  <FaGear />
+                </Button>
+              )}
               {userDataRetrievedFromLocalDB && user && (
                 <Button
                   loading={logoutMutation.isPending}
@@ -37,9 +45,16 @@ export const Navbar = () => {
                 </Button>
               )}
               {userDataRetrievedFromLocalDB && !user && (
-                <Button onClick={() => navigate("/login")}>
-                  Login <FiLogIn />
-                </Button>
+                <>
+                  <Link to="/login">
+                    <Button>
+                      Login <FiLogIn />
+                    </Button>
+                  </Link>
+                  <Link to="/signup">
+                    <Button variant="outline">Sign Up</Button>
+                  </Link>
+                </>
               )}
               {!userDataRetrievedFromLocalDB && (
                 <>

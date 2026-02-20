@@ -18,6 +18,7 @@ import { GroupContextProvider } from "./contexts/GroupContextProvider";
 import { useEffect } from "react";
 import { WhitepaperPage } from "./pages/Whitepaper";
 import { Navbar } from "./pages/Navbar";
+import { SettingsPage } from "./pages/Settings/Settings";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,8 @@ const RoutesWithNavbar = () => (
     <Navbar />
     <Routes>
       <Route path="/" element={<Home />} />
+
+      <Route path="/settings" element={<SettingsPage />} />
 
       <Route path="/app/*" element={<SCApp />} />
 
