@@ -80,7 +80,7 @@ export const ChangePasswordDialog = () => {
       if (data.status === 401) {
         toaster.create({
           title: "Failed to change password",
-          description: "Old password is incorrect",
+          description: "The old password is incorrect",
           type: "error",
         });
 

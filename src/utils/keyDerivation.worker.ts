@@ -24,7 +24,7 @@ self.onmessage = async (event: MessageEvent<KeyDerivationRequest>) => {
     );
     const salt = new Uint8Array(saltBuffer);
 
-    const ikm = await argon2id({
+    const inputKeyMaterial = await argon2id({
       ...argon2idParams,
       password,
       salt,
@@ -32,9 +32,9 @@ self.onmessage = async (event: MessageEvent<KeyDerivationRequest>) => {
       outputType: "binary",
     });
 
-    const ikmKey = await crypto.subtle.importKey(
+    const importedInputKeyMaterial = await crypto.subtle.importKey(
       "raw",
-      Uint8Array.from(ikm),
+      Uint8Array.from(inputKeyMaterial),
       "HKDF",
       false,
       ["deriveKey", "deriveBits"],
@@ -47,7 +47,7 @@ self.onmessage = async (event: MessageEvent<KeyDerivationRequest>) => {
         info: new TextEncoder().encode(HKDF_INFO_PASSWORD_KEY),
         hash: "SHA-256",
       },
-      ikmKey,
+      importedInputKeyMaterial,
       { name: "AES-GCM", length: 256 },
       false,
       ["encrypt", "decrypt"],
@@ -60,7 +60,7 @@ self.onmessage = async (event: MessageEvent<KeyDerivationRequest>) => {
         info: new TextEncoder().encode(HKDF_INFO_AUTHENTICATION_TOKEN),
         hash: "SHA-256",
       },
-      ikmKey,
+      importedInputKeyMaterial,
       256,
     );
 
