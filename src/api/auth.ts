@@ -9,15 +9,33 @@ import { UserContext } from "@/contexts/UserContext";
 import { useContext } from "react";
 import { useNavigate } from "react-router";
 
+type LoginSignupBody =
+  | ({
+      isLogin: true;
+    } & {
+      username: string;
+      authenticationToken: string;
+      userEncryptionKey: null;
+    })
+  | ({
+      isLogin: false;
+    } & {
+      username: string;
+      authenticationToken: string;
+      userEncryptionKey: string;
+    });
+
+export interface LoginSignupResponse {
+  userId: number;
+  userEncryptionKey: string;
+}
+
 export const postSignupLoginMutation = async ({
+  isLogin,
   username,
   authenticationToken,
-  isLogin,
-}: {
-  username: string;
-  authenticationToken: string;
-  isLogin: boolean;
-}) => {
+  userEncryptionKey,
+}: LoginSignupBody) => {
   if (isLogin) {
     return fetchApi("POST", "/v1/login", {
       username,
@@ -27,6 +45,7 @@ export const postSignupLoginMutation = async ({
     return fetchApi("POST", "/v1/signup", {
       username,
       authenticationToken,
+      userEncryptionKey,
     });
   }
 };

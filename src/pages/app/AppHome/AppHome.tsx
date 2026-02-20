@@ -38,7 +38,7 @@ export const AppHomePage = () => {
         body.groups.map(async (group) => {
           const groupEncryptionKey = await decryptEncryptionKey(
             group.groupEncryptionKey,
-            user.user?.encryptionKey as CryptoKey,
+            user.user?.userEncryptionKey as CryptoKey,
           );
 
           return {

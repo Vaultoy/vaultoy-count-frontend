@@ -3,7 +3,7 @@ import React, { createContext } from "react";
 export interface User {
   id: number;
   username: string;
-  encryptionKey: CryptoKey;
+  userEncryptionKey: CryptoKey;
 }
 
 export interface UserContextType {

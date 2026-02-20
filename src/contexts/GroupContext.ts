@@ -71,7 +71,7 @@ export const useDecryptAndSaveGroupToContext = (
 
       const decryptedGroup = await decryptGroup(
         encryptedGroup,
-        user.user.encryptionKey,
+        user.user.userEncryptionKey,
       );
 
       const decryptedComputedGroup =

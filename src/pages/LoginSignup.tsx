@@ -20,7 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toaster } from "../components/ui/toast-store";
-import { postSignupLoginMutation } from "../api/auth";
+import { postSignupLoginMutation, type LoginSignupResponse } from "../api/auth";
 import { UserContext } from "@/contexts/UserContext";
 import {
   UNKNOWN_ERROR_TOAST,
@@ -28,10 +28,19 @@ import {
 } from "@/components/toastMessages";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { useKeyDerivation } from "@/utils/useKeyDerivation";
+import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
+
+interface TemporaryUserWaitingForServerResponse {
+  username: string;
+  passwordEncryptionKey: CryptoKey;
+}
 
 export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const [passwordLength, setPasswordLength] = useState(0);
   const [keyDerivationInProgress, setKeyDerivationInProgress] = useState(false);
+  const [tmpUserWaiting, setTmpUserWaiting] = useState<
+    TemporaryUserWaitingForServerResponse | undefined
+  >(undefined);
 
   const navigate = useNavigate();
   const user = useContext(UserContext);
@@ -101,22 +110,29 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         return;
       }
 
-      const responseData = await data.json();
-      user.setUser((oldValue) => {
-        if (!oldValue) {
-          console.error(
-            "User context not set, yet it should have been set when user clicked login/signup",
-          );
-          toaster.create(UNKNOWN_ERROR_TOAST);
+      const responseData: LoginSignupResponse = await data.json();
 
-          return undefined;
-        }
+      if (!tmpUserWaiting) {
+        console.error(
+          "Temporary user data not set, yet it should have been set when user clicked login/signup",
+        );
+        toaster.create(UNKNOWN_ERROR_TOAST);
 
-        return {
-          ...oldValue,
-          id: responseData.userId as number,
-        };
+        return undefined;
+      }
+
+      const userEncryptionKey = await decryptEncryptionKey(
+        responseData.userEncryptionKey,
+        tmpUserWaiting.passwordEncryptionKey,
+      );
+
+      user.setUser({
+        id: responseData.userId as number,
+        username: tmpUserWaiting.username,
+        userEncryptionKey,
       });
+
+      setTmpUserWaiting(undefined);
 
       toaster.create({
         title: isLogin ? "Login successful" : "Account created successfully",
@@ -148,17 +164,33 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         await keyDerivation(normalizedUsername, normalizedPassword);
       setKeyDerivationInProgress(false);
 
-      user.setUser({
-        id: -1, // This is updated upon successful login/signup
+      setTmpUserWaiting({
         username: normalizedUsername,
-        encryptionKey: passwordEncryptionKey,
+        passwordEncryptionKey,
       });
 
-      mutation.mutate({
-        username: normalizedUsername,
-        authenticationToken,
-        isLogin,
-      });
+      if (isLogin) {
+        mutation.mutate({
+          username: normalizedUsername,
+          authenticationToken,
+          isLogin,
+          userEncryptionKey: null,
+        });
+      } else {
+        const userEncryptionKeyRaw = crypto.getRandomValues(new Uint8Array(32));
+
+        const encryptedUserEncryptionKey = await encryptEncryptionKey(
+          userEncryptionKeyRaw,
+          passwordEncryptionKey,
+        );
+
+        mutation.mutate({
+          username: normalizedUsername,
+          authenticationToken,
+          isLogin,
+          userEncryptionKey: encryptedUserEncryptionKey,
+        });
+      }
     } catch (error) {
       setKeyDerivationInProgress(false);
       console.error("Key derivation failed", error);

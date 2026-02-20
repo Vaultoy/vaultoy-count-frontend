@@ -69,7 +69,7 @@ export const CreateGroupDialog = () => {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!user || !user.user?.encryptionKey) {
+    if (!user || !user.user?.userEncryptionKey) {
       toaster.create(UNKNOWN_ERROR_TOAST);
       return;
     }
@@ -78,12 +78,12 @@ export const CreateGroupDialog = () => {
 
     const encryptedGroupEncryptionKey = await encryptEncryptionKey(
       groupEncryptionKeyRaw,
-      user.user.encryptionKey,
+      user.user.userEncryptionKey,
     );
 
     const groupEncryptionKey = await decryptEncryptionKey(
       encryptedGroupEncryptionKey,
-      user.user.encryptionKey,
+      user.user.userEncryptionKey,
     );
 
     mutation.mutate({

@@ -76,7 +76,23 @@ export const WhitepaperPage = () => (
           <Heading as="h3" textAlign="left" marginTop="2em">
             Key derivation
           </Heading>
-          <Text textAlign="justify">
+          <Text
+            color="gray.500"
+            fontStyle="italic"
+            marginTop="0.5em"
+            textAlign="justify"
+          >
+            The implementation of the key derivation process can be found on{" "}
+            <Link
+              color="gray.500"
+              href="https://github.com/Vaultoy/vaultoy-count-frontend/blob/main/src/utils/keyDerivation.worker.ts"
+              variant="underline"
+              target="_blank"
+            >
+              vaultoy-count-frontend/src/utils/keyDerivation.worker.ts
+            </Link>
+          </Text>
+          <Text textAlign="justify" marginTop="0.5em">
             In this section, we discuss how the{" "}
             <span style={{ fontStyle: "italic" }}>password key</span> and the{" "}
             <span style={{ fontStyle: "italic" }}>authentication token</span>{" "}
@@ -123,6 +139,7 @@ export const WhitepaperPage = () => (
             <Link
               href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id"
               variant="underline"
+              target="_blank"
             >
               OWASP recommendation
             </Link>{" "}
@@ -130,6 +147,7 @@ export const WhitepaperPage = () => (
             <Link
               href="https://bitwarden.com/help/kdf-algorithms/#argon2id"
               variant="underline"
+              target="_blank"
             >
               Bitwarden defaults
             </Link>

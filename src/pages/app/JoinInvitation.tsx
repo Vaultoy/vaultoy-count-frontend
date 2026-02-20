@@ -92,7 +92,7 @@ export const JoinInvitation = () => {
 
       const encryptedGroupEncryptionKey = await encryptEncryptionKey(
         groupEncryptionKeyRaw,
-        user.encryptionKey,
+        user.userEncryptionKey,
       );
 
       secondMutation.mutate({
