@@ -15,6 +15,34 @@ import {
 import { useContext, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
 
+const getDialogButtonText = (
+  userHasRepaymentsToMake: boolean | undefined,
+  othersMustSendMeRepayments: boolean | undefined,
+  othersHaveRepaymentsToMake: boolean | undefined,
+): string => {
+  if (
+    userHasRepaymentsToMake === undefined ||
+    othersMustSendMeRepayments === undefined ||
+    othersHaveRepaymentsToMake === undefined
+  ) {
+    return "";
+  }
+
+  if (userHasRepaymentsToMake) {
+    return "🤝 You have repayments to make!";
+  }
+
+  if (othersMustSendMeRepayments) {
+    return "👋 You have no repayments to make, but others must repay you";
+  }
+
+  if (othersHaveRepaymentsToMake) {
+    return "✅ You have no repayments to make, but others do";
+  }
+
+  return "✅ No repayments to make";
+};
+
 export const EquilibriumRepaymentsDialog = () => {
   const { user } = useContext(UserContext);
   const { group, groupMembersIndex } = useContext(GroupContext);
@@ -37,23 +65,31 @@ export const EquilibriumRepaymentsDialog = () => {
         )
     : undefined;
 
+  const userHasRepaymentsToMake = userRepayments && userRepayments.length > 0;
+  const othersMustSendMeRepayments =
+    othersRepayments &&
+    othersRepayments.some(
+      (repayment) => repayment.toUserId === user?.id && repayment.amount > 0,
+    );
+  const othersHaveRepaymentsToMake =
+    othersRepayments && othersRepayments.length > 0;
+
+  const dialogButtonText = getDialogButtonText(
+    userHasRepaymentsToMake,
+    othersMustSendMeRepayments,
+    othersHaveRepaymentsToMake,
+  );
+
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild marginTop="1em">
         <Card.Root width="100%" marginBottom="1em" cursor="pointer">
           <Card.Body>
             <Flex alignItems="center" justifyContent="space-between">
-              <VStack alignItems="flex-start">
-                <Heading size="lg">
-                  {userRepayments?.length === 0
-                    ? "✅ You have no repayments to make!"
-                    : "🤝 See which repayments to make"}
-                </Heading>
-                {userRepayments?.length === 0 && (
-                  <Text>See all repayments</Text>
-                )}
-              </VStack>
-              <FaAnglesRight size="1.6em" />
+              <Heading size="lg">{dialogButtonText}</Heading>
+              {(userHasRepaymentsToMake || othersHaveRepaymentsToMake) && (
+                <FaAnglesRight size="1.6em" />
+              )}
             </Flex>
           </Card.Body>
         </Card.Root>
