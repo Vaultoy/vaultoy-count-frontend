@@ -79,11 +79,14 @@ export const CreateGroupDialog = () => {
     const encryptedGroupEncryptionKey = await encryptEncryptionKey(
       groupEncryptionKeyRaw,
       user.user.userEncryptionKey,
+      "group key for new group",
     );
 
     const groupEncryptionKey = await decryptEncryptionKey(
       encryptedGroupEncryptionKey,
       user.user.userEncryptionKey,
+      false,
+      "group key for new group",
     );
 
     mutation.mutate({

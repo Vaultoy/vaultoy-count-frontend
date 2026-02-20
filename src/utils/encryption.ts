@@ -160,31 +160,32 @@ export const encryptStringList = encryptListGenerator<string>(encryptString);
 export const decryptStringList = decryptListGenerator<string>(decryptString);
 
 export const encryptEncryptionKey = async (
-  groupEncryptionKey: Uint8Array<ArrayBuffer>,
-  userEncryptionKey: CryptoKey,
+  keyToEncrypt: Uint8Array<ArrayBuffer>,
+  encryptionKey: CryptoKey,
+  keyName: string, // Only used for error logging
 ): Promise<string> => {
-  return encrypt(groupEncryptionKey, userEncryptionKey, "group encryption key");
+  return encrypt(keyToEncrypt, encryptionKey, keyName);
 };
-export const decryptEncryptionKey = async (
-  encryptedGroupEncryptionKey: string,
-  userEncryptionKey: CryptoKey,
-): Promise<CryptoKey> => {
-  const decryptedKeyRaw = await decrypt(
-    encryptedGroupEncryptionKey,
-    userEncryptionKey,
-    "group encryption key",
-  );
 
-  // TODO: Exportable is required to create a shareable link, Find a better way
-  return crypto.subtle.importKey("raw", decryptedKeyRaw, "AES-GCM", true, [
-    "encrypt",
-    "decrypt",
-  ]);
+export const decryptEncryptionKey = async (
+  keyToDecrypt: string,
+  encryptionKey: CryptoKey,
+  extractable: boolean, // Whether the resulting CryptoKey should be extractable
+  keyName: string, // Only used for error logging
+): Promise<CryptoKey> => {
+  const decryptedKeyRaw = await decrypt(keyToDecrypt, encryptionKey, keyName);
+
+  return crypto.subtle.importKey(
+    "raw",
+    decryptedKeyRaw,
+    "AES-GCM",
+    extractable,
+    ["encrypt", "decrypt"],
+  );
 };
 
 /**
- * Decrypts an entire group object, including all nested transactions and members, using the provided user encryption key. This is a comprehensive function that handles the decryption of all relevant fields in the group data structure.
- *
+ * Decrypts an entire group object, including all nested transactions and members, using the provided user encryption key.
  */
 export const decryptGroup = async (
   encryptedGroup: GroupExtended<true>,
@@ -193,6 +194,8 @@ export const decryptGroup = async (
   const groupEncryptionKey = await decryptEncryptionKey(
     encryptedGroup.groupEncryptionKey,
     userEncryptionKey,
+    true, // TODO: Required for invitation links, not ideal for security
+    `group key for group ${encryptedGroup.id}`,
   );
 
   const decryptedGroup: GroupExtended<false> = {
@@ -202,7 +205,7 @@ export const decryptGroup = async (
       groupEncryptionKey,
       "group name",
     ),
-    groupEncryptionKey: groupEncryptionKey,
+    groupEncryptionKey,
     members: encryptedGroup.members,
     transactions: await Promise.all(
       encryptedGroup.transactions.map(async (transaction) => {

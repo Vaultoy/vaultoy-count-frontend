@@ -124,6 +124,8 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       const userEncryptionKey = await decryptEncryptionKey(
         responseData.userEncryptionKey,
         tmpUserWaiting.passwordEncryptionKey,
+        false,
+        "user key",
       );
 
       user.setUser({
@@ -151,6 +153,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     onError: (error) => {
       console.error("Login failed", error);
       toaster.create(UNKNOWN_ERROR_TOAST);
+      setTmpUserWaiting(undefined);
     },
   });
 
@@ -182,6 +185,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         const encryptedUserEncryptionKey = await encryptEncryptionKey(
           userEncryptionKeyRaw,
           passwordEncryptionKey,
+          "user key",
         );
 
         mutation.mutate({

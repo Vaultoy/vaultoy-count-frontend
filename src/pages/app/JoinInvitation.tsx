@@ -84,6 +84,8 @@ export const JoinInvitation = () => {
       const groupEncryptionKey = await decryptEncryptionKey(
         invitationKey,
         invitationLinkSecretKey,
+        true, // This key is rapidly dropped so it's extractability is not an issue
+        "group key from invitation",
       );
 
       const groupEncryptionKeyRaw = new Uint8Array(
@@ -93,6 +95,7 @@ export const JoinInvitation = () => {
       const encryptedGroupEncryptionKey = await encryptEncryptionKey(
         groupEncryptionKeyRaw,
         user.userEncryptionKey,
+        "group key for invitation",
       );
 
       secondMutation.mutate({

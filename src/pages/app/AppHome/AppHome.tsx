@@ -39,6 +39,8 @@ export const AppHomePage = () => {
           const groupEncryptionKey = await decryptEncryptionKey(
             group.groupEncryptionKey,
             user.user?.userEncryptionKey as CryptoKey,
+            false,
+            "group key for group list",
           );
 
           return {

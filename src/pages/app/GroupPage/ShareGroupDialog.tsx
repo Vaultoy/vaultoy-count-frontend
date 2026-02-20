@@ -81,6 +81,8 @@ export const ShareGroupDialog = () => {
       const invitationLinkSecretKey = await decryptEncryptionKey(
         existingInvitation?.invitationLinkSecret,
         group.groupEncryptionKey,
+        true, // This key is rapidly dropped so it's extractability is not an issue
+        "invitation link secret key",
       );
 
       const invitationLinkSecret = await cryptoKeyToString(
@@ -180,13 +182,17 @@ export const ShareGroupDialog = () => {
     const encryptedInvitationLinkSecret = await encryptEncryptionKey(
       invitationLinkSecretRaw,
       group!.groupEncryptionKey,
+      "invitation link secret",
     );
 
     const invitationLinkSecretKey = await decryptEncryptionKey(
       encryptedInvitationLinkSecret,
       group!.groupEncryptionKey,
+      false,
+      "invitation link secret key",
     );
 
+    // TODO: This requires the group encryption key to be exportable, which is currently the case, but is not ideal for security.
     const groupEncryptionKeyBuffer = new Uint8Array(
       await window.crypto.subtle.exportKey("raw", group!.groupEncryptionKey),
     );
@@ -194,6 +200,7 @@ export const ShareGroupDialog = () => {
     const invitationKey = await encryptEncryptionKey(
       groupEncryptionKeyBuffer,
       invitationLinkSecretKey,
+      "invitation key",
     );
 
     const url = urlFromInvitationLinkSecret(
