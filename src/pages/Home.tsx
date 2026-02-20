@@ -24,7 +24,7 @@ export const Home = () => {
         </Card.Root>
         <Card.Root margin="1em" width="100%">
           <Card.Body>
-            <Logo size="large" />
+            <Logo size="large" showText />
 
             <HStack justifyContent="center" marginTop="2em">
               {!user && (

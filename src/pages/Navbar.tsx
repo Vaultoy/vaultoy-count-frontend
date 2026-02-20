@@ -1,4 +1,12 @@
-import { Button, Card, Center, HStack, Skeleton, Text } from "@chakra-ui/react";
+import {
+  Button,
+  Card,
+  Center,
+  HStack,
+  Skeleton,
+  Text,
+  useBreakpointValue,
+} from "@chakra-ui/react";
 import { useContext } from "react";
 import { UserContext } from "@/contexts/UserContext";
 import { useNavigate } from "react-router";
@@ -18,19 +26,26 @@ export const Navbar = () => {
     navigateToAfterLogout: "/",
   });
 
+  const showText = useBreakpointValue({ base: false, md: true }) ?? false;
+
   return (
     <Center>
       <Card.Root width={{ base: "94%", md: "70%", lg: "60%" }} marginTop="2em">
         <Card.Body>
           <HStack justifyContent="space-between" alignItems="center">
             <Link to="/">
-              <Logo size="small" />
+              <Logo size="small" showText={showText} />
             </Link>
-            <HStack justifyContent="flex-end">
+            <HStack justifyContent="flex-end" flex="1" minWidth="0">
               {userDataRetrievedFromLocalDB && user && (
-                <Button variant="ghost" onClick={() => navigate("/settings")}>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/settings")}
+                  minWidth="0"
+                  flexShrink={1}
+                >
                   <FaRegUser />
-                  <Text>{user?.username}</Text>
+                  <Text truncate>{user?.username}</Text>
                   <FaGear />
                 </Button>
               )}
