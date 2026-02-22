@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/password-input";
 import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
+import { checkValidationError } from "@/utils/checkValidationError";
 import { encryptEncryptionKey } from "@/utils/encryption";
 import { MINIMUM_PASSWORD_LENGTH } from "@/utils/passwordParams";
 import { useKeyDerivation } from "@/utils/useKeyDerivation";
@@ -77,6 +78,10 @@ export const ChangePasswordDialog = () => {
   const mutation = useMutation({
     mutationFn: postChangePasswordMutation,
     onSuccess: async (data) => {
+      if (await checkValidationError(data)) {
+        return;
+      }
+
       if (data.status === 401) {
         toaster.create({
           title: "Failed to change password",

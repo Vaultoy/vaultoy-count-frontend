@@ -45,6 +45,7 @@ import {
   getForText,
   getPaidByText,
 } from "../../../utils/textGeneration";
+import { checkValidationError } from "@/utils/checkValidationError";
 
 const formValuesSchema = z
   .object({
@@ -148,6 +149,10 @@ export const AddTransactionDialog = ({
   const mutation = useMutation({
     mutationFn: postAddTransactionMutation,
     onSuccess: async (data) => {
+      if (await checkValidationError(data)) {
+        return;
+      }
+
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
         return;

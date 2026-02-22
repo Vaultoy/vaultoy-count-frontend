@@ -7,6 +7,7 @@ import { toaster } from "@/components/ui/toast-store";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { UserContext } from "@/contexts/UserContext";
 import { atob_uri } from "@/utils/base64Uri";
+import { checkValidationError } from "@/utils/checkValidationError";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
 import {
   deriveVerificationTokenFromLinkSecret,
@@ -40,6 +41,10 @@ export const JoinInvitation = () => {
   const firstMutation = useMutation({
     mutationFn: joinInvitationMutation,
     onSuccess: async (data) => {
+      if (await checkValidationError(data)) {
+        return;
+      }
+
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
         setIsStatusError(true);
@@ -115,6 +120,10 @@ export const JoinInvitation = () => {
   const secondMutation = useMutation({
     mutationFn: joinInvitationMutation,
     onSuccess: async (data) => {
+      if (await checkValidationError(data)) {
+        return;
+      }
+
       if (data.status === 409) {
         toaster.create({
           title: "You are already a member of this group",

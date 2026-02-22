@@ -30,6 +30,7 @@ import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { useKeyDerivation } from "@/utils/useKeyDerivation";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
 import { MINIMUM_PASSWORD_LENGTH } from "@/utils/passwordParams";
+import { checkValidationError } from "@/utils/checkValidationError";
 
 interface TemporaryUserWaitingForServerResponse {
   username: string;
@@ -85,6 +86,10 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const mutation = useMutation({
     mutationFn: postSignupLoginMutation,
     onSuccess: async (data) => {
+      if (await checkValidationError(data)) {
+        return;
+      }
+
       if (isLogin && data.status === 401) {
         toaster.create({
           title: "Login failed",

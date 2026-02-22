@@ -8,6 +8,7 @@ import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
 import { useContext } from "react";
 import { useNavigate } from "react-router";
+import { checkValidationError } from "@/utils/checkValidationError";
 
 type LoginSignupBody =
   | ({
@@ -68,6 +69,10 @@ export const useLogoutMutation = ({
   return useMutation({
     mutationFn: postLogoutMutation,
     onSuccess: async (data) => {
+      if (await checkValidationError(data)) {
+        return;
+      }
+
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
         return;

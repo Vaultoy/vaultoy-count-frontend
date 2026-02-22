@@ -33,6 +33,7 @@ import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
 import { btoa_uri } from "@/utils/base64Uri";
 import { GroupContext } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
+import { checkValidationError } from "@/utils/checkValidationError";
 
 const urlFromInvitationLinkSecret = (
   groupId: string,
@@ -103,6 +104,10 @@ export const ShareGroupDialog = () => {
   const createMutation = useMutation({
     mutationFn: createInvitationMutation,
     onSuccess: async (data) => {
+      if (await checkValidationError(data)) {
+        return;
+      }
+
       if (data.status === 403) {
         toaster.create({
           title: "You are not allowed to share this group",
@@ -137,6 +142,10 @@ export const ShareGroupDialog = () => {
   const deleteMutation = useMutation({
     mutationFn: deleteInvitationMutation,
     onSuccess: async (data) => {
+      if (await checkValidationError(data)) {
+        return;
+      }
+
       if (data.status === 403) {
         toaster.create({
           title: "You are not allowed to delete this invitation",
