@@ -11,5 +11,3 @@ export const argon2idParams = {
   iterations: 5,
   memorySize: 64 * 1024, // KB
 };
-
-export const MINIMUM_PASSWORD_LENGTH = 8;

@@ -11,7 +11,7 @@ import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
 import { checkValidationError } from "@/utils/checkValidationError";
 import { encryptEncryptionKey } from "@/utils/encryption";
-import { MINIMUM_PASSWORD_LENGTH } from "@/utils/passwordParams";
+import { PASSWORD_MINIMUM_LENGTH } from "@/utils/constants";
 import { useKeyDerivation } from "@/utils/useKeyDerivation";
 import {
   Button,
@@ -29,9 +29,9 @@ import z from "zod";
 
 const formValuesSchema = z
   .object({
-    oldPassword: z.string().min(MINIMUM_PASSWORD_LENGTH),
-    newPassword: z.string().min(MINIMUM_PASSWORD_LENGTH),
-    confirmNewPassword: z.string().min(MINIMUM_PASSWORD_LENGTH),
+    oldPassword: z.string().min(PASSWORD_MINIMUM_LENGTH),
+    newPassword: z.string().min(PASSWORD_MINIMUM_LENGTH),
+    confirmNewPassword: z.string().min(PASSWORD_MINIMUM_LENGTH),
   })
   .refine(
     (data) => {

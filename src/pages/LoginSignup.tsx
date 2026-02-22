@@ -29,7 +29,11 @@ import {
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { useKeyDerivation } from "@/utils/useKeyDerivation";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
-import { MINIMUM_PASSWORD_LENGTH } from "@/utils/passwordParams";
+import {
+  PASSWORD_MINIMUM_LENGTH,
+  USERNAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+} from "@/utils/constants";
 import { checkValidationError } from "@/utils/checkValidationError";
 
 interface TemporaryUserWaitingForServerResponse {
@@ -53,8 +57,15 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
 
   const formValuesSchema = z
     .object({
-      username: z.string().min(3).max(100),
-      password: z.string().min(MINIMUM_PASSWORD_LENGTH),
+      username: z
+        .string()
+        .min(USERNAME_MIN_LENGTH)
+        .max(USERNAME_MAX_LENGTH)
+        .regex(
+          /^[a-z0-9]+$/,
+          "Username can only contain lowercase letters and numbers, without spaces",
+        ),
+      password: z.string().min(PASSWORD_MINIMUM_LENGTH),
       confirmPassword: isLogin ? z.string().optional() : z.string(),
     })
     .refine(
