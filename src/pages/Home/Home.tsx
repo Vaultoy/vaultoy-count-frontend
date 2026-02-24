@@ -118,12 +118,14 @@ export const Home = () => {
                   source code <LuExternalLink />
                 </ChakraLink>{" "}
                 and security{" "}
-                <Link to="/whitepaper" target="_blank">
-                  <ChakraLink variant="underline">
-                    whitepaper
-                    <LuExternalLink />
-                  </ChakraLink>
-                </Link>{" "}
+                <ChakraLink
+                  href="/whitepaper"
+                  variant="underline"
+                  target="_blank"
+                >
+                  whitepaper
+                  <LuExternalLink />
+                </ChakraLink>{" "}
                 are accessible for anyone to review and audit.
               </Text>
             }

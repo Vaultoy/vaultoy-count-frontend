@@ -36,6 +36,7 @@ import {
 } from "@/utils/constants";
 import { checkResponseError } from "@/utils/checkResponseError";
 import { checkResponseJson } from "@/utils/checkResponseJson";
+import { MdArrowBack } from "react-icons/md";
 
 interface TemporaryUserWaitingForServerResponse {
   username: string;
@@ -228,6 +229,13 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         alignItems="stretch"
         width={{ base: "94vw", sm: "auto" }}
       >
+        <Button
+          onClick={() => navigate("/")}
+          width="fit-content"
+          variant="outline"
+        >
+          <MdArrowBack /> Back
+        </Button>
         {postLoginRedirectInfos?.type === "JOIN_INVITATION" && (
           <Card.Root padding="1em">
             <Card.Header>

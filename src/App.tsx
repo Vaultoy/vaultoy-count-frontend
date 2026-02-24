@@ -17,7 +17,7 @@ import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectCo
 import { GroupContextProvider } from "./contexts/GroupContextProvider";
 import { useEffect } from "react";
 import { WhitepaperPage } from "./pages/Whitepaper";
-import { Navbar } from "./pages/Navbar";
+import { Navbar } from "./pages/Navbar/Navbar";
 import { SettingsPage } from "./pages/Settings/Settings";
 
 const queryClient = new QueryClient();
@@ -53,7 +53,7 @@ const RoutesWithNavbar = () => (
         path="*"
         element={
           <ErrorPage
-            title="404 - Page Not Found"
+            title="Page Not Found"
             description="Unfortunately, the page you were looking for was not found."
           />
         }

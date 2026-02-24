@@ -5,6 +5,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { MdArrowBack } from "react-icons/md";
 import { Link } from "react-router";
 
 export const ErrorPage = ({
@@ -16,10 +17,14 @@ export const ErrorPage = ({
 }) => (
   <AbsoluteCenter>
     <VStack>
-      <Heading>{title}</Heading>
-      <Text marginBottom="2em">{description}</Text>
+      <Heading textAlign="center">{title}</Heading>
+      <Text marginBottom="2em" textAlign="center">
+        {description}
+      </Text>
       <Link to="/">
-        <Button>Back to Home</Button>
+        <Button>
+          <MdArrowBack /> Back to Home
+        </Button>
       </Link>
     </VStack>
   </AbsoluteCenter>

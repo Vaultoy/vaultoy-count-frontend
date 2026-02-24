@@ -9,24 +9,22 @@ import {
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import { UserContext } from "@/contexts/UserContext";
-import { useNavigate } from "react-router";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
 import { Logo } from "@/components/Logo";
 import { Link } from "react-router";
 import { useLogoutMutation } from "@/api/auth";
 import { FaRegUser } from "react-icons/fa";
-import { FaGear } from "react-icons/fa6";
+import { NavbarMenu } from "./NavbarMenu";
 
 export const Navbar = () => {
   const { user, userDataRetrievedFromLocalDB } = useContext(UserContext);
-  const navigate = useNavigate();
 
   const logoutMutation = useLogoutMutation({
     showSuccessToast: true,
     navigateToAfterLogout: "/",
   });
 
-  const showText = useBreakpointValue({ base: false, md: true }) ?? false;
+  const largeScreen = useBreakpointValue({ base: false, md: true }) ?? false;
 
   return (
     <Center>
@@ -34,22 +32,17 @@ export const Navbar = () => {
         <Card.Body>
           <HStack justifyContent="space-between" alignItems="center">
             <Link to="/">
-              <Logo size="small" showText={showText} />
+              <Logo size="small" showText={largeScreen} />
             </Link>
             <HStack justifyContent="flex-end" flex="1" minWidth="0">
               {userDataRetrievedFromLocalDB && user && (
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/settings")}
-                  minWidth="0"
-                  flexShrink={1}
-                >
+                <HStack minWidth="0" flexShrink={1} marginRight="1em">
                   <FaRegUser />
                   <Text truncate>{user?.username}</Text>
-                  <FaGear />
-                </Button>
+                </HStack>
               )}
-              {userDataRetrievedFromLocalDB && user && (
+              <NavbarMenu />
+              {largeScreen && userDataRetrievedFromLocalDB && user && (
                 <Button
                   loading={logoutMutation.isPending}
                   onClick={() => {
@@ -59,7 +52,7 @@ export const Navbar = () => {
                   Logout <FiLogOut />
                 </Button>
               )}
-              {userDataRetrievedFromLocalDB && !user && (
+              {largeScreen && userDataRetrievedFromLocalDB && !user && (
                 <>
                   <Link to="/login">
                     <Button>
