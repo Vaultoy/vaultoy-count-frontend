@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/password-input";
 import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
-import { checkValidationError } from "@/utils/checkValidationError";
+import { checkResponseError } from "@/utils/checkResponseError";
 import { encryptEncryptionKey } from "@/utils/encryption";
 import { PASSWORD_MINIMUM_LENGTH } from "@/utils/constants";
 import { useKeyDerivation } from "@/utils/useKeyDerivation";
@@ -26,6 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
+import { checkResponseJson } from "@/utils/checkResponseJson";
 
 const formValuesSchema = z
   .object({
@@ -78,7 +79,8 @@ export const ChangePasswordDialog = () => {
   const mutation = useMutation({
     mutationFn: postChangePasswordMutation,
     onSuccess: async (data) => {
-      if (await checkValidationError(data)) {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
         return;
       }
 

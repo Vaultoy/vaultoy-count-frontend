@@ -34,7 +34,8 @@ import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
 } from "@/utils/constants";
-import { checkValidationError } from "@/utils/checkValidationError";
+import { checkResponseError } from "@/utils/checkResponseError";
+import { checkResponseJson } from "@/utils/checkResponseJson";
 
 interface TemporaryUserWaitingForServerResponse {
   username: string;
@@ -97,7 +98,8 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const mutation = useMutation({
     mutationFn: postSignupLoginMutation,
     onSuccess: async (data) => {
-      if (await checkValidationError(data)) {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
         return;
       }
 
@@ -127,7 +129,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         return;
       }
 
-      const responseData: LoginSignupResponse = await data.json();
+      const typedResponse = responseData as LoginSignupResponse;
 
       if (!tmpUserWaiting) {
         console.error(
@@ -139,14 +141,14 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       }
 
       const userEncryptionKey = await decryptEncryptionKey(
-        responseData.userEncryptionKey,
+        typedResponse.userEncryptionKey,
         tmpUserWaiting.passwordEncryptionKey,
         true, // TODO: Extractability is required for password change. We should change this
         "user key",
       );
 
       user.setUser({
-        id: responseData.userId as number,
+        id: typedResponse.userId as number,
         username: tmpUserWaiting.username,
         userEncryptionKey,
       });

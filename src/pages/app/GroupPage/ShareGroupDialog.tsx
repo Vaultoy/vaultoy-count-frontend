@@ -33,7 +33,8 @@ import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
 import { btoa_uri } from "@/utils/base64Uri";
 import { GroupContext } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
-import { checkValidationError } from "@/utils/checkValidationError";
+import { checkResponseError } from "@/utils/checkResponseError";
+import { checkResponseJson } from "@/utils/checkResponseJson";
 
 const urlFromInvitationLinkSecret = (
   groupId: string,
@@ -104,7 +105,8 @@ export const ShareGroupDialog = () => {
   const createMutation = useMutation({
     mutationFn: createInvitationMutation,
     onSuccess: async (data) => {
-      if (await checkValidationError(data)) {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
         return;
       }
 
@@ -142,7 +144,8 @@ export const ShareGroupDialog = () => {
   const deleteMutation = useMutation({
     mutationFn: deleteInvitationMutation,
     onSuccess: async (data) => {
-      if (await checkValidationError(data)) {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
         return;
       }
 

@@ -45,7 +45,8 @@ import {
   getForText,
   getPaidByText,
 } from "../../../utils/textGeneration";
-import { checkValidationError } from "@/utils/checkValidationError";
+import { checkResponseError } from "@/utils/checkResponseError";
+import { checkResponseJson } from "@/utils/checkResponseJson";
 
 const formValuesSchema = z
   .object({
@@ -149,7 +150,8 @@ export const AddTransactionDialog = ({
   const mutation = useMutation({
     mutationFn: postAddTransactionMutation,
     onSuccess: async (data) => {
-      if (await checkValidationError(data)) {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
         return;
       }
 

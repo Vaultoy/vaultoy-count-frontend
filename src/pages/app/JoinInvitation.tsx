@@ -7,7 +7,8 @@ import { toaster } from "@/components/ui/toast-store";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { UserContext } from "@/contexts/UserContext";
 import { atob_uri } from "@/utils/base64Uri";
-import { checkValidationError } from "@/utils/checkValidationError";
+import { checkResponseError } from "@/utils/checkResponseError";
+import { checkResponseJson } from "@/utils/checkResponseJson";
 import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
 import {
   deriveVerificationTokenFromLinkSecret,
@@ -17,6 +18,10 @@ import { AbsoluteCenter, Heading, ProgressCircle } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
+
+interface FirstMutationResponse {
+  invitationKey: string;
+}
 
 export const JoinInvitation = () => {
   const { groupId, invitationLinkSecret: invitationLinkSecretTransformed } =
@@ -41,7 +46,8 @@ export const JoinInvitation = () => {
   const firstMutation = useMutation({
     mutationFn: joinInvitationMutation,
     onSuccess: async (data) => {
-      if (await checkValidationError(data)) {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
         return;
       }
 
@@ -50,6 +56,8 @@ export const JoinInvitation = () => {
         setIsStatusError(true);
         return;
       }
+
+      const typedResponse = responseData as FirstMutationResponse;
 
       if (!groupId || !invitationLinkSecret) {
         toaster.create({
@@ -75,9 +83,7 @@ export const JoinInvitation = () => {
       const invitationLinkSecretKey =
         await stringToCryptoKey(invitationLinkSecret);
 
-      const invitationKey = (await data.json()).invitationKey as string;
-
-      if (!invitationKey) {
+      if (!typedResponse.invitationKey) {
         toaster.create({
           title: "Invalid response from server",
           description: "The response did not contain an invitation key.",
@@ -87,7 +93,7 @@ export const JoinInvitation = () => {
       }
 
       const groupEncryptionKey = await decryptEncryptionKey(
-        invitationKey,
+        typedResponse.invitationKey,
         invitationLinkSecretKey,
         true, // This key is rapidly dropped so it's extractability is not an issue
         "group key from invitation",
@@ -120,7 +126,8 @@ export const JoinInvitation = () => {
   const secondMutation = useMutation({
     mutationFn: joinInvitationMutation,
     onSuccess: async (data) => {
-      if (await checkValidationError(data)) {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
         return;
       }
 

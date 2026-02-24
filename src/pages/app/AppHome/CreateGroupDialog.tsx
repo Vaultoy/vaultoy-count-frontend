@@ -24,7 +24,8 @@ import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
-import { checkValidationError } from "@/utils/checkValidationError";
+import { checkResponseError } from "@/utils/checkResponseError";
+import { checkResponseJson } from "@/utils/checkResponseJson";
 
 const formValuesSchema = z.object({
   name: z.string().min(3).max(100),
@@ -50,7 +51,8 @@ export const CreateGroupDialog = () => {
   const mutation = useMutation({
     mutationFn: createGroupMutation,
     onSuccess: async (data) => {
-      if (await checkValidationError(data)) {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
         return;
       }
 
