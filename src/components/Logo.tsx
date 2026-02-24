@@ -1,14 +1,16 @@
 import { Heading, Image, HStack } from "@chakra-ui/react";
 
-export const Logo = ({
-  size,
-  showText,
-}: {
+interface LogoProps extends Omit<
+  React.ComponentProps<typeof HStack>,
+  "children"
+> {
   size: "small" | "large";
   showText: boolean;
-}) => {
+}
+
+export const Logo = ({ size, showText, ...rest }: LogoProps) => {
   return (
-    <HStack alignItems="center" justifyContent="center">
+    <HStack alignItems="center" justifyContent="center" {...rest}>
       <Image
         src="/vaultoy_count_logo.svg"
         alt="Vaultoy Count Logo"
