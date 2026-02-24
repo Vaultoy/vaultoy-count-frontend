@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import { WhitepaperPage } from "./pages/Whitepaper";
 import { Navbar } from "./pages/Navbar/Navbar";
 import { SettingsPage } from "./pages/Settings/Settings";
+import { ContactPage } from "./pages/ContactPage";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const RoutesWithNavbar = () => (
         element={<JoinInvitation />}
       />
 
+      <Route path="/contact" element={<ContactPage />} />
       <Route path="/whitepaper" element={<WhitepaperPage />} />
 
       <Route
