@@ -41,9 +41,9 @@ export const SettingsPage = () => {
             <Heading>Settings</Heading>
           </HStack>
         </Card.Header>
-        <Card.Body marginTop="2em">
+        <Card.Body marginTop="2em" alignItems="center">
           <Grid
-            templateColumns="1fr 1fr"
+            templateColumns="auto 1fr"
             gap="1em"
             justifyContent="center"
             alignItems="center"

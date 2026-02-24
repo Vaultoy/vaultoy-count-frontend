@@ -19,7 +19,7 @@ interface MenuItem {
 
 type MenuItemOrSeparator = MenuItem | typeof SEPARATOR;
 
-const currentPageColor = "purple.500";
+const currentPageColor = "purple.600";
 const SEPARATOR = "SEPARATOR" as const;
 
 const menuItems: MenuItemOrSeparator[] = [
