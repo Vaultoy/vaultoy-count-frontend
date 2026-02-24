@@ -24,7 +24,8 @@ export const Navbar = () => {
     navigateToAfterLogout: "/",
   });
 
-  const largeScreen = useBreakpointValue({ base: false, md: true }) ?? false;
+  const largeScreen =
+    useBreakpointValue({ base: false, md: true }, { ssr: false }) ?? false;
 
   return (
     <Center>
@@ -41,7 +42,13 @@ export const Navbar = () => {
                   <Text truncate>{user?.username}</Text>
                 </HStack>
               )}
+
+              {!userDataRetrievedFromLocalDB && (
+                <Skeleton height="1.5em" width="6em" marginRight="1em" />
+              )}
+
               <NavbarMenu />
+
               {largeScreen && userDataRetrievedFromLocalDB && user && (
                 <Button
                   loading={logoutMutation.isPending}
@@ -52,6 +59,7 @@ export const Navbar = () => {
                   Logout <FiLogOut />
                 </Button>
               )}
+
               {largeScreen && userDataRetrievedFromLocalDB && !user && (
                 <>
                   <Link to="/login">
@@ -64,14 +72,12 @@ export const Navbar = () => {
                   </Link>
                 </>
               )}
-              {!userDataRetrievedFromLocalDB && (
-                <>
-                  <Skeleton height="1.5em" width="6em" marginRight="1em" />
+
+              {largeScreen && !userDataRetrievedFromLocalDB && (
+                <Button color="rgb(0, 0, 0, 0)">
                   {/* Make the text invisible but still take up same space */}
-                  <Button color="rgb(0, 0, 0, 0)">
-                    Logout <FiLogOut />
-                  </Button>
-                </>
+                  Logout <FiLogOut />
+                </Button>
               )}
             </HStack>
           </HStack>
