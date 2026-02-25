@@ -1,4 +1,4 @@
-import { EmailButton } from "@/components/EmailButton";
+import { EmailButton } from "./EmailButton";
 import {
   Card,
   Center,
@@ -8,6 +8,7 @@ import {
   VStack,
   HStack,
 } from "@chakra-ui/react";
+import { PGPKey } from "./PGPKey";
 
 export const ContactPage = () => (
   <Center>
@@ -47,6 +48,12 @@ export const ContactPage = () => (
               </HStack>
             </List.Item>
           </List.Root>
+
+          <Text textAlign="justify" marginTop="1.5em">
+            If you want to encrypt the emails you send to us, you can use the
+            following PGP key:
+          </Text>
+          <PGPKey />
         </VStack>
       </Card.Body>
     </Card.Root>

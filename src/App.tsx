@@ -19,7 +19,7 @@ import { useEffect } from "react";
 import { WhitepaperPage } from "./pages/Whitepaper";
 import { Navbar } from "./pages/Navbar/Navbar";
 import { SettingsPage } from "./pages/Settings/Settings";
-import { ContactPage } from "./pages/ContactPage";
+import { ContactPage } from "./pages/ContactPage/ContactPage";
 
 const queryClient = new QueryClient();
 

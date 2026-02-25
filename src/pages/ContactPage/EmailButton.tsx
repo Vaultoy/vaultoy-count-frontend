@@ -1,5 +1,5 @@
 import { Button, Image, useClipboard } from "@chakra-ui/react";
-import { toaster } from "./ui/toast-store";
+import { toaster } from "@/components/ui/toast-store";
 import { LuClipboard, LuClipboardCheck } from "react-icons/lu";
 
 /**
@@ -24,7 +24,6 @@ export const EmailButton = ({
     toaster.create({
       title: "Email copied to clipboard",
       type: "success",
-      duration: 5000,
     });
   };
 
