@@ -3,6 +3,7 @@ import {
   GroupContext,
   type GroupMembersComputedIndex,
   type GroupExtendedComputed,
+  type GroupMemberComputed,
 } from "./GroupContext";
 
 export const GroupContextProvider = ({ children }: { children: ReactNode }) => {
@@ -14,6 +15,10 @@ export const GroupContextProvider = ({ children }: { children: ReactNode }) => {
     GroupMembersComputedIndex | undefined
   >(undefined);
 
+  const [selfMember, setSelfMember] = useState<GroupMemberComputed | undefined>(
+    undefined,
+  );
+
   const [isError, setIsError] = useState(false);
 
   return (
@@ -21,6 +26,8 @@ export const GroupContextProvider = ({ children }: { children: ReactNode }) => {
       value={{
         group,
         setGroup,
+        selfMember,
+        setSelfMember,
         groupMembersIndex,
         setGroupMembersIndex,
         isError,

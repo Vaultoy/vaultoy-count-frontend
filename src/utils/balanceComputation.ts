@@ -16,7 +16,7 @@ export const computeMembersBalanceAndRepayments = (
       balance: decryptedGroup.transactions.reduce((balance, transaction) => {
         let newBalance = balance;
 
-        const totalShares = transaction.toUsers.reduce(
+        const totalShares = transaction.toMembers.reduce(
           (sum, toUser) => sum + toUser.share,
           0,
         );
@@ -32,13 +32,14 @@ export const computeMembersBalanceAndRepayments = (
           return balance;
         }
 
-        if (transaction.fromUserId === member.userId) {
+        if (transaction.fromMemberId === member.memberId) {
           newBalance += transaction.amount;
         }
 
         const toUserShare =
-          transaction.toUsers.find((toUser) => toUser.id === member.userId)
-            ?.share ?? 0;
+          transaction.toMembers.find(
+            (toMember) => toMember.memberId === member.memberId,
+          )?.share ?? 0;
 
         if (toUserShare > 0) {
           newBalance -= transaction.amount * (toUserShare / totalShares);
@@ -53,7 +54,7 @@ export const computeMembersBalanceAndRepayments = (
 
   const membersComputedWithRepayments = membersComputed.map((member) => ({
     ...member,
-    repaymentsToMake: equilibriumRepayments[member.userId] || [],
+    repaymentsToMake: equilibriumRepayments[member.memberId] || [],
   }));
 
   return {
@@ -70,7 +71,7 @@ export const computeGroupMembersIndex = (
   const index: Record<number, GroupMemberComputed> = {};
 
   for (const member of group.members) {
-    index[member.userId] = member;
+    index[member.memberId] = member;
   }
   return index;
 };

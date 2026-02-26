@@ -12,10 +12,27 @@ export const Equilibrium = () => {
       <EquilibriumRepaymentsDialog />
 
       {group?.members.map((member) => (
-        <Card.Root key={member.userId} width="100%">
-          <Card.Body>
-            <HStack justifyContent="space-between">
-              <Text>{member.username}</Text>
+        <Card.Root key={member.memberId} width="100%">
+          <Card.Body padding="0">
+            <HStack
+              justifyContent="space-between"
+              alignItems="center"
+              margin="1em"
+            >
+              <VStack
+                alignItems="flex-start"
+                gap="0"
+                justifyContent="center"
+                height="100%"
+              >
+                <Text>{member.nickname}</Text>
+                <Text fontSize="0.9em" color="gray.400">
+                  {member.username
+                    ? `Username: ${member.username}`
+                    : "Not connected"}
+                </Text>
+              </VStack>
+
               <Text
                 color={
                   member.balance > 0

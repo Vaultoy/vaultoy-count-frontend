@@ -45,11 +45,8 @@ const getDialogButtonText = (
 
 export const EquilibriumRepaymentsDialog = () => {
   const { user } = useContext(UserContext);
-  const { group, groupMembersIndex } = useContext(GroupContext);
-  const userRepayments =
-    groupMembersIndex && user
-      ? groupMembersIndex[user.id]?.repaymentsToMake
-      : undefined;
+  const { group, groupMembersIndex, selfMember } = useContext(GroupContext);
+  const selfRepayments = selfMember?.repaymentsToMake;
 
   const [open, setOpen] = useState(false);
 
@@ -58,18 +55,18 @@ export const EquilibriumRepaymentsDialog = () => {
         .filter((member) => member.userId !== user?.id)
         .flatMap((member) =>
           member.repaymentsToMake.map((repayment) => ({
-            fromUserId: member.userId,
-            toUserId: repayment.toUserId,
+            fromMemberId: member.memberId,
+            toMemberId: repayment.toMemberId,
             amount: repayment.amount,
           })),
         )
     : undefined;
 
-  const userHasRepaymentsToMake = userRepayments && userRepayments.length > 0;
+  const userHasRepaymentsToMake = selfRepayments && selfRepayments.length > 0;
   const othersMustSendMeRepayments =
     othersRepayments &&
     othersRepayments.some(
-      (repayment) => repayment.toUserId === user?.id && repayment.amount > 0,
+      (repayment) => repayment.toMemberId === user?.id && repayment.amount > 0,
     );
   const othersHaveRepaymentsToMake =
     othersRepayments && othersRepayments.length > 0;
@@ -105,17 +102,17 @@ export const EquilibriumRepaymentsDialog = () => {
               <Heading size="md" marginBottom="0.5em">
                 Yours
               </Heading>
-              {userRepayments?.length === 0 && (
+              {selfRepayments?.length === 0 && (
                 <Text>✅ You have no repayments to make!</Text>
               )}
               <VStack alignItems="flex-start" marginBottom="1em">
-                {userRepayments?.map((repayment) => (
+                {selfRepayments?.map((repayment) => (
                   <EquilibriumRepayment
-                    key={repayment.toUserId}
-                    fromUsername={user?.username ?? "Unknown User"}
-                    toUsername={
+                    key={repayment.toMemberId}
+                    fromNickname={selfMember?.nickname ?? "Unknown User"}
+                    toNickname={
                       groupMembersIndex
-                        ? groupMembersIndex[repayment.toUserId]?.username ||
+                        ? groupMembersIndex[repayment.toMemberId]?.nickname ||
                           "Unknown User"
                         : "Unknown User"
                     }
@@ -132,16 +129,16 @@ export const EquilibriumRepaymentsDialog = () => {
               <VStack alignItems="flex-start" marginBottom="1em">
                 {othersRepayments?.map((repayment) => (
                   <EquilibriumRepayment
-                    key={repayment.toUserId}
-                    fromUsername={
+                    key={repayment.toMemberId}
+                    fromNickname={
                       groupMembersIndex
-                        ? groupMembersIndex[repayment.fromUserId]?.username ||
+                        ? groupMembersIndex[repayment.fromMemberId]?.nickname ||
                           "Unknown User"
                         : "Unknown User"
                     }
-                    toUsername={
+                    toNickname={
                       groupMembersIndex
-                        ? groupMembersIndex[repayment.toUserId]?.username ||
+                        ? groupMembersIndex[repayment.toMemberId]?.nickname ||
                           "Unknown User"
                         : "Unknown User"
                     }

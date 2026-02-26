@@ -52,12 +52,12 @@ const formValuesSchema = z
   .object({
     // size enforced in the refine
     name: z.string(),
-    fromUserId: z
+    fromMemberId: z
       .array(z.string())
       .min(1, "Select exactly one member")
       .max(1, "Select exactly one member")
       .transform((val) => Number(val[0])),
-    toUsers: z
+    toMembers: z
       .array(z.object({ id: z.string(), share: z.number() }))
       .min(1, "Select at least one member")
       .transform((vals) =>
@@ -81,7 +81,7 @@ const formValuesSchema = z
         case EXPENSE:
           return true;
         case REPAYMENT:
-          return data.toUsers.length === 1;
+          return data.toMembers.length === 1;
         case REVENUE:
           return true;
       }
@@ -89,7 +89,7 @@ const formValuesSchema = z
     {
       message:
         "Please select only one member to repay, or create an expense or revenue instead",
-      path: ["toUsers"],
+      path: ["toMembers"],
     },
   )
   .refine(
@@ -133,15 +133,15 @@ export const AddTransactionDialog = ({
     resolver: zodResolver(formValuesSchema),
     defaultValues: {
       name: "",
-      fromUserId: undefined,
-      toUsers: [],
+      fromMemberId: undefined,
+      toMembers: [],
       amount: "",
       transaction_type: EXPENSE,
     },
   });
 
   const transaction_type = watch("transaction_type");
-  const totalShares = watch("toUsers").reduce(
+  const totalShares = watch("toMembers").reduce(
     (acc, curr) => acc + curr.share,
     0,
   );
@@ -197,22 +197,22 @@ export const AddTransactionDialog = ({
           groupData.groupEncryptionKey,
           "group transaction amount",
         ),
-        fromUserId: await encryptNumber(
-          data.fromUserId,
+        fromMemberId: await encryptNumber(
+          data.fromMemberId,
           groupData.groupEncryptionKey,
-          "group transaction from user id",
+          "group transaction from member id",
         ),
-        toUsers: await Promise.all(
-          data.toUsers.map(async (toUser) => ({
-            id: await encryptNumber(
-              toUser.id,
+        toMembers: await Promise.all(
+          data.toMembers.map(async (toMember) => ({
+            memberId: await encryptNumber(
+              toMember.id,
               groupData.groupEncryptionKey,
-              "group transaction to user id",
+              "group transaction to member id",
             ),
             share: await encryptNumber(
-              toUser.share,
+              toMember.share,
               groupData.groupEncryptionKey,
-              "group transaction to user share",
+              "group transaction to member share",
             ),
           })),
         ),
@@ -234,8 +234,8 @@ export const AddTransactionDialog = ({
   const membersSelector = createListCollection({
     items:
       groupData?.members.map((member) => ({
-        label: member.username,
-        value: member.userId.toString(), // For some weird reason, Select only works with strings
+        label: member.nickname,
+        value: member.memberId.toString(), // For some weird reason, Select only works with strings
       })) ?? [],
   });
 
@@ -306,11 +306,11 @@ export const AddTransactionDialog = ({
                     <Field.ErrorText>{errors.amount?.message}</Field.ErrorText>
                   </Field.Root>
 
-                  <Field.Root invalid={!!errors.fromUserId}>
+                  <Field.Root invalid={!!errors.fromMemberId}>
                     <Field.Label>{getPaidByText(transaction_type)}</Field.Label>
                     <Controller
                       control={control}
-                      name="fromUserId"
+                      name="fromMemberId"
                       render={({ field }) => (
                         <Select.Root
                           name={field.name}
@@ -345,11 +345,11 @@ export const AddTransactionDialog = ({
                     />
 
                     <Field.ErrorText>
-                      {errors.fromUserId?.message}
+                      {errors.fromMemberId?.message}
                     </Field.ErrorText>
                   </Field.Root>
 
-                  <Fieldset.Root invalid={!!errors.toUsers}>
+                  <Fieldset.Root invalid={!!errors.toMembers}>
                     <HStack alignItems="center" justifyContent="space-between">
                       <Text>{getForText(transaction_type)}</Text>
 
@@ -358,7 +358,7 @@ export const AddTransactionDialog = ({
 
                     <Controller
                       control={control}
-                      name="toUsers"
+                      name="toMembers"
                       render={({ field }) => {
                         if (
                           transaction_type === EXPENSE ||
@@ -366,7 +366,7 @@ export const AddTransactionDialog = ({
                         ) {
                           return (
                             <CheckboxGroup
-                              invalid={!!errors.toUsers}
+                              invalid={!!errors.toMembers}
                               value={field.value.map((val) => val.id)}
                               onValueChange={(value) =>
                                 field.onChange(
@@ -550,7 +550,7 @@ export const AddTransactionDialog = ({
                     />
 
                     <Fieldset.ErrorText>
-                      {errors.toUsers?.message}
+                      {errors.toMembers?.message}
                     </Fieldset.ErrorText>
                   </Fieldset.Root>
                 </VStack>

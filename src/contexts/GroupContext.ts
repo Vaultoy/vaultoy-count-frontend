@@ -8,7 +8,7 @@ import {
 } from "@/utils/balanceComputation";
 
 export interface RepaymentsToMake {
-  toUserId: number;
+  toMemberId: number;
   amount: number;
 }
 
@@ -25,7 +25,7 @@ export interface GroupExtendedComputed extends GroupExtended<false> {
 }
 
 /**
- * A mapping of userId to GroupMemberComputed for quick access to member data.
+ * A mapping of member ID to GroupMemberComputed for quick access to member data.
  */
 export type GroupMembersComputedIndex = Record<number, GroupMemberComputed>;
 
@@ -33,6 +33,10 @@ export interface GroupContextType {
   group: GroupExtendedComputed | undefined;
   setGroup: React.Dispatch<
     React.SetStateAction<GroupExtendedComputed | undefined>
+  >;
+  selfMember: GroupMemberComputed | undefined;
+  setSelfMember: React.Dispatch<
+    React.SetStateAction<GroupMemberComputed | undefined>
   >;
   groupMembersIndex: Record<number, GroupMemberComputed> | undefined;
   setGroupMembersIndex: React.Dispatch<
@@ -45,6 +49,8 @@ export interface GroupContextType {
 export const GroupContext = createContext<GroupContextType>({
   group: undefined,
   setGroup: () => {},
+  selfMember: undefined,
+  setSelfMember: () => {},
   groupMembersIndex: undefined,
   setGroupMembersIndex: () => {},
   isError: false,
@@ -55,7 +61,7 @@ export const useDecryptAndSaveGroupToContext = (
   encryptedGroup: GroupExtended<true> | undefined,
   isQueryError: boolean,
 ) => {
-  const { setGroup, setGroupMembersIndex, setIsError } =
+  const { setGroup, setGroupMembersIndex, setIsError, setSelfMember } =
     useContext(GroupContext);
   const user = useContext(UserContext);
 
@@ -64,6 +70,7 @@ export const useDecryptAndSaveGroupToContext = (
       if (!encryptedGroup) {
         setGroup(undefined);
         setGroupMembersIndex(undefined);
+        setSelfMember(undefined);
         setIsError(isQueryError);
         return;
       }
@@ -81,8 +88,13 @@ export const useDecryptAndSaveGroupToContext = (
         decryptedComputedGroup,
       );
 
+      const selfMember = decryptedComputedGroup?.members.find(
+        (member) => member.userId === user.user?.id,
+      );
+
       if (!active) return;
       setGroup(decryptedComputedGroup);
+      setSelfMember(selfMember);
       setGroupMembersIndex(groupMembersIndex);
       setIsError(isQueryError);
     };
@@ -99,5 +111,6 @@ export const useDecryptAndSaveGroupToContext = (
     setGroupMembersIndex,
     isQueryError,
     setIsError,
+    setSelfMember,
   ]);
 };

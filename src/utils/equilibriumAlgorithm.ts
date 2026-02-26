@@ -1,23 +1,23 @@
 export interface RepaymentsToMake {
-  toUserId: number;
+  toMemberId: number;
   amount: number;
 }
 
 interface MemberWithBalance {
-  userId: number;
+  memberId: number;
   balance: number;
 }
 
 /**
- * Given a mapping of userId to their balance, compute the repayments needed to reach equilibrium.
+ * Given a mapping of memberId to their balance, compute the repayments needed to reach equilibrium.
  *
- * @param membersBalances A mapping of userId to their balance (positive means they should receive money, negative means they owe money)
- * @returns A mapping of userId to a list of repayments they should make (toUserId and amount).
+ * @param membersBalances A mapping of memberId to their balance (positive means they should receive money, negative means they owe money)
+ * @returns A mapping of memberId to a list of repayments they should make (toMemberId and amount).
  */
 export const computeEquilibriumRepayments = (
   membersBalances: MemberWithBalance[],
 ): Record<number, RepaymentsToMake[]> => {
-  const userIds = membersBalances.map((member) => member.userId);
+  const userIds = membersBalances.map((member) => member.memberId);
   const balances = membersBalances.map((member) => member.balance);
   const paymentMatrix: number[][] = new Array(balances.length)
     .fill(0)
@@ -25,7 +25,8 @@ export const computeEquilibriumRepayments = (
 
   // Compute repayments until all balances are zero
   let iterationCount = 0;
-  while (balances.some((balance) => balance != 0)) {
+  // balance > 1 because we accept 1 cent of imbalance when there are rounding issues
+  while (balances.some((balance) => balance > 1)) {
     const maxIndex = balances.reduce(
       (maxIdx, value, idx, arr) => (value > arr[maxIdx] ? idx : maxIdx),
       0,
@@ -63,7 +64,7 @@ export const computeEquilibriumRepayments = (
           repayments[userIds[i]] = [];
         }
         repayments[userIds[i]].push({
-          toUserId: userIds[j],
+          toMemberId: userIds[j],
           amount: paymentMatrix[i][j],
         });
       }
@@ -85,11 +86,11 @@ const verifyValidity = (
     computedBalances[userId] = balances[userId];
   }
 
-  for (const fromUserId in repayments) {
-    const repaymentsList = repayments[fromUserId];
+  for (const fromMemberId in repayments) {
+    const repaymentsList = repayments[fromMemberId];
     for (const repayment of repaymentsList) {
-      const { toUserId, amount } = repayment;
-      computedBalances[fromUserId] += amount;
+      const { toMemberId, amount } = repayment;
+      computedBalances[fromMemberId] += amount;
       computedBalances[toUserId] -= amount;
     }
   }

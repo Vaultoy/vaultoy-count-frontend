@@ -206,7 +206,19 @@ export const decryptGroup = async (
       "group name",
     ),
     groupEncryptionKey,
-    members: encryptedGroup.members,
+    members: (
+      await Promise.all(
+        encryptedGroup.members.map(async (member) => ({
+          ...member,
+          nickname: await decryptString(
+            member.nickname,
+            groupEncryptionKey,
+            "group member nickname",
+          ),
+        })),
+      )
+    ).sort((a, b) => a.memberId - b.memberId),
+
     transactions: await Promise.all(
       encryptedGroup.transactions.map(async (transaction) => {
         let transactionType = (await decryptString(
@@ -236,22 +248,22 @@ export const decryptGroup = async (
             groupEncryptionKey,
             "group transaction amount",
           ),
-          fromUserId: await decryptNumber(
-            transaction.fromUserId,
+          fromMemberId: await decryptNumber(
+            transaction.fromMemberId,
             groupEncryptionKey,
-            "group transaction from user id",
+            "group transaction from member id",
           ),
-          toUsers: await Promise.all(
-            transaction.toUsers.map(async (toUser) => ({
-              id: await decryptNumber(
-                toUser.id,
+          toMembers: await Promise.all(
+            transaction.toMembers.map(async (toMember) => ({
+              memberId: await decryptNumber(
+                toMember.memberId,
                 groupEncryptionKey,
-                "group transaction to user id",
+                "group transaction to member id",
               ),
               share: await decryptNumber(
-                toUser.share,
+                toMember.share,
                 groupEncryptionKey,
-                "group transaction to user share",
+                "group transaction to member share",
               ),
             })),
           ),

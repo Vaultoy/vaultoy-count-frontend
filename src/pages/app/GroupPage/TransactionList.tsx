@@ -52,14 +52,15 @@ export const TransactionList = () => {
                   <Text color="gray.600">
                     {getPaidByText(transaction.transactionType)}{" "}
                     {groupMembersIndex &&
-                      groupMembersIndex[transaction.fromUserId].username}
+                      groupMembersIndex[transaction.fromMemberId].nickname}
                   </Text>
                   <Text color="gray.600">
                     {getForText(transaction.transactionType)}{" "}
-                    {transaction.toUsers
+                    {transaction.toMembers
                       .map(
-                        ({ id }) =>
-                          groupMembersIndex && groupMembersIndex[id].username,
+                        ({ memberId }) =>
+                          groupMembersIndex &&
+                          groupMembersIndex[memberId].nickname,
                       )
                       .join(", ")}
                   </Text>

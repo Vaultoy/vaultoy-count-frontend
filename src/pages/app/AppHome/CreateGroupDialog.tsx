@@ -6,14 +6,18 @@ import {
   Dialog,
   Field,
   Input,
+  Text,
   Portal,
+  HStack,
+  VStack,
+  Center,
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaRegTrashAlt } from "react-icons/fa";
 import {
   decryptEncryptionKey,
   encryptEncryptionKey,
@@ -29,6 +33,8 @@ import { checkResponseJson } from "@/utils/checkResponseJson";
 
 const formValuesSchema = z.object({
   name: z.string().min(3).max(100),
+  selfMemberNickname: z.string().min(3).max(100),
+  memberNicknames: z.array(z.string().min(3).max(100)),
 });
 
 export const CreateGroupDialog = () => {
@@ -39,6 +45,8 @@ export const CreateGroupDialog = () => {
   const {
     register,
     handleSubmit,
+    control,
+
     formState: { errors },
   } = useForm<
     z.input<typeof formValuesSchema>,
@@ -46,6 +54,11 @@ export const CreateGroupDialog = () => {
     z.output<typeof formValuesSchema>
   >({
     resolver: zodResolver(formValuesSchema),
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "memberNicknames" as never,
   });
 
   const mutation = useMutation({
@@ -99,6 +112,20 @@ export const CreateGroupDialog = () => {
     mutation.mutate({
       name: await encryptString(data.name, groupEncryptionKey, "group name"),
       encryptedGroupEncryptionKey,
+      selfMemberNickname: await encryptString(
+        data.selfMemberNickname,
+        groupEncryptionKey,
+        "self member nickname for new group",
+      ),
+      memberNicknames: await Promise.all(
+        data.memberNicknames.map((nickname, index) =>
+          encryptString(
+            nickname,
+            groupEncryptionKey,
+            `member nickname ${index} for new group`,
+          ),
+        ),
+      ),
     });
   });
 
@@ -123,6 +150,71 @@ export const CreateGroupDialog = () => {
                   <Input {...register("name")} />
                   <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
                 </Field.Root>
+
+                <Field.Root
+                  invalid={!!errors.selfMemberNickname}
+                  marginTop="1em"
+                >
+                  <Field.Label>Your nickname in this group</Field.Label>
+                  <Input {...register("selfMemberNickname")} />
+                  <Field.ErrorText>
+                    {errors.selfMemberNickname?.message}
+                  </Field.ErrorText>
+                </Field.Root>
+
+                <Text marginTop="1em" marginBottom="0.5em">
+                  Other members' nicknames
+                </Text>
+                <Field.Root invalid={!!errors.memberNicknames} width="100%">
+                  <VStack
+                    justifyContent="center"
+                    alignItems="center"
+                    width="100%"
+                  >
+                    {fields.map((fieldItem, index) => (
+                      <Field.Root
+                        key={fieldItem.id}
+                        marginBottom="0.5em"
+                        invalid={!!errors.memberNicknames?.[index]}
+                      >
+                        <HStack gap="0.5em" alignItems="stretch" width="100%">
+                          <Input
+                            width="100%"
+                            {...register(`memberNicknames.${index}`)}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            padding="0"
+                            color={"red.600"}
+                            onClick={() => remove(index)}
+                          >
+                            <FaRegTrashAlt />
+                          </Button>
+                        </HStack>
+                        <Field.ErrorText>
+                          {errors.memberNicknames?.[index]?.message}
+                        </Field.ErrorText>
+                      </Field.Root>
+                    ))}
+                  </VStack>
+
+                  <Field.ErrorText>
+                    {errors.memberNicknames?.message}
+                  </Field.ErrorText>
+                </Field.Root>
+
+                <Center>
+                  <Button
+                    marginTop="1em"
+                    variant="outline"
+                    onClick={() => {
+                      append("");
+                    }}
+                  >
+                    <FaPlus /> Add an other member
+                  </Button>
+                </Center>
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>

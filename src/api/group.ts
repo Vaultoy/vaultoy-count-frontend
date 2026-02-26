@@ -1,10 +1,14 @@
 import type { Encrypted } from "@/types";
 import { fetchApi, type ApiResponse } from "./fetch";
 
-export const createGroupMutation = async (data: {
+interface CreateGroupBody {
   name: string;
   encryptedGroupEncryptionKey: string;
-}) => {
+  selfMemberNickname: string;
+  memberNicknames: string[];
+}
+
+export const createGroupMutation = async (data: CreateGroupBody) => {
   return fetchApi("POST", "/v1/group", data);
 };
 
@@ -15,8 +19,10 @@ export interface Group<isEncrypted extends boolean = true> {
 }
 
 export interface GroupMember {
-  userId: number;
-  username: string;
+  memberId: number;
+  userId: number | null; // null if the member has not joined yet
+  username: string | null; // null if the member has not joined yet
+  nickname: string;
   rights: "admin" | "member";
 }
 
@@ -26,16 +32,16 @@ export const REVENUE = "revenue";
 export const TRANSACTION_TYPES = [EXPENSE, REPAYMENT, REVENUE] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
-interface GroupTransactionToUser<isEncrypted extends boolean = true> {
-  id: Encrypted<number, isEncrypted>;
+interface GroupTransactionToMember<isEncrypted extends boolean = true> {
+  memberId: Encrypted<number, isEncrypted>;
   share: Encrypted<number, isEncrypted>;
 }
 
 export interface GroupTransaction<isEncrypted extends boolean = true> {
   id: number;
   name: Encrypted<string, isEncrypted>;
-  fromUserId: Encrypted<number, isEncrypted>;
-  toUsers: GroupTransactionToUser<isEncrypted>[];
+  fromMemberId: Encrypted<number, isEncrypted>;
+  toMembers: GroupTransactionToMember<isEncrypted>[];
   amount: Encrypted<number, isEncrypted>;
   transactionType: Encrypted<TransactionType, isEncrypted>;
   date: Encrypted<number, isEncrypted>;

@@ -87,7 +87,7 @@ export const GroupPage = () => {
             >
               <Text flexShrink={0} maxWidth="100%">
                 {!isError && "👥 Members: "}
-                {group?.members.map((member) => member.username).join(", ")}
+                {group?.members.map((member) => member.nickname).join(", ")}
               </Text>
 
               {!isError &&
