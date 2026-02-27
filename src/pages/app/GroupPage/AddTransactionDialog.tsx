@@ -34,7 +34,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import { encryptNumber, encryptString } from "@/utils/encryption";
+import { encryptNumber, encryptString } from "@/encryption/encryption";
 import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,

@@ -10,9 +10,9 @@ import {
 import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
 import { checkResponseError } from "@/utils/checkResponseError";
-import { encryptEncryptionKey } from "@/utils/encryption";
+import { encryptEncryptionKey } from "@/encryption/encryption";
 import { PASSWORD_MINIMUM_LENGTH } from "@/utils/constants";
-import { useKeyDerivation } from "@/utils/useKeyDerivation";
+import { useKeyDerivation } from "@/encryption/useKeyDerivation";
 import {
   Button,
   Dialog,

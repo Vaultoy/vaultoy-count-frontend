@@ -22,7 +22,7 @@ import {
   decryptEncryptionKey,
   encryptEncryptionKey,
   encryptString,
-} from "@/utils/encryption";
+} from "@/encryption/encryption";
 import { UserContext } from "@/contexts/UserContext";
 import {
   UNKNOWN_ERROR_TOAST,

@@ -27,8 +27,11 @@ import {
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
-import { useKeyDerivation } from "@/utils/useKeyDerivation";
-import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
+import { useKeyDerivation } from "@/encryption/useKeyDerivation";
+import {
+  decryptEncryptionKey,
+  encryptEncryptionKey,
+} from "@/encryption/encryption";
 import {
   PASSWORD_MINIMUM_LENGTH,
   USERNAME_MAX_LENGTH,

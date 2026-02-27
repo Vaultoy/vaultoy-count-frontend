@@ -13,7 +13,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
 import { NavLink } from "react-router";
-import { decryptEncryptionKey, decryptString } from "@/utils/encryption";
+import { decryptEncryptionKey, decryptString } from "@/encryption/encryption";
 import { UserContext } from "@/contexts/UserContext";
 import { CreateGroupDialog } from "./CreateGroupDialog";
 import { useQueryApi } from "@/api/useQueryApi";

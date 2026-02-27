@@ -2,7 +2,7 @@ import {
   createInvitationMutation,
   deleteInvitationMutation,
   getInvitationQuery,
-} from "@/api/group";
+} from "@/api/invitation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -18,7 +18,10 @@ import {
 } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toast-store";
 import { useContext, useEffect, useState } from "react";
-import { decryptEncryptionKey, encryptEncryptionKey } from "@/utils/encryption";
+import {
+  decryptEncryptionKey,
+  encryptEncryptionKey,
+} from "@/encryption/encryption";
 import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
@@ -27,7 +30,7 @@ import { FaShareNodes } from "react-icons/fa6";
 import {
   cryptoKeyToString,
   deriveVerificationTokenFromLinkSecret,
-} from "@/utils/groupInvitationDerivation";
+} from "@/encryption/groupInvitationDerivation";
 import { UserContext } from "@/contexts/UserContext";
 import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
 import { btoa_uri } from "@/utils/base64Uri";

@@ -1,5 +1,5 @@
 import type { Encrypted } from "@/types";
-import { fetchApi } from "./fetch";
+import { fetchApi, type ApiResponse } from "./fetch";
 import type { GroupMember } from "./group";
 
 export interface GroupJoinInitiateBody {
@@ -37,4 +37,38 @@ export const joinInvitationConcludeMutation = async ({
   invitationData: GroupJoinConcludeBody;
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/join/conclude`, invitationData);
+};
+
+export const createInvitationMutation = async ({
+  groupId,
+  invitationData,
+}: {
+  groupId: string;
+  invitationData: {
+    invitationVerificationToken: string;
+    invitationKey: string;
+    invitationLinkSecret: string;
+  };
+}) => {
+  return fetchApi("POST", `/v1/group/${groupId}/invitation`, invitationData);
+};
+
+interface GroupInvitation {
+  invitationLinkSecret: string;
+}
+
+export const getInvitationQuery = async (
+  groupId: string,
+): Promise<ApiResponse<GroupInvitation | null>> => {
+  const response = await fetchApi("GET", `/v1/group/${groupId}/invitation`);
+  const bodyJson = await response.json();
+  return Object.assign(response, { bodyJson });
+};
+
+export const deleteInvitationMutation = async ({
+  groupId,
+}: {
+  groupId: string;
+}) => {
+  return fetchApi("DELETE", `/v1/group/${groupId}/invitation`);
 };

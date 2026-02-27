@@ -17,8 +17,8 @@ import {
   decryptGroupForJoining,
   encryptEncryptionKey,
   type GroupForJoiningWithKey,
-} from "@/utils/encryption";
-import { deriveVerificationTokenFromLinkSecret } from "@/utils/groupInvitationDerivation";
+} from "@/encryption/encryption";
+import { deriveVerificationTokenFromLinkSecret } from "@/encryption/groupInvitationDerivation";
 import {
   Button,
   Card,
