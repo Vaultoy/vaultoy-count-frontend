@@ -1,10 +1,16 @@
 import {
   TRANSACTION_TYPES,
   type GroupExtended,
+  type GroupMember,
   type GroupTransaction,
   type TransactionType,
 } from "@/api/group";
+import type { GroupForJoiningInitiate } from "@/api/invitation";
 import type { Encrypted } from "@/types";
+import {
+  deriveVerificationTokenFromLinkSecret,
+  stringToCryptoKey,
+} from "./groupInvitationDerivation";
 
 const encrypt = async (
   data: Uint8Array<ArrayBuffer>,
@@ -281,6 +287,60 @@ export const decryptGroup = async (
   };
 
   decryptedGroup.transactions.sort((a, b) => b.date - a.date);
+
+  return decryptedGroup;
+};
+
+export interface GroupForJoiningWithKey {
+  groupId: number;
+  name: Encrypted<string, false>;
+  members: GroupMember<false>[];
+  groupEncryptionKey: CryptoKey;
+  invitationVerificationToken: string;
+}
+
+/**
+ * Decrypts agroup object necessary for joining a group via an invitation link.
+ */
+export const decryptGroupForJoining = async (
+  encryptedGroup: GroupForJoiningInitiate<true>,
+  invitationLinkSecret: string,
+  invitationKey: Encrypted<CryptoKey, true>,
+): Promise<GroupForJoiningWithKey> => {
+  const invitationVerificationToken =
+    await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
+
+  const invitationLinkSecretKey = await stringToCryptoKey(invitationLinkSecret);
+
+  const groupEncryptionKey = await decryptEncryptionKey(
+    invitationKey,
+    invitationLinkSecretKey,
+    true, // This key is rapidly dropped so it's extractability is not an issue
+    "group key from invitation",
+  );
+
+  const decryptedGroup: GroupForJoiningWithKey = {
+    ...encryptedGroup,
+    name: await decryptString(
+      encryptedGroup.name,
+      groupEncryptionKey,
+      "group name",
+    ),
+    members: (
+      await Promise.all(
+        encryptedGroup.members.map(async (member) => ({
+          ...member,
+          nickname: await decryptString(
+            member.nickname,
+            groupEncryptionKey,
+            "group member nickname",
+          ),
+        })),
+      )
+    ).sort((a, b) => a.memberId - b.memberId),
+    groupEncryptionKey,
+    invitationVerificationToken,
+  };
 
   return decryptedGroup;
 };

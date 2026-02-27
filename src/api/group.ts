@@ -18,11 +18,11 @@ export interface Group<isEncrypted extends boolean = true> {
   groupEncryptionKey: Encrypted<CryptoKey, isEncrypted>; // encrypted with user's encryption key
 }
 
-export interface GroupMember {
+export interface GroupMember<isEncrypted extends boolean = true> {
   memberId: number;
   userId: number | null; // null if the member has not joined yet
   username: string | null; // null if the member has not joined yet
-  nickname: string;
+  nickname: Encrypted<string, isEncrypted>;
   rights: "admin" | "member";
 }
 
@@ -50,7 +50,7 @@ export interface GroupTransaction<isEncrypted extends boolean = true> {
 export interface GroupExtended<
   isEncrypted extends boolean = true,
 > extends Group<isEncrypted> {
-  members: GroupMember[];
+  members: GroupMember<isEncrypted>[];
   transactions: GroupTransaction<isEncrypted>[];
 }
 
@@ -94,19 +94,6 @@ export const createInvitationMutation = async ({
   };
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/invitation`, invitationData);
-};
-
-export const joinInvitationMutation = async ({
-  groupId,
-  invitationData,
-}: {
-  groupId: string;
-  invitationData: {
-    invitationVerificationToken: string;
-    groupEncryptionKey?: string;
-  };
-}) => {
-  return fetchApi("POST", `/v1/group/${groupId}/join`, invitationData);
 };
 
 interface GroupInvitation {
