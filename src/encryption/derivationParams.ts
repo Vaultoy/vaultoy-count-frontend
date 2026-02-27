@@ -11,3 +11,7 @@ export const argon2idParams = {
   iterations: 5,
   memorySize: 64 * 1024, // KB
 };
+
+export const VAULTOY_DERIVATION_SALT = "vaultoy_8QQWm8MZPgVa3WaLv6XS2k";
+export const HKDF_INFO_PASSWORD_KEY = "vaultoy_password_key";
+export const HKDF_INFO_AUTHENTICATION_TOKEN = "vaultoy_authentication_token";

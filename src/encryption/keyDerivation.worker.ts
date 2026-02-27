@@ -1,20 +1,20 @@
 import { argon2id } from "hash-wasm";
-import { argon2idParams } from "./passwordParams";
+import {
+  argon2idParams,
+  HKDF_INFO_AUTHENTICATION_TOKEN,
+  HKDF_INFO_PASSWORD_KEY,
+  VAULTOY_DERIVATION_SALT,
+} from "./derivationParams";
 
 interface KeyDerivationRequest {
   username: string;
   password: string;
 }
 
-const VAULTOY_COUNT_DERIVATION_SALT = "vaultoy_count_8QQWm8MZPgVa3WaLv6XS2k";
-
-const HKDF_INFO_PASSWORD_KEY = "vaultoy_count_password_key";
-const HKDF_INFO_AUTHENTICATION_TOKEN = "vaultoy_count_authentication_token";
-
 self.onmessage = async (event: MessageEvent<KeyDerivationRequest>) => {
   try {
     const { username, password } = event.data;
-    const saltString = VAULTOY_COUNT_DERIVATION_SALT + username;
+    const saltString = VAULTOY_DERIVATION_SALT + username;
 
     const startTime = performance.now();
 
