@@ -5,7 +5,7 @@ import { HStack, List, Text, Image } from "@chakra-ui/react";
 
 export const LegalNotice = () => (
   <>
-    <HeadingL as="h2" textAlign="left" marginTop="2em" marginBottom="1em">
+    <HeadingL as="h2" textAlign="left" marginTop="1em" marginBottom="1em">
       {{
         fr: "Mentions légales",
         en: "Legal notice",
@@ -109,6 +109,12 @@ export const LegalNotice = () => (
         {{
           fr: "Site web : https://ovh.com",
           en: "Website: https://ovh.com",
+        }}
+      </ListItemL>
+      <ListItemL>
+        {{
+          fr: "Le Site est hébergé en France.",
+          en: "The Site is hosted in France.",
         }}
       </ListItemL>
     </List.Root>
