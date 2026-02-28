@@ -21,7 +21,7 @@ import { Navbar } from "./pages/Navbar/Navbar";
 import { SettingsPage } from "./pages/Settings/Settings";
 import { ContactPage } from "./pages/ContactPage/ContactPage";
 import { LanguageContextProvider } from "./contexts/LanguageContextProvider";
-import { LegalPage } from "./pages/LegalPage";
+import { LegalPage } from "./pages/LegalPage/LegalPage";
 
 const queryClient = new QueryClient();
 

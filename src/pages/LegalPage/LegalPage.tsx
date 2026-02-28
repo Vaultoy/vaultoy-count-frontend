@@ -2,6 +2,9 @@ import { HeadingL } from "@/components/language/HeadingL";
 import { LanguageSelector } from "@/components/language/LanguageSelector";
 import { TextL } from "@/components/language/TextL";
 import { Card, Center, VStack, Grid } from "@chakra-ui/react";
+import { LegalNotice } from "./LegalNotice";
+import { PrivacyPolicy } from "./PrivacyPolicy";
+import { TermsService } from "./TermsService";
 
 export const LegalPage = () => (
   <Center>
@@ -24,6 +27,7 @@ export const LegalPage = () => (
             alignSelf="center"
             gap="1em"
             justifyContent="center"
+            alignItems="center"
             marginTop={{ base: "1em", md: "0" }}
             templateColumns={{ base: "1fr", md: "3fr 1fr" }}
           >
@@ -44,44 +48,11 @@ export const LegalPage = () => (
             <LanguageSelector />
           </Grid>
 
-          <HeadingL as="h2" textAlign="left" marginTop="2em">
-            {{
-              fr: "Mentions légales",
-              en: "Legal notice",
-            }}
-          </HeadingL>
-          <TextL textAlign="justify">
-            {{
-              fr: "Bientôt disponible",
-              en: "Coming soon",
-            }}
-          </TextL>
+          <LegalNotice />
 
-          <HeadingL as="h2" textAlign="left" marginTop="2em">
-            {{
-              fr: "Politique de confidentialité",
-              en: "Privacy policy",
-            }}
-          </HeadingL>
-          <TextL textAlign="justify">
-            {{
-              fr: "Bientôt disponible",
-              en: "Coming soon",
-            }}
-          </TextL>
+          <PrivacyPolicy />
 
-          <HeadingL as="h2" textAlign="left" marginTop="2em">
-            {{
-              fr: "Conditions générales d'utilisation",
-              en: "Terms of service",
-            }}
-          </HeadingL>
-          <TextL textAlign="justify">
-            {{
-              fr: "Bientôt disponible",
-              en: "Coming soon",
-            }}
-          </TextL>
+          <TermsService />
         </VStack>
       </Card.Body>
     </Card.Root>
