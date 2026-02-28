@@ -20,6 +20,8 @@ import { WhitepaperPage } from "./pages/Whitepaper";
 import { Navbar } from "./pages/Navbar/Navbar";
 import { SettingsPage } from "./pages/Settings/Settings";
 import { ContactPage } from "./pages/ContactPage/ContactPage";
+import { LanguageContextProvider } from "./contexts/LanguageContextProvider";
+import { LegalPage } from "./pages/LegalPage";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,7 @@ const RoutesWithNavbar = () => (
 
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/whitepaper" element={<WhitepaperPage />} />
+      <Route path="/legal" element={<LegalPage />} />
 
       <Route
         path="*"
@@ -75,17 +78,19 @@ const App = () => {
         <UserContextProvider>
           <GroupContextProvider>
             <PostLoginRedirectContextProvider>
-              <Toaster />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/login" element={<LoginSignup isLogin />} />
-                  <Route
-                    path="/signup"
-                    element={<LoginSignup isLogin={false} />}
-                  />
-                  <Route path="*" element={<RoutesWithNavbar />} />
-                </Routes>
-              </BrowserRouter>
+              <LanguageContextProvider>
+                <Toaster />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/login" element={<LoginSignup isLogin />} />
+                    <Route
+                      path="/signup"
+                      element={<LoginSignup isLogin={false} />}
+                    />
+                    <Route path="*" element={<RoutesWithNavbar />} />
+                  </Routes>
+                </BrowserRouter>
+              </LanguageContextProvider>
             </PostLoginRedirectContextProvider>
           </GroupContextProvider>
         </UserContextProvider>
