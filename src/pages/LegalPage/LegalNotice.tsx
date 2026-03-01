@@ -1,7 +1,8 @@
+import { EmailAddress } from "@/components/EmailAddress";
 import { HeadingL } from "@/components/language/HeadingL";
 import { ListItemL } from "@/components/language/ListItemL";
 import { TextL } from "@/components/language/TextL";
-import { HStack, List, Text, Image } from "@chakra-ui/react";
+import { HStack, List } from "@chakra-ui/react";
 
 export const LegalNotice = () => (
   <>
@@ -13,8 +14,8 @@ export const LegalNotice = () => (
     </HeadingL>
     <TextL textAlign="justify">
       {{
-        fr: `Conformément aux dispositions de l'article 6 de la Loi n°2004-575 du 21 juin 2004 pour la Confiance dans l'Économie Numérique (LCEN), il est précisé aux utilisateurs du site vaultoy.com et de l'ensemble de ses sous-domaines (ci-après désignés collectivement comme "le Site") l'identité des différents intervenants dans le cadre de sa réalisation et de son suivi.`,
-        en: `In accordance with the provisions of Article 6 of the French Law No. 2004-575 of June 21, 2004 for Confidence in the Digital Economy (LCEN), the identity of the different parties involved in the creation and monitoring of the vaultoy.com website and all its subdomains (hereinafter collectively referred to as "the Site") is specified to users.`,
+        fr: `Conformément aux dispositions de l'article 6 de la Loi n°2004-575 du 21 juin 2004 pour la Confiance dans l'Économie Numérique (LCEN), il est précisé aux utilisateurs du Site l'identité des différents intervenants dans le cadre de sa réalisation et de son suivi.`,
+        en: `In accordance with the provisions of Article 6 of the French Law No. 2004-575 of June 21, 2004 for Confidence in the Digital Economy (LCEN), the identity of the different parties involved in the creation and monitoring of the Site is specified to users.`,
       }}
     </TextL>
 
@@ -40,22 +41,14 @@ export const LegalNotice = () => (
         }}
       </ListItemL>
       <List.Item>
-        <HStack alignItems="center" gap="0">
+        <HStack gap="0.3em" wrap="wrap">
           <TextL>
             {{
               fr: "Contact par courriel :",
               en: "Contact by email:",
             }}
           </TextL>
-          <Text marginLeft="0.4em">contact</Text>
-          <Image
-            src="/at.png"
-            height="1.1em"
-            marginBottom="-0.1em"
-            marginLeft="0.1em"
-            marginRight="0.1em"
-          />
-          <Text>vaultoy.com</Text>
+          <EmailAddress mailUser="contact" mailDomain="vaultoy.com" />
         </HStack>
       </List.Item>
       <ListItemL>

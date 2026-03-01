@@ -32,7 +32,7 @@ const menuItems: MenuItemOrSeparator[] = [
   SEPARATOR,
   { path: "/contact", icon: IoMdMail, label: "Contact" },
   { path: "/whitepaper", icon: FaScroll, label: "Security whitepaper" },
-  { path: "/legal", icon: FaBalanceScale, label: "Legal" },
+  { path: "/legal", icon: FaBalanceScale, label: "Legal information" },
 ];
 
 export const NavbarMenu = () => {

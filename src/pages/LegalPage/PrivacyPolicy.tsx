@@ -1,7 +1,8 @@
+import { EmailAddress } from "@/components/EmailAddress";
 import { HeadingL } from "@/components/language/HeadingL";
 import { ListItemL } from "@/components/language/ListItemL";
 import { TextL } from "@/components/language/TextL";
-import { HStack, List, Text, Image } from "@chakra-ui/react";
+import { HStack, List } from "@chakra-ui/react";
 
 export const PrivacyPolicy = () => (
   <>
@@ -40,22 +41,14 @@ export const PrivacyPolicy = () => (
         }}
       </ListItemL>
       <List.Item>
-        <HStack alignItems="center" gap="0">
+        <HStack gap="0.3em" wrap="wrap">
           <TextL>
             {{
               fr: "Contact par courriel :",
               en: "Contact by email:",
             }}
           </TextL>
-          <Text marginLeft="0.4em">contact</Text>
-          <Image
-            src="/at.png"
-            height="1.1em"
-            marginBottom="-0.1em"
-            marginLeft="0.1em"
-            marginRight="0.1em"
-          />
-          <Text>vaultoy.com</Text>
+          <EmailAddress mailUser="contact" mailDomain="vaultoy.com" />
         </HStack>
       </List.Item>
     </List.Root>

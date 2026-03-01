@@ -1,4 +1,4 @@
-import { EmailButton } from "./EmailButton";
+import { EmailButton } from "@/components/EmailButton";
 import {
   Card,
   Center,

@@ -1,10 +1,11 @@
 import { HeadingL } from "@/components/language/HeadingL";
 import { LanguageSelector } from "@/components/language/LanguageSelector";
 import { TextL } from "@/components/language/TextL";
-import { Card, Center, VStack, Grid } from "@chakra-ui/react";
+import { Card, Center, VStack, Grid, HStack, List } from "@chakra-ui/react";
 import { LegalNotice } from "./LegalNotice";
 import { PrivacyPolicy } from "./PrivacyPolicy";
 import { TermsService } from "./TermsService";
+import { EmailAddress } from "@/components/EmailAddress";
 
 export const LegalPage = () => (
   <Center>
@@ -16,8 +17,8 @@ export const LegalPage = () => (
       <Card.Header>
         <HeadingL marginTop="1em" textAlign="center" size="2xl">
           {{
-            fr: "Documents légaux",
-            en: "Legal documents",
+            fr: "Informations légales",
+            en: "Legal information",
           }}
         </HeadingL>
       </Card.Header>
@@ -50,15 +51,22 @@ export const LegalPage = () => (
 
           <TextL color="gray.500" fontStyle="italic" marginTop="2em">
             {{
-              fr: "Dernière mise à jour : 28 février 2026",
-              en: "Last updated: February 28th, 2026",
+              fr: "Dernière mise à jour : 1er Mars 2026",
+              en: "Last updated: March 1st, 2026",
             }}
           </TextL>
 
           <TextL textAlign="justify" marginTop="1em">
             {{
-              fr: "Bienvenue sur la page des documents légaux de Vaultoy ! Vous trouverez ici nos mentions légales, notre politique de confidentialité et nos conditions générales d'utilisation. Pour pouvoir créer un compte et continuer à l'utiliser, vous devez accepter les termes décrits dans ces documents.",
-              en: "Welcome to the legal documents page of Vaultoy! Here you will find our legal notice, privacy policy, and terms of service. To be able to create an account and continue using it, you must accept the terms described in these documents.",
+              fr: "Bienvenue sur la page des documents légaux de Vaultoy ! Vous trouverez ici nos mentions légales, notre politique de confidentialité et nos conditions générales d'utilisation.",
+              en: "Welcome to the legal documents page of Vaultoy! Here you will find our legal notice, privacy policy, and terms of service.",
+            }}
+          </TextL>
+
+          <TextL textAlign="justify">
+            {{
+              fr: `En utilisant le site vaultoy.com ou l'un de ses sous-domaines (ci-après désignés collectivement comme "le Site"), vous acceptez les mentions légales, la politique de confidentialité et les conditions générales d'utilisation décrites dans les sections suivantes. Si vous ne souhaitez pas accepter ces documents, veuillez ne pas utiliser nos services.`,
+              en: `By using the vaultoy.com website or one of its subdomains (collectively referred to as "the Site"), you agree to the legal notice, privacy policy, and terms of service described in the following sections. If you do not wish to agree to these documents, please do not use our services.`,
             }}
           </TextL>
 
@@ -81,6 +89,32 @@ export const LegalPage = () => (
               en: "We reserve the right to modify these documents at any time. In case of changes, we will update the 'Last updated' date at the top of this page and inform you of significant changes through a notification on the Site. We encourage you to regularly review this page to stay informed of any changes.",
             }}
           </TextL>
+
+          <HeadingL as="h2" textAlign="left" marginTop="2em" marginBottom="1em">
+            {{
+              fr: "Nous contacter",
+              en: "Contact us",
+            }}
+          </HeadingL>
+          <TextL textAlign="justify">
+            {{
+              fr: "N'hésitez pas à nous contacter si vous avez des questions concernant ces documents légaux.",
+              en: "Please feel free to contact us if you have any questions about these legal documents.",
+            }}
+          </TextL>
+          <List.Root marginLeft="1.5em" marginTop="0.5em" marginBottom="0.5em">
+            <List.Item>
+              <HStack gap="0.3em" wrap="wrap">
+                <TextL>
+                  {{
+                    fr: "Contact par courriel :",
+                    en: "Contact by email:",
+                  }}
+                </TextL>
+                <EmailAddress mailUser="contact" mailDomain="vaultoy.com" />
+              </HStack>
+            </List.Item>
+          </List.Root>
         </VStack>
       </Card.Body>
     </Card.Root>
