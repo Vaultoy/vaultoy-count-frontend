@@ -305,7 +305,6 @@ export interface GroupForJoiningWithKey {
 export const decryptGroupForJoining = async (
   encryptedGroup: GroupForJoiningInitiate<true>,
   invitationLinkSecret: string,
-  invitationKey: Encrypted<CryptoKey, true>,
 ): Promise<GroupForJoiningWithKey> => {
   const invitationVerificationToken =
     await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
@@ -313,14 +312,14 @@ export const decryptGroupForJoining = async (
   const invitationLinkSecretKey = await stringToCryptoKey(invitationLinkSecret);
 
   const groupEncryptionKey = await decryptEncryptionKey(
-    invitationKey,
+    encryptedGroup.invitationGroupEncryptionKey,
     invitationLinkSecretKey,
     true, // This key is rapidly dropped so it's extractability is not an issue
     "group key from invitation",
   );
 
   const decryptedGroup: GroupForJoiningWithKey = {
-    ...encryptedGroup,
+    groupId: encryptedGroup.groupId,
     name: await decryptString(
       encryptedGroup.name,
       groupEncryptionKey,

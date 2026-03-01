@@ -212,10 +212,10 @@ export const ShareGroupDialog = () => {
       await window.crypto.subtle.exportKey("raw", group!.groupEncryptionKey),
     );
 
-    const invitationKey = await encryptEncryptionKey(
+    const invitationGroupEncryptionKey = await encryptEncryptionKey(
       groupEncryptionKeyBuffer,
       invitationLinkSecretKey,
-      "invitation key",
+      "invitation group encryption key",
     );
 
     const url = urlFromInvitationLinkSecret(
@@ -229,7 +229,7 @@ export const ShareGroupDialog = () => {
       groupId: group!.id.toString(),
       invitationData: {
         invitationVerificationToken,
-        invitationKey,
+        invitationGroupEncryptionKey,
         invitationLinkSecret: encryptedInvitationLinkSecret,
       },
     });

@@ -10,7 +10,7 @@ export interface GroupForJoiningInitiate<isEncrypted extends boolean = true> {
   groupId: number;
   name: Encrypted<string, isEncrypted>;
   members: GroupMember<isEncrypted>[];
-  invitationKey: string;
+  invitationGroupEncryptionKey: string;
 }
 
 export const joinInvitationInitiateMutation = async ({
@@ -46,7 +46,7 @@ export const createInvitationMutation = async ({
   groupId: string;
   invitationData: {
     invitationVerificationToken: string;
-    invitationKey: string;
+    invitationGroupEncryptionKey: string;
     invitationLinkSecret: string;
   };
 }) => {

@@ -121,10 +121,11 @@ export const JoinInvitation = () => {
         return;
       }
 
-      if (!typedResponse.invitationKey) {
+      if (!typedResponse.invitationGroupEncryptionKey) {
         toaster.create({
           title: "Invalid response from server",
-          description: "The response did not contain an invitation key.",
+          description:
+            "The response did not contain an invitation group encryption key.",
           type: "error",
         });
         return;
@@ -133,7 +134,6 @@ export const JoinInvitation = () => {
       const group = await decryptGroupForJoining(
         typedResponse,
         invitationLinkSecret,
-        typedResponse.invitationKey,
       );
 
       setGroupForJoining(group);
