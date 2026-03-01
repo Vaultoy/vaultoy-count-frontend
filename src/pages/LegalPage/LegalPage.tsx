@@ -58,8 +58,8 @@ export const LegalPage = () => (
 
           <TextL textAlign="justify" marginTop="1em">
             {{
-              fr: "Bienvenue sur la page des documents légaux de Vaultoy ! Vous trouverez ici nos mentions légales, notre politique de confidentialité et nos conditions générales d'utilisation.",
-              en: "Welcome to the legal documents page of Vaultoy! Here you will find our legal notice, privacy policy, and terms of service.",
+              fr: "Bienvenue sur la page des informations légales de Vaultoy ! Vous trouverez ici nos mentions légales, notre politique de confidentialité et nos conditions générales d'utilisation.",
+              en: "Welcome to the legal information page of Vaultoy! Here you will find our legal notice, privacy policy, and terms of service.",
             }}
           </TextL>
 

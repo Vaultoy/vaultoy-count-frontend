@@ -25,8 +25,8 @@ export const TermsService = () => (
     </TextL>
     <TextL textAlign="justify">
       {{
-        fr: "Vous vous engagez à ne pas utiliser le service à des fins illégales ou interdites par les présentes conditions. Vous ne devez pas tenter de compromettre la sécurité ou l'intégrité de nos systèmes informatiques.",
-        en: "You agree not to use the service for any illegal or prohibited purpose. You must not attempt to compromise the security or integrity of our computer systems.",
+        fr: "Vous vous engagez à ne pas utiliser le service à des fins illégales ou interdites par les présentes conditions. Vous ne devez pas tenter de compromettre la sécurité ou l'intégrité de nos systèmes informatiques ou de ceux de nos utilisateurs. Vous ne devez pas tenter de perturber la qualité du service pour les autres utilisateurs.",
+        en: "You agree not to use the service for any illegal or prohibited purpose. You must not attempt to compromise the security or integrity of our computer systems or those of our users. You must not attempt to disrupt the quality of the service for other users.",
       }}
     </TextL>
 
