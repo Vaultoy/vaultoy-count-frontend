@@ -4,18 +4,18 @@ export const deriveVerificationTokenFromLinkSecret = async (
   const invitationValidationSaltString =
     "vaultoy_count_invitation_validation_salt";
 
-  const invitationVerificationTokenBuffer = await window.crypto.subtle.digest(
+  const invitationAuthenticationTokenBuffer = await window.crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(
       invitationLinkSecret + invitationValidationSaltString,
     ),
   );
 
-  const invitationVerificationToken = btoa(
-    String.fromCharCode(...new Uint8Array(invitationVerificationTokenBuffer)),
+  const invitationAuthenticationToken = btoa(
+    String.fromCharCode(...new Uint8Array(invitationAuthenticationTokenBuffer)),
   );
 
-  return invitationVerificationToken;
+  return invitationAuthenticationToken;
 };
 
 export const stringToCryptoKey = async (

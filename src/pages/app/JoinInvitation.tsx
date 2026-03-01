@@ -194,14 +194,14 @@ export const JoinInvitation = () => {
         return;
       }
 
-      const invitationVerificationToken =
+      const invitationAuthenticationToken =
         await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
 
       setIsStatusError(false);
       joinInitiateMutation.mutate({
         groupId,
         invitationData: {
-          invitationVerificationToken,
+          invitationAuthenticationToken,
         },
       });
     };
@@ -278,8 +278,8 @@ export const JoinInvitation = () => {
       groupId,
       invitationData: {
         memberId: selfMemberIdInt,
-        invitationVerificationToken:
-          groupForJoining.invitationVerificationToken,
+        invitationAuthenticationToken:
+          groupForJoining.invitationAuthenticationToken,
         groupEncryptionKey: encryptedGroupEncryptionKey,
       },
     });

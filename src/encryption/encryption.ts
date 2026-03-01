@@ -296,7 +296,7 @@ export interface GroupForJoiningWithKey {
   name: Encrypted<string, false>;
   members: GroupMember<false>[];
   groupEncryptionKey: CryptoKey;
-  invitationVerificationToken: string;
+  invitationAuthenticationToken: string;
 }
 
 /**
@@ -306,7 +306,7 @@ export const decryptGroupForJoining = async (
   encryptedGroup: GroupForJoiningInitiate<true>,
   invitationLinkSecret: string,
 ): Promise<GroupForJoiningWithKey> => {
-  const invitationVerificationToken =
+  const invitationAuthenticationToken =
     await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
 
   const invitationLinkSecretKey = await stringToCryptoKey(invitationLinkSecret);
@@ -338,7 +338,7 @@ export const decryptGroupForJoining = async (
       )
     ).sort((a, b) => a.memberId - b.memberId),
     groupEncryptionKey,
-    invitationVerificationToken,
+    invitationAuthenticationToken,
   };
 
   return decryptedGroup;

@@ -191,7 +191,7 @@ export const ShareGroupDialog = () => {
     const invitationLinkSecret = btoa(
       String.fromCharCode(...invitationLinkSecretRaw),
     );
-    const invitationVerificationToken =
+    const invitationAuthenticationToken =
       await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
 
     const encryptedInvitationLinkSecret = await encryptEncryptionKey(
@@ -228,7 +228,7 @@ export const ShareGroupDialog = () => {
     createMutation.mutate({
       groupId: group!.id.toString(),
       invitationData: {
-        invitationVerificationToken,
+        invitationAuthenticationToken,
         invitationGroupEncryptionKey,
         invitationLinkSecret: encryptedInvitationLinkSecret,
       },

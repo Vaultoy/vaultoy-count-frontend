@@ -3,7 +3,7 @@ import { fetchApi, type ApiResponse } from "./fetch";
 import type { GroupMember } from "./group";
 
 export interface GroupJoinInitiateBody {
-  invitationVerificationToken: string;
+  invitationAuthenticationToken: string;
 }
 
 export interface GroupForJoiningInitiate<isEncrypted extends boolean = true> {
@@ -24,7 +24,7 @@ export const joinInvitationInitiateMutation = async ({
 };
 
 export interface GroupJoinConcludeBody {
-  invitationVerificationToken: string;
+  invitationAuthenticationToken: string;
   groupEncryptionKey: Encrypted<CryptoKey, true>;
   memberId: number;
 }
@@ -45,7 +45,7 @@ export const createInvitationMutation = async ({
 }: {
   groupId: string;
   invitationData: {
-    invitationVerificationToken: string;
+    invitationAuthenticationToken: string;
     invitationGroupEncryptionKey: string;
     invitationLinkSecret: string;
   };
