@@ -108,7 +108,7 @@ const VisibilityTrigger = React.forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 
-interface PasswordStrengthMeterProps extends StackProps {
+export interface PasswordStrengthMeterProps extends StackProps {
   value: number;
 }
 

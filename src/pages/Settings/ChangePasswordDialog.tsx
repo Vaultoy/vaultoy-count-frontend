@@ -3,10 +3,7 @@ import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
-import {
-  PasswordInput,
-  PasswordStrengthMeter,
-} from "@/components/ui/password-input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
 import { checkResponseError } from "@/utils/checkResponseError";
@@ -27,6 +24,7 @@ import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { checkResponseJson } from "@/utils/checkResponseJson";
+import { PasswordHints } from "@/components/PasswordHints";
 
 const formValuesSchema = z
   .object({
@@ -204,15 +202,7 @@ export const ChangePasswordDialog = () => {
                   </Field.ErrorText>
                 </Field.Root>
 
-                <PasswordStrengthMeter marginTop="1em" value={passwordLength} />
-                <Text marginTop="1em" color="gray">
-                  This password will be used as a key to encrypt your data.
-                  <br />
-                  Therefore, we recommend that you use a long and complex
-                  password that you don't use anywhere else.
-                  <br />A perfect password would be choosen randomly, 21
-                  characters long from a-z, A-Z, 0-9 and !@#$%^&*.
-                </Text>
+                <PasswordHints value={passwordLength} />
               </Dialog.Body>
               <Dialog.Footer>
                 <Text fontSize="lg" marginLeft="1em">
