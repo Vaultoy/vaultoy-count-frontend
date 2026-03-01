@@ -1,4 +1,4 @@
-import { Badge, Card, Heading } from "@chakra-ui/react";
+import { Badge, Card, Heading, Icon } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 import type { IconType } from "react-icons";
 
@@ -15,21 +15,19 @@ export const FeatureCard = ({
   titleColorPalette,
   description,
 }: FeatureCardProps) => {
-  const Icon = icon;
-
   return (
     <Card.Root>
       <Card.Body textAlign="center" alignItems="center">
-        <Icon size="1.6em" />
+        <Icon as={icon} boxSize="1.6em" color={`${titleColorPalette}.700`} />
         <Badge
           colorPalette={titleColorPalette}
-          fontSize="0.85em"
           marginTop="0.8em"
           marginBottom="0.6em"
         >
-          <Heading size="sm">{title}</Heading>
+          <Heading size="sm" fontWeight="medium">
+            {title}
+          </Heading>
         </Badge>
-
         {description}
       </Card.Body>
     </Card.Root>

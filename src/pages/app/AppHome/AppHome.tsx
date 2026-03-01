@@ -17,6 +17,7 @@ import { decryptEncryptionKey, decryptString } from "@/encryption/encryption";
 import { UserContext } from "@/contexts/UserContext";
 import { CreateGroupDialog } from "./CreateGroupDialog";
 import { useQueryApi } from "@/api/useQueryApi";
+import { FcConferenceCall, FcFolder } from "react-icons/fc";
 
 export const AppHomePage = () => {
   const user = useContext(UserContext);
@@ -69,8 +70,14 @@ export const AppHomePage = () => {
   return (
     <Center>
       <VStack marginTop="3em" width={{ base: "94%", md: "70%", lg: "60%" }}>
-        <Heading fontSize="3xl" marginBottom="1em">
-          📚 Your groups
+        <Heading
+          fontSize="3xl"
+          marginBottom="1em"
+          display="flex"
+          alignItems="center"
+          gap="0.5em"
+        >
+          <FcFolder size="1.5em" /> Your groups
         </Heading>
         {decryptedGroups?.length === 0 && (
           <Text>🙅 You are not in any groups yet.</Text>
@@ -84,7 +91,14 @@ export const AppHomePage = () => {
             <Card.Root>
               <Card.Body>
                 <Flex alignItems="center" justifyContent="space-between">
-                  <Heading marginRight="1em">📔 {group.name}</Heading>
+                  <Heading
+                    marginRight="1em"
+                    display="flex"
+                    alignItems="center"
+                    gap="0.5em"
+                  >
+                    <FcConferenceCall size="1.7em" /> {group.name}
+                  </Heading>
                   <FaAnglesRight size="1.6em" />
                 </Flex>
               </Card.Body>

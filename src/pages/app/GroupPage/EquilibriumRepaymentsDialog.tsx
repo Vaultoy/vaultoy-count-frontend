@@ -66,7 +66,8 @@ export const EquilibriumRepaymentsDialog = () => {
   const othersMustSendMeRepayments =
     othersRepayments &&
     othersRepayments.some(
-      (repayment) => repayment.toMemberId === user?.id && repayment.amount > 0,
+      (repayment) =>
+        repayment.toMemberId === selfMember?.memberId && repayment.amount > 0,
     );
   const othersHaveRepaymentsToMake =
     othersRepayments && othersRepayments.length > 0;

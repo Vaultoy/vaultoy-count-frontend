@@ -23,6 +23,7 @@ import {
   useDecryptAndSaveGroupToContext,
 } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
+import { FcConferenceCall } from "react-icons/fc";
 
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -67,7 +68,17 @@ export const GroupPage = () => {
             <ShareGroupDialog />
           </HStack>
           <Center marginTop="1em">
-            {group && <Heading>📔 {group.name}</Heading>}{" "}
+            {group && (
+              <Heading
+                marginRight="1em"
+                display="flex"
+                alignItems="center"
+                gap="0.5em"
+              >
+                <FcConferenceCall size="1.7em" />
+                {group.name}
+              </Heading>
+            )}{" "}
             {!isError && !group && <Skeleton height="2em" width="50%" />}
             {isError && (
               <Text marginBottom="1em">
@@ -111,7 +122,7 @@ export const GroupPage = () => {
             >
               <Tabs.List width="100%" justifyContent="center">
                 <Tabs.Trigger value="transactions">Transactions</Tabs.Trigger>
-                <Tabs.Trigger value="equilibrium">Equilibrium</Tabs.Trigger>
+                <Tabs.Trigger value="equilibrium">Balances</Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="transactions">
                 <TransactionList />
