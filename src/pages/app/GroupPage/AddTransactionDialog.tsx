@@ -108,6 +108,16 @@ const formValuesSchema = z
     },
   );
 
+const defaultValues = {
+  name: "",
+  fromMemberId: undefined,
+  toMembers: [],
+  amount: "",
+  transaction_type: EXPENSE as z.infer<
+    typeof formValuesSchema
+  >["transaction_type"],
+};
+
 export const AddTransactionDialog = ({
   groupData,
 }: {
@@ -131,17 +141,11 @@ export const AddTransactionDialog = ({
     z.output<typeof formValuesSchema>
   >({
     resolver: zodResolver(formValuesSchema),
-    defaultValues: {
-      name: "",
-      fromMemberId: undefined,
-      toMembers: [],
-      amount: "",
-      transaction_type: EXPENSE,
-    },
+    defaultValues: defaultValues,
   });
 
   const transaction_type = watch("transaction_type");
-  const totalShares = watch("toMembers").reduce(
+  const totalShares = (watch("toMembers") ?? []).reduce(
     (acc, curr) => acc + curr.share,
     0,
   );
@@ -166,7 +170,8 @@ export const AddTransactionDialog = ({
       });
 
       setOpen(false);
-      reset();
+      // Also reset errors
+      reset(defaultValues, { keepErrors: false });
       queryClient.invalidateQueries({ queryKey: ["getGroup", groupId] });
     },
     onError: (error) => {
