@@ -25,8 +25,8 @@ export const computeEquilibriumRepayments = (
 
   // Compute repayments until all balances are zero
   let iterationCount = 0;
-  // balance > 1 because we accept 1 cent of imbalance when there are rounding issues
-  while (balances.some((balance) => balance > 1)) {
+  // We stop even if there is still one non-zero balance, as it can be the case with rounding issues.
+  while (balances.filter((balance) => balance !== 0).length > 1) {
     const maxIndex = balances.reduce(
       (maxIdx, value, idx, arr) => (value > arr[maxIdx] ? idx : maxIdx),
       0,

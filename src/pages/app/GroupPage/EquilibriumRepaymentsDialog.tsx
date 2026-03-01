@@ -109,7 +109,7 @@ export const EquilibriumRepaymentsDialog = () => {
               <VStack alignItems="flex-start" marginBottom="1em">
                 {selfRepayments?.map((repayment) => (
                   <EquilibriumRepayment
-                    key={repayment.toMemberId}
+                    key={`${selfMember?.memberId}-${repayment.toMemberId}`}
                     fromNickname={selfMember?.nickname ?? "Unknown User"}
                     toNickname={
                       groupMembersIndex
@@ -130,7 +130,7 @@ export const EquilibriumRepaymentsDialog = () => {
               <VStack alignItems="flex-start" marginBottom="1em">
                 {othersRepayments?.map((repayment) => (
                   <EquilibriumRepayment
-                    key={repayment.toMemberId}
+                    key={`${repayment.fromMemberId}-${repayment.toMemberId}`}
                     fromNickname={
                       groupMembersIndex
                         ? groupMembersIndex[repayment.fromMemberId]?.nickname ||
