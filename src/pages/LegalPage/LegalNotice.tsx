@@ -57,6 +57,12 @@ export const LegalNotice = () => (
           en: "Publication director: Thomas Sauvage",
         }}
       </ListItemL>
+      <ListItemL>
+        {{
+          fr: "L'addresse personelle de l'éditeur a été transmise à l'hébergeur du Site",
+          en: "The publisher's personal address has been transmitted to the Site's host",
+        }}
+      </ListItemL>
     </List.Root>
 
     <HeadingL as="h3" textAlign="left" size="lg">

@@ -1,5 +1,6 @@
 import { HeadingL } from "@/components/language/HeadingL";
 import { TextL } from "@/components/language/TextL";
+import { Text } from "@chakra-ui/react";
 
 export const TermsService = () => (
   <>
@@ -45,16 +46,26 @@ export const TermsService = () => (
     </TextL>
     <TextL textAlign="justify">
       {{
-        fr: "Nous nous réservons le droit de suspendre ou de résilier votre compte si vous ne respectez pas ces conditions ou si nous soupçonnons une utilisation frauduleuse.",
-        en: "We reserve the right to suspend or terminate your account if you violate these terms or if we suspect fraudulent use.",
+        fr: "Nous nous réservons le droit de suspendre ou de résilier votre compte en cas de non-respect manifeste de ces conditions, d'utilisation illégale confirmée, ou si les autorités compétentes nous y contraignent.",
+        en: "We reserve the right to suspend or terminate your account in case of manifest violation of these terms, confirmed illegal use, or if compelled by competent authorities.",
       }}
     </TextL>
-    <TextL textAlign="justify">
-      {{
-        fr: "En raison du chiffrement de bout en bout, si vous perdez votre mot de passe, nous ne pourrons pas le réinitialiser et vous perdrez l'accès à votre compte et à vos données. Vous êtes seul responsable de retenir votre mot de passe.",
-        en: "Due to end-to-end encryption, if you lose your password, we will not be able to reset it and you will lose access to your account and data. You are solely responsible for remembering your password.",
-      }}
-    </TextL>
+
+    <Text textAlign="justify">
+      <TextL fontWeight="bold" as="span">
+        {{
+          fr: "⚠️ Important : ",
+          en: "⚠️ Important: ",
+        }}
+      </TextL>
+      <TextL as="span">
+        {{
+          fr: "En raison du chiffrement de bout en bout, si vous perdez votre mot de passe, nous ne pourrons jamais le réinitialiser. Vous perdrez définitivement l'accès à votre compte et à toutes vos données. Vous êtes seul responsable de la conservation de votre mot de passe.",
+          en: "Due to end-to-end encryption, if you lose your password, we will never be able to reset it. You will permanently lose access to your account and all your data. You are solely responsible for keeping your password.",
+        }}
+      </TextL>
+    </Text>
+
     <TextL textAlign="justify">
       {{
         fr: "La sécurité de votre compte et du chiffrement de vos données dépend de la force de votre mot de passe. Nous vous recommandons d'utiliser un mot de passe fort et unique pour protéger votre compte. Nous ne sommes pas responsables si la sécurité de votre compte ou du chiffrement est compromise en raison d'un mot de passe faible ou divulgué.",
@@ -71,8 +82,8 @@ export const TermsService = () => (
 
     <TextL textAlign="justify">
       {{
-        fr: "Dans toute la mesure permise par la loi applicable, Vaultoy ne sera pas responsable des dommages indirects, accessoires, spéciaux, consécutifs ou punitifs, ou de toute perte de profits ou de revenus.",
-        en: "To the fullest extent permitted by applicable law, Vaultoy shall not be liable for any indirect, incidental, special, consequential or punitive damages, or any loss of profits or revenues.",
+        fr: "L'éditeur est tenu à une obligation de moyens pour assurer la disponibilité et la sécurité du service. Toutefois, dans la limite permise par la loi, l'éditeur ne saurait être tenu responsable des dommages indirects (telles que la perte de données, de profits ou d'opportunités) résultant de l'utilisation ou de l'impossibilité d'utiliser le service.",
+        en: "The publisher is under an obligation of means (best effort) to ensure the availability and security of the service. However, to the extent permitted by law, the publisher shall not be liable for any indirect damages (such as loss of data, profits, or opportunities) resulting from the use or inability to use the service.",
       }}
     </TextL>
 

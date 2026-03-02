@@ -51,7 +51,7 @@ export const LegalPage = () => (
 
           <TextL color="gray.500" fontStyle="italic" marginTop="2em">
             {{
-              fr: "Dernière mise à jour : 2 Mars 2026",
+              fr: "Dernière mise à jour : 2 mars 2026",
               en: "Last updated: March 2nd, 2026",
             }}
           </TextL>
