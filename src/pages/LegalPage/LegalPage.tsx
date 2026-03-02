@@ -51,8 +51,8 @@ export const LegalPage = () => (
 
           <TextL color="gray.500" fontStyle="italic" marginTop="2em">
             {{
-              fr: "Dernière mise à jour : 1er Mars 2026",
-              en: "Last updated: March 1st, 2026",
+              fr: "Dernière mise à jour : 2 Mars 2026",
+              en: "Last updated: March 2nd, 2026",
             }}
           </TextL>
 
@@ -85,8 +85,8 @@ export const LegalPage = () => (
 
           <TextL textAlign="justify">
             {{
-              fr: "Nous nous réservons le droit de modifier ces documents à tout moment. En cas de modification, nous mettrons à jour la date de 'Dernière mise à jour' en haut de cette page et vous informerons des changements importants via une notification sur le Site. Nous vous encourageons à consulter régulièrement cette page pour prendre connaissance de toute modification.",
-              en: "We reserve the right to modify these documents at any time. In case of changes, we will update the 'Last updated' date at the top of this page and inform you of significant changes through a notification on the Site. We encourage you to regularly review this page to stay informed of any changes.",
+              fr: "Nous nous réservons le droit de modifier ces documents à tout moment. En cas de modification, nous mettrons à jour la date de 'Dernière mise à jour' en haut de cette page et vous informerons des changements importants via un courriel ou une notification sur le Site. Nous vous encourageons à consulter régulièrement cette page pour prendre connaissance de toute modification.",
+              en: "We reserve the right to modify these documents at any time. In case of changes, we will update the 'Last updated' date at the top of this page and inform you of significant changes through an email or a notification on the Site. We encourage you to regularly review this page to stay informed of any changes.",
             }}
           </TextL>
 

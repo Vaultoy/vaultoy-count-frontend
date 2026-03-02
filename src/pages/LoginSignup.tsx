@@ -73,6 +73,9 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         ),
       password: z.string().min(PASSWORD_MINIMUM_LENGTH),
       confirmPassword: isLogin ? z.string().optional() : z.string(),
+      email: isLogin
+        ? z.string().optional()
+        : z.email("Please provide a valid email address"),
       acceptTerms: z
         .boolean()
         .default(false)
@@ -125,16 +128,6 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         return;
       }
 
-      if (!isLogin && data.status === 409) {
-        toaster.create({
-          title: "Could not create your account",
-          description: `Username already taken`,
-          type: "error",
-        });
-
-        return;
-      }
-
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
 
@@ -162,6 +155,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       user.setUser({
         id: typedResponse.userId as number,
         username: tmpUserWaiting.username,
+        email: typedResponse.email,
         userEncryptionKey,
       });
 
@@ -215,6 +209,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       if (isLogin) {
         mutation.mutate({
           username: normalizedUsername,
+          email: null,
           authenticationToken,
           isLogin,
           userEncryptionKey: null,
@@ -230,6 +225,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
 
         mutation.mutate({
           username: normalizedUsername,
+          email: data.email!,
           authenticationToken,
           isLogin,
           userEncryptionKey: encryptedUserEncryptionKey,
@@ -298,6 +294,13 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                 <Input {...register("username")} />
                 <Field.ErrorText>{errors.username?.message}</Field.ErrorText>
               </Field.Root>
+              {!isLogin && (
+                <Field.Root invalid={!!errors.email} marginTop="1em">
+                  <Field.Label>Email</Field.Label>
+                  <Input {...register("email")} />
+                  <Field.ErrorText>{errors.email?.message}</Field.ErrorText>
+                </Field.Root>
+              )}
               <Field.Root invalid={!!errors.password} marginTop="1em">
                 <Field.Label>Password</Field.Label>
                 <PasswordInput

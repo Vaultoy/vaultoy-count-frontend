@@ -76,8 +76,8 @@ export const PrivacyPolicy = () => (
       </ListItemL>
       <ListItemL>
         {{
-          fr: "Données non chiffrées : Les données nécessaires au fonctionnement du Site qui sont envoyées et stockées sur nos serveurs avec un chiffrement en transit mais sans chiffrement de bout en bout. Cette catégorie inclut votre nom d'utilisateur, les noms d'utilisateurs des membres d'un groupe, etc.",
-          en: "Unencrypted data: The data necessary for the operation of the Site which is sent and stored on our servers with transit encryption but without end-to-end encryption. This category includes your username, the usernames of members of a group, etc.",
+          fr: "Données non chiffrées : Les données nécessaires au fonctionnement du Site qui sont envoyées et stockées sur nos serveurs avec un chiffrement en transit mais sans chiffrement de bout en bout. Cette catégorie inclut votre adresse courriel, votre nom d'utilisateur, les noms d'utilisateurs des membres d'un groupe, etc.",
+          en: "Unencrypted data: The data necessary for the operation of the Site which is sent and stored on our servers with transit encryption but without end-to-end encryption. This category includes your email address, your username, the usernames of members of a group, etc.",
         }}
       </ListItemL>
     </List.Root>
@@ -105,8 +105,8 @@ export const PrivacyPolicy = () => (
       </ListItemL>
       <ListItemL>
         {{
-          fr: "Communiquer avec vous : Les données sont utilisées pour répondre à vos demandes de support, vous envoyer des notifications importantes concernant le Site, etc.",
-          en: "Communicate with you: The data is used to respond to your support requests, send you important notifications regarding the Site, etc.",
+          fr: "Communiquer avec vous : Votre adresse courriel est utilisée pour répondre à vos demandes de support, vous envoyer des notifications importantes concernant le Site, etc.",
+          en: "Communicate with you: Your email address is used to respond to your support requests, send you important notifications regarding the Site, etc.",
         }}
       </ListItemL>
     </List.Root>

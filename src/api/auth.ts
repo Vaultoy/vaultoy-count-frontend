@@ -16,6 +16,7 @@ type LoginSignupBody =
       isLogin: true;
     } & {
       username: string;
+      email: null;
       authenticationToken: string;
       userEncryptionKey: null;
     })
@@ -23,18 +24,21 @@ type LoginSignupBody =
       isLogin: false;
     } & {
       username: string;
+      email: string;
       authenticationToken: string;
       userEncryptionKey: string;
     });
 
 export interface LoginSignupResponse {
   userId: number;
+  email: string;
   userEncryptionKey: string;
 }
 
 export const postSignupLoginMutation = async ({
   isLogin,
   username,
+  email,
   authenticationToken,
   userEncryptionKey,
 }: LoginSignupBody) => {
@@ -46,6 +50,7 @@ export const postSignupLoginMutation = async ({
   } else {
     return fetchApi("POST", "/v1/signup", {
       username,
+      email,
       authenticationToken,
       userEncryptionKey,
     });

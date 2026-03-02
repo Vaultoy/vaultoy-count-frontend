@@ -18,7 +18,14 @@ interface TooManyRequestsResponse {
   reason: string;
 }
 
-type ServerErrorResponse = ValidationErrorResponse | TooManyRequestsResponse;
+interface ErrorWithoutDetailsResponse {
+  error: "USERNAME_ALREADY_EXISTS" | "EMAIL_ALREADY_EXISTS";
+}
+
+type ServerErrorResponse =
+  | ValidationErrorResponse
+  | TooManyRequestsResponse
+  | ErrorWithoutDetailsResponse;
 
 /**
  * Returns true if there was an error AND it was handled, false otherwise.
@@ -63,12 +70,33 @@ export const checkResponseError = async (
 
       return true;
     }
+
     case "TOO_MANY_REQUESTS": {
       console.warn(`Too many requests with the same ${typedDataJson.reason}`);
 
       toaster.create({
         title: "Too many requests",
         description: `Try again in ${typedDataJson.retryAfterTime} seconds`,
+        type: "error",
+      });
+
+      return true;
+    }
+
+    case "USERNAME_ALREADY_EXISTS": {
+      toaster.create({
+        title: "Username already taken",
+        description: "Please choose a different username and try again",
+        type: "error",
+      });
+
+      return true;
+    }
+
+    case "EMAIL_ALREADY_EXISTS": {
+      toaster.create({
+        title: "Email already taken",
+        description: "Please choose a different email and try again",
         type: "error",
       });
 

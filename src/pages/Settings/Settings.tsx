@@ -57,6 +57,14 @@ export const SettingsPage = () => {
             </HStack>
 
             <Text textAlign="right" fontWeight="bold">
+              Email
+            </Text>
+            <HStack>
+              <Text>{user?.email}</Text>
+              <InfoTip content="The email cannot be changed yet, please contact the support if you need to change it." />
+            </HStack>
+
+            <Text textAlign="right" fontWeight="bold">
               Password
             </Text>
             <ChangePasswordDialog />

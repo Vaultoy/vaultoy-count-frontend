@@ -39,8 +39,8 @@ export const TermsService = () => (
 
     <TextL textAlign="justify">
       {{
-        fr: "Pour utiliser certaines fonctionnalités, vous devez créer un compte utilisateur. Vous êtes responsable de la confidentialité de votre mot de passe et de toutes les activités effectuées sous votre compte.",
-        en: "To use certain features, you must create a user account. You are responsible for maintaining the confidentiality of your password and for all activities that occur under your account.",
+        fr: "Pour utiliser certaines fonctionnalités, vous devez créer un compte utilisateur en fournissant une adresse courriel valide. Vous êtes responsable de la confidentialité de votre mot de passe et de toutes les activités effectuées sous votre compte.",
+        en: "To use certain features, you must create a user account by providing a valid email address. You are responsible for maintaining the confidentiality of your password and for all activities that occur under your account.",
       }}
     </TextL>
     <TextL textAlign="justify">
