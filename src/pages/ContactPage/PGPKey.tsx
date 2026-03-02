@@ -67,12 +67,12 @@ export const PGPKey = () => {
             }}
             size="xs"
           >
+            <Text>Copy</Text>
             {copyData.pgpKey.clipboard.copied ? (
               <LuClipboardCheck />
             ) : (
               <LuClipboard />
             )}
-            <Text>Copy</Text>
           </Button>
         </HStack>
       </List.Item>

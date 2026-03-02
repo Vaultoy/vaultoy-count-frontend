@@ -29,9 +29,9 @@ const config = defineConfig({
   theme: {
     tokens: {
       fonts: {
-        body: { value: '"Noto Color Emoji", "Roboto", system-ui, sans-serif' },
+        body: { value: '"Roboto", "Noto Color Emoji", system-ui, sans-serif' },
         heading: {
-          value: '"Noto Color Emoji", "Roboto", system-ui, sans-serif',
+          value: '"Roboto", "Noto Color Emoji", system-ui, sans-serif',
         },
       },
       colors: {},
