@@ -15,3 +15,6 @@ export const argon2idParams = {
 export const VAULTOY_DERIVATION_SALT = "vaultoy_8QQWm8MZPgVa3WaLv6XS2k";
 export const HKDF_INFO_PASSWORD_KEY = "vaultoy_password_key";
 export const HKDF_INFO_AUTHENTICATION_TOKEN = "vaultoy_authentication_token";
+export const HKDF_INFO_INVITATION_KEY = "vaultoy_invitation_key";
+export const HKDF_INFO_INVITATION_AUTHENTICATION_TOKEN =
+  "vaultoy_invitation_authentication_token";

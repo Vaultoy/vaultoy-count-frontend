@@ -10,7 +10,6 @@ import {
 import { toaster } from "@/components/ui/toast-store";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { UserContext } from "@/contexts/UserContext";
-import { atob_uri } from "@/utils/base64Uri";
 import { checkResponseError } from "@/utils/checkResponseError";
 import { checkResponseJson } from "@/utils/checkResponseJson";
 import {
@@ -18,7 +17,7 @@ import {
   encryptEncryptionKey,
   type GroupForJoiningWithKey,
 } from "@/encryption/encryption";
-import { deriveVerificationTokenFromLinkSecret } from "@/encryption/groupInvitationDerivation";
+import { deriveInvitationAuthenticationToken } from "@/encryption/groupInvitationDerivation";
 import {
   Button,
   Card,
@@ -42,15 +41,10 @@ const formValuesSchema = z.object({
 });
 
 export const JoinInvitation = () => {
-  const { groupId, invitationLinkSecret: invitationLinkSecretTransformed } =
-    useParams<{
-      groupId: string;
-      invitationLinkSecret: string;
-    }>();
-
-  const invitationLinkSecret = invitationLinkSecretTransformed
-    ? atob_uri(invitationLinkSecretTransformed)
-    : undefined;
+  const { groupId, invitationLinkSecret } = useParams<{
+    groupId: string;
+    invitationLinkSecret: string;
+  }>();
 
   const navigate = useNavigate();
 
@@ -195,7 +189,7 @@ export const JoinInvitation = () => {
       }
 
       const invitationAuthenticationToken =
-        await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
+        await deriveInvitationAuthenticationToken(invitationLinkSecret);
 
       setIsStatusError(false);
       joinInitiateMutation.mutate({
@@ -213,7 +207,7 @@ export const JoinInvitation = () => {
 
     if (!user) {
       setPostLoginRedirectInfos({
-        uri: `/join/${groupId}/${invitationLinkSecretTransformed}`,
+        uri: `/join/${groupId}/${invitationLinkSecret}`,
         type: "JOIN_INVITATION",
       });
 

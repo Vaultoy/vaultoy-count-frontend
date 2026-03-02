@@ -8,8 +8,8 @@ import {
 import type { GroupForJoiningInitiate } from "@/api/invitation";
 import type { Encrypted } from "@/types";
 import {
-  deriveVerificationTokenFromLinkSecret,
-  stringToCryptoKey,
+  deriveInvitationAuthenticationToken,
+  deriveInvitationEncryptionKey,
 } from "./groupInvitationDerivation";
 
 const encrypt = async (
@@ -307,9 +307,10 @@ export const decryptGroupForJoining = async (
   invitationLinkSecret: string,
 ): Promise<GroupForJoiningWithKey> => {
   const invitationAuthenticationToken =
-    await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
+    await deriveInvitationAuthenticationToken(invitationLinkSecret);
 
-  const invitationLinkSecretKey = await stringToCryptoKey(invitationLinkSecret);
+  const invitationLinkSecretKey =
+    await deriveInvitationEncryptionKey(invitationLinkSecret);
 
   const groupEncryptionKey = await decryptEncryptionKey(
     encryptedGroup.invitationGroupEncryptionKey,

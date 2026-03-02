@@ -1,14 +1,44 @@
-export const deriveVerificationTokenFromLinkSecret = async (
+import { fromBase64Url, toBase64Url } from "@/utils/base64Url";
+import {
+  HKDF_INFO_INVITATION_AUTHENTICATION_TOKEN,
+  HKDF_INFO_INVITATION_KEY,
+} from "./derivationParams";
+
+export const encodeInvitationLinkSecret = (
+  invitationLinkSecretRaw: Uint8Array<ArrayBuffer>,
+): string => {
+  return toBase64Url(invitationLinkSecretRaw);
+};
+
+const decodeInvitationLinkSecret = (
+  invitationLinkSecret: string,
+): Uint8Array<ArrayBuffer> => {
+  return fromBase64Url(invitationLinkSecret);
+};
+
+export const deriveInvitationAuthenticationToken = async (
   invitationLinkSecret: string,
 ): Promise<string> => {
-  const invitationValidationSaltString =
-    "vaultoy_count_invitation_validation_salt";
+  const invitationLinkSecretRaw =
+    decodeInvitationLinkSecret(invitationLinkSecret);
 
-  const invitationAuthenticationTokenBuffer = await window.crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(
-      invitationLinkSecret + invitationValidationSaltString,
-    ),
+  const importedInputKeyMaterial = await crypto.subtle.importKey(
+    "raw",
+    invitationLinkSecretRaw,
+    "HKDF",
+    false,
+    ["deriveBits"],
+  );
+
+  const invitationAuthenticationTokenBuffer = await crypto.subtle.deriveBits(
+    {
+      name: "HKDF",
+      salt: new Uint8Array(),
+      info: new TextEncoder().encode(HKDF_INFO_INVITATION_AUTHENTICATION_TOKEN),
+      hash: "SHA-256",
+    },
+    importedInputKeyMaterial,
+    256,
   );
 
   const invitationAuthenticationToken = btoa(
@@ -18,27 +48,30 @@ export const deriveVerificationTokenFromLinkSecret = async (
   return invitationAuthenticationToken;
 };
 
-export const stringToCryptoKey = async (
-  keyString: string,
+export const deriveInvitationEncryptionKey = async (
+  invitationLinkSecret: string,
 ): Promise<CryptoKey> => {
-  const keyBuffer = new Uint8Array(
-    Array.from(atob(keyString)).map((c) => c.charCodeAt(0)),
+  const invitationLinkSecretRaw =
+    decodeInvitationLinkSecret(invitationLinkSecret);
+
+  const importedInputKeyMaterial = await crypto.subtle.importKey(
+    "raw",
+    invitationLinkSecretRaw,
+    "HKDF",
+    false,
+    ["deriveKey"],
   );
 
-  return crypto.subtle.importKey("raw", keyBuffer, "AES-GCM", false, [
-    "encrypt",
-    "decrypt",
-  ]);
-};
-
-export const cryptoKeyToString = async (key: CryptoKey): Promise<string> => {
-  // Check if the key is extractable
-  if (!key.extractable) {
-    throw new Error("Key is not extractable");
-  }
-
-  const keyBuffer = new Uint8Array(
-    await window.crypto.subtle.exportKey("raw", key),
+  return await crypto.subtle.deriveKey(
+    {
+      name: "HKDF",
+      salt: new Uint8Array(),
+      info: new TextEncoder().encode(HKDF_INFO_INVITATION_KEY),
+      hash: "SHA-256",
+    },
+    importedInputKeyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
   );
-  return btoa(String.fromCharCode(...keyBuffer));
 };

@@ -19,8 +19,9 @@ import {
 import { toaster } from "@/components/ui/toast-store";
 import { useContext, useEffect, useState } from "react";
 import {
-  decryptEncryptionKey,
+  decryptString,
   encryptEncryptionKey,
+  encryptString,
 } from "@/encryption/encryption";
 import {
   UNKNOWN_ERROR_TOAST,
@@ -28,12 +29,12 @@ import {
 } from "@/components/toastMessages";
 import { FaShareNodes } from "react-icons/fa6";
 import {
-  cryptoKeyToString,
-  deriveVerificationTokenFromLinkSecret,
+  deriveInvitationAuthenticationToken,
+  deriveInvitationEncryptionKey,
+  encodeInvitationLinkSecret,
 } from "@/encryption/groupInvitationDerivation";
 import { UserContext } from "@/contexts/UserContext";
 import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
-import { btoa_uri } from "@/utils/base64Uri";
 import { GroupContext } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
 import { checkResponseError } from "@/utils/checkResponseError";
@@ -44,11 +45,7 @@ const urlFromInvitationLinkSecret = (
   invitationLinkSecret: string,
 ) => {
   const url = new URL(
-    window.location.origin +
-      "/join/" +
-      groupId +
-      "/" +
-      btoa_uri(invitationLinkSecret),
+    window.location.origin + "/join/" + groupId + "/" + invitationLinkSecret,
   );
   return url.toString();
 };
@@ -59,7 +56,7 @@ export const ShareGroupDialog = () => {
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
   const { user } = useContext(UserContext);
-  const { group } = useContext(GroupContext);
+  const { group, selfMember } = useContext(GroupContext);
 
   const queryClient = useQueryClient();
 
@@ -83,15 +80,10 @@ export const ShareGroupDialog = () => {
         return;
       }
 
-      const invitationLinkSecretKey = await decryptEncryptionKey(
+      const invitationLinkSecret = await decryptString(
         existingInvitation?.invitationLinkSecret,
         group.groupEncryptionKey,
-        true, // This key is rapidly dropped so it's extractability is not an issue
-        "invitation link secret key",
-      );
-
-      const invitationLinkSecret = await cryptoKeyToString(
-        invitationLinkSecretKey,
+        "invitation link secret from existing invitation",
       );
 
       const url = urlFromInvitationLinkSecret(
@@ -188,23 +180,20 @@ export const ShareGroupDialog = () => {
 
   const createShareGroup = async () => {
     const invitationLinkSecretRaw = crypto.getRandomValues(new Uint8Array(32));
-    const invitationLinkSecret = btoa(
-      String.fromCharCode(...invitationLinkSecretRaw),
-    );
-    const invitationAuthenticationToken =
-      await deriveVerificationTokenFromLinkSecret(invitationLinkSecret);
-
-    const encryptedInvitationLinkSecret = await encryptEncryptionKey(
+    const invitationLinkSecret = encodeInvitationLinkSecret(
       invitationLinkSecretRaw,
+    );
+
+    const invitationAuthenticationToken =
+      await deriveInvitationAuthenticationToken(invitationLinkSecret);
+
+    const invitationEncryptionKey =
+      await deriveInvitationEncryptionKey(invitationLinkSecret);
+
+    const encryptedInvitationLinkSecret = await encryptString(
+      invitationLinkSecret,
       group!.groupEncryptionKey,
       "invitation link secret",
-    );
-
-    const invitationLinkSecretKey = await decryptEncryptionKey(
-      encryptedInvitationLinkSecret,
-      group!.groupEncryptionKey,
-      false,
-      "invitation link secret key",
     );
 
     // TODO: This requires the group encryption key to be exportable, which is currently the case, but is not ideal for security.
@@ -212,9 +201,9 @@ export const ShareGroupDialog = () => {
       await window.crypto.subtle.exportKey("raw", group!.groupEncryptionKey),
     );
 
-    const invitationGroupEncryptionKey = await encryptEncryptionKey(
+    const encryptedInvitationGroupEncryptionKey = await encryptEncryptionKey(
       groupEncryptionKeyBuffer,
-      invitationLinkSecretKey,
+      invitationEncryptionKey,
       "invitation group encryption key",
     );
 
@@ -229,17 +218,13 @@ export const ShareGroupDialog = () => {
       groupId: group!.id.toString(),
       invitationData: {
         invitationAuthenticationToken,
-        invitationGroupEncryptionKey,
+        invitationGroupEncryptionKey: encryptedInvitationGroupEncryptionKey,
         invitationLinkSecret: encryptedInvitationLinkSecret,
       },
     });
   };
 
-  const isGroupAdmin = user
-    ? group?.members.find(
-        (member) => member.userId === user.id && member.rights === "admin",
-      ) !== undefined
-    : false;
+  const isGroupAdmin = selfMember?.rights === "admin";
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
