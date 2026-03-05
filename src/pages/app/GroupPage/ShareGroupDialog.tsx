@@ -33,7 +33,6 @@ import {
   deriveInvitationEncryptionKey,
   encodeInvitationLinkSecret,
 } from "@/encryption/groupInvitationDerivation";
-import { UserContext } from "@/contexts/UserContext";
 import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
 import { GroupContext } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
@@ -55,21 +54,16 @@ export const ShareGroupDialog = () => {
   const [url, setUrl] = useState<string | null>(null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
-  const { user } = useContext(UserContext);
   const { group, selfMember } = useContext(GroupContext);
 
   const queryClient = useQueryClient();
-
-  const userMember = group?.members.find(
-    (member) => member.userId === user?.id,
-  );
 
   const { body: existingInvitation, isLoading: isLoadingExistingInvitation } =
     useQueryApi({
       queryKey: ["getInvitation", group?.id],
       queryFn: () =>
         // Only fetch invitation if user is an admin
-        group?.id && !isNaN(Number(group?.id)) && userMember?.rights === "admin"
+        group?.id && !isNaN(Number(group?.id)) && selfMember?.rights === "admin"
           ? getInvitationQuery(group?.id.toString())
           : Promise.resolve(null),
     });
@@ -77,6 +71,7 @@ export const ShareGroupDialog = () => {
   useEffect(() => {
     const existingInvitationDecrypt = async () => {
       if (!existingInvitation?.invitationLinkSecret || !group) {
+        setUrl(null);
         return;
       }
 
