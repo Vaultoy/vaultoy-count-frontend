@@ -3,7 +3,6 @@ import { CURRENCY_SYMBOL, floatCentsToString } from "@/utils/textGeneration";
 import { useContext } from "react";
 import { EquilibriumRepaymentsDialog } from "./EquilibriumRepaymentsDialog";
 import { GroupContext } from "@/contexts/GroupContext";
-import { FaUser, FaUserSlash } from "react-icons/fa";
 
 export const Equilibrium = () => {
   const { group } = useContext(GroupContext);
@@ -20,19 +19,7 @@ export const Equilibrium = () => {
               alignItems="center"
               margin="1em"
             >
-              <VStack
-                alignItems="flex-start"
-                gap="0"
-                justifyContent="center"
-                height="100%"
-              >
-                <Text>{member.nickname}</Text>
-
-                <HStack fontSize="0.9em" color="gray.400" gap="0.3em">
-                  {member.username ? <FaUser /> : <FaUserSlash />}{" "}
-                  <Text>{member.username ?? "Didn't join yet"}</Text>
-                </HStack>
-              </VStack>
+              <Text>{member.nickname}</Text>
 
               <Text
                 color={

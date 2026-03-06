@@ -24,6 +24,7 @@ import {
 } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
 import { FcConferenceCall } from "react-icons/fc";
+import { Members } from "./Members";
 
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -123,12 +124,16 @@ export const GroupPage = () => {
               <Tabs.List width="100%" justifyContent="center">
                 <Tabs.Trigger value="transactions">Transactions</Tabs.Trigger>
                 <Tabs.Trigger value="equilibrium">Balances</Tabs.Trigger>
+                <Tabs.Trigger value="members">Members</Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="transactions">
                 <TransactionList />
               </Tabs.Content>
               <Tabs.Content value="equilibrium">
                 <Equilibrium />
+              </Tabs.Content>
+              <Tabs.Content value="members">
+                <Members />
               </Tabs.Content>
             </Tabs.Root>
           </VStack>
