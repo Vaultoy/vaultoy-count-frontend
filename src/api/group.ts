@@ -115,3 +115,15 @@ export const deleteGroupMemberMutation = async ({
 }) => {
   return fetchApi("DELETE", `/v1/group/${groupId}/member/${memberId}`);
 };
+
+export const postAddMemberMutation = async ({
+  groupId,
+  nickname,
+}: {
+  groupId: number;
+  nickname: string;
+}) => {
+  return fetchApi("POST", `/v1/group/${groupId}/member`, {
+    nickname,
+  });
+};

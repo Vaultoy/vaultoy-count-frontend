@@ -1,9 +1,10 @@
 import { GroupContext } from "@/contexts/GroupContext";
-import { Card, HStack, VStack, Text, Button } from "@chakra-ui/react";
+import { Card, HStack, VStack, Text } from "@chakra-ui/react";
 import { useContext } from "react";
-import { FaPlus, FaUser, FaUserSlash } from "react-icons/fa";
+import { FaUser, FaUserSlash } from "react-icons/fa";
 import { LuCrown } from "react-icons/lu";
 import { EditMemberDialog } from "./EditMemberDialog";
+import { AddMemberDialog } from "./AddMemberDialog";
 
 export const Members = () => {
   const { group } = useContext(GroupContext);
@@ -44,10 +45,8 @@ export const Members = () => {
           </Card.Body>
         </Card.Root>
       ))}
-      <Button marginTop="1em">
-        <FaPlus />
-        Add a member
-      </Button>
+
+      <AddMemberDialog />
     </VStack>
   );
 };

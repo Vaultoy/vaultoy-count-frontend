@@ -281,8 +281,9 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                           group member with nickname "{member?.nickname}". This
                           means that no data will be lost, only "
                           <Icon as={FaUser} size="xs" /> {member?.username}"
-                          will loose access to the group. If you gave an
-                          invitation link to "
+                          will loose access to the group.
+                          <br />
+                          If you gave an invitation link to "
                           <Icon as={FaUser} size="xs" /> {member?.username}",
                           you might want to delete the link before kicking him
                           out, or he will be able to come back.
