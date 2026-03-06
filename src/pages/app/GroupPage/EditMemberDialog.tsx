@@ -1,4 +1,17 @@
+import {
+  deleteGroupMemberMutation,
+  patchEditGroupMemberNicknameMutation,
+  postKickGroupMemberMutation,
+} from "@/api/group";
+import {
+  unknownErrorToastWithStatus,
+  UNKNOWN_ERROR_TOAST,
+} from "@/components/toastMessages";
+import { toaster } from "@/components/ui/toast-store";
 import { GroupContext } from "@/contexts/GroupContext";
+import { encryptString } from "@/encryption/encryption";
+import { checkResponseError } from "@/utils/checkResponseError";
+import { checkResponseJson } from "@/utils/checkResponseJson";
 import {
   Button,
   Center,
@@ -13,11 +26,13 @@ import {
   Field,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useContext, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { FaUser } from "react-icons/fa";
 import { LuCheck, LuPencilLine, LuX } from "react-icons/lu";
 import { MdOutlineEdit } from "react-icons/md";
+import { useNavigate } from "react-router";
 import z from "zod";
 
 const formValuesSchema = z.object({
@@ -26,6 +41,8 @@ const formValuesSchema = z.object({
 
 export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { group, selfMember } = useContext(GroupContext);
   const member = group?.members.find((mbr) => mbr.memberId == memberId);
@@ -45,9 +62,113 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
     },
   });
 
+  const editNicknameMutation = useMutation({
+    mutationFn: patchEditGroupMemberNicknameMutation,
+    onSuccess: async (data) => {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
+        return;
+      }
+
+      if (data.status !== 200) {
+        toaster.create(unknownErrorToastWithStatus(data.status));
+        return;
+      }
+
+      toaster.create({
+        title: "Nickname edited successfully",
+        type: "success",
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["getGroup", group?.id.toString()],
+      });
+    },
+    onError: (error) => {
+      console.error("Editing nickname failed", error);
+      toaster.create(UNKNOWN_ERROR_TOAST);
+    },
+  });
+
+  const kickMemberMutation = useMutation({
+    mutationFn: postKickGroupMemberMutation,
+    onSuccess: async (data) => {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
+        return;
+      }
+
+      if (data.status !== 200) {
+        toaster.create(unknownErrorToastWithStatus(data.status));
+        return;
+      }
+
+      toaster.create({
+        title:
+          memberId === selfMember?.memberId
+            ? "You successfully left the group"
+            : "User kicked out successfully",
+        type: "success",
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["getGroup", group?.id.toString()],
+      });
+
+      if (memberId === selfMember?.memberId) {
+        setOpen(false);
+        navigate("/app");
+      }
+    },
+    onError: (error) => {
+      console.error("Kicking member failed", error);
+      toaster.create(UNKNOWN_ERROR_TOAST);
+    },
+  });
+
+  const deleteMemberMutation = useMutation({
+    mutationFn: deleteGroupMemberMutation,
+    onSuccess: async (data) => {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
+        return;
+      }
+
+      if (data.status !== 200) {
+        toaster.create(unknownErrorToastWithStatus(data.status));
+        return;
+      }
+
+      toaster.create({
+        title: "Member removed successfully",
+        type: "success",
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["getGroup", group?.id.toString()],
+      });
+
+      setOpen(false);
+    },
+    onError: (error) => {
+      console.error("Removing member failed", error);
+      toaster.create(UNKNOWN_ERROR_TOAST);
+    },
+  });
+
   const submitNickname = () => {
-    handleSubmit((data) => {
-      console.log("Submitting form with data:", data);
+    handleSubmit(async (data) => {
+      if (!group) return;
+
+      editNicknameMutation.mutate({
+        groupId: group!.id,
+        memberId,
+        newNickname: await encryptString(
+          data.nickname,
+          group!.groupEncryptionKey,
+          "new nickname",
+        ),
+      });
     })();
   };
 
@@ -106,13 +227,16 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                             </Button>
                           </Editable.EditTrigger>
                           <Editable.SubmitTrigger asChild>
-                            <Button size="xs">
+                            <Button
+                              size="xs"
+                              loading={editNicknameMutation.isPending}
+                            >
                               <LuCheck /> Save
                             </Button>
                           </Editable.SubmitTrigger>
                           <Editable.CancelTrigger asChild>
                             <Button variant="outline" size="xs">
-                              <LuX /> Cancel
+                              <LuX />
                             </Button>
                           </Editable.CancelTrigger>
                         </Editable.Control>
@@ -133,8 +257,8 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                     </Text>
 
                     <Text color="gray.600" textAlign="center">
-                      The associated username is the username of the account who
-                      decided to join the group using this member nickname.
+                      The "associated username" is the username of the account
+                      who decided to join the group using this member nickname.
                     </Text>
                   </Field.Root>
                 ) : (
@@ -149,91 +273,133 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                 {member?.userId && (
                   <Card.Root borderColor="red">
                     <Card.Body padding="1em">
-                      <Text textAlign="center">
-                        Kicking user "<Icon as={FaUser} size="xs" />{" "}
-                        {member?.username}" out of the group will remove him
-                        from this group, <strong>without deleting</strong> the
-                        group member with nickname "{member?.nickname}". This
-                        means that no data will be deleted, only "
-                        <Icon as={FaUser} size="xs" /> {member?.username}" will
-                        loose access to the group. If you gave an invitation
-                        link to "
-                        <Icon as={FaUser} size="xs" /> {member?.username}", you
-                        might want to delete the link before kicking him out, or
-                        he will be able to come back.
-                      </Text>
-                      {selfMember?.rights !== "admin" && (
-                        <Text
-                          color="red.700"
-                          marginTop="1em"
-                          textAlign="center"
-                        >
-                          Only group administrators can kick users out.
+                      {selfMember?.memberId !== memberId && (
+                        <Text textAlign="center">
+                          Kicking user "<Icon as={FaUser} size="xs" />{" "}
+                          {member?.username}" out of the group will remove him
+                          from this group, <strong>without deleting</strong> the
+                          group member with nickname "{member?.nickname}". This
+                          means that no data will be lost, only "
+                          <Icon as={FaUser} size="xs" /> {member?.username}"
+                          will loose access to the group. If you gave an
+                          invitation link to "
+                          <Icon as={FaUser} size="xs" /> {member?.username}",
+                          you might want to delete the link before kicking him
+                          out, or he will be able to come back.
                         </Text>
                       )}
+                      {selfMember?.memberId === memberId && (
+                        <Text textAlign="center">
+                          By leaving the group, you will loose access to it.
+                          However, it will <strong>not delete</strong> the group
+                          member with nickname "{member?.nickname}". This means
+                          that no data will be lost.
+                        </Text>
+                      )}
+                      {selfMember?.rights !== "admin" &&
+                        selfMember?.memberId !== memberId && (
+                          <Text
+                            color="red.700"
+                            marginTop="1em"
+                            textAlign="center"
+                          >
+                            Only group administrators can kick users out.
+                          </Text>
+                        )}
                       <Button
                         colorPalette="red"
                         variant="surface"
                         marginTop="1em"
-                        disabled={selfMember?.rights !== "admin"}
+                        disabled={
+                          selfMember?.rights !== "admin" &&
+                          selfMember?.memberId !== memberId
+                        }
                         gap="0"
+                        loading={kickMemberMutation.isPending}
+                        onClick={() => {
+                          if (!group) return;
+                          kickMemberMutation.mutate({
+                            groupId: group!.id,
+                            memberId,
+                          });
+                        }}
                       >
-                        Kick user "
-                        <Icon
-                          as={FaUser}
-                          height="0.85em"
-                          width="0.85em"
-                          marginRight="0.3em"
-                        />{" "}
-                        {member?.username}" out of the group
+                        {selfMember?.memberId !== memberId ? (
+                          <>
+                            Kick user "
+                            <Icon
+                              as={FaUser}
+                              height="0.85em"
+                              width="0.85em"
+                              marginRight="0.3em"
+                            />{" "}
+                            {member?.username}" out of the group
+                          </>
+                        ) : (
+                          "Leave this group"
+                        )}
                       </Button>
                     </Card.Body>
                   </Card.Root>
                 )}
 
-                <Card.Root borderColor="red" marginTop="1em">
-                  <Card.Body padding="1em">
-                    <Text textAlign="center">
-                      Deleteing group member "{member?.nickname}" will remove
-                      this nickname from the list of members.
-                    </Text>
-
-                    {memberAppearsInATransaction && (
-                      <Text textAlign="center" color="red.700" marginTop="1em">
-                        This member has taken part in a transaction, so he
-                        cannot be deleted.
+                {selfMember?.memberId !== memberId && (
+                  <Card.Root borderColor="red" marginTop="1em">
+                    <Card.Body padding="1em">
+                      <Text textAlign="center">
+                        Deleteing group member "{member?.nickname}" will remove
+                        this nickname from the list of members.
                       </Text>
-                    )}
 
-                    {!memberAppearsInATransaction &&
-                      member?.userId !== null && (
+                      {memberAppearsInATransaction && (
                         <Text
                           textAlign="center"
                           color="red.700"
                           marginTop="1em"
                         >
-                          User "
-                          <Icon as={FaUser} size="xs" /> {member?.username}" has
-                          already joined the group using this nickname. To
-                          delete the member "{member?.nickname}", you must first
-                          kick user "
-                          <Icon as={FaUser} size="xs" /> {member?.username}" out
-                          of this group with the button above.
+                          This member has taken part in a transaction, so he
+                          cannot be deleted.
                         </Text>
                       )}
 
-                    <Button
-                      colorPalette="red"
-                      variant="surface"
-                      marginTop="1em"
-                      disabled={
-                        memberAppearsInATransaction || member?.userId !== null
-                      }
-                    >
-                      Delete group member "{member?.nickname}"
-                    </Button>
-                  </Card.Body>
-                </Card.Root>
+                      {!memberAppearsInATransaction &&
+                        member?.userId !== null && (
+                          <Text
+                            textAlign="center"
+                            color="red.700"
+                            marginTop="1em"
+                          >
+                            User "
+                            <Icon as={FaUser} size="xs" /> {member?.username}"
+                            has already joined the group using this nickname. To
+                            delete the member "{member?.nickname}", you must
+                            first kick user "
+                            <Icon as={FaUser} size="xs" /> {member?.username}"
+                            out of this group with the button above.
+                          </Text>
+                        )}
+
+                      <Button
+                        colorPalette="red"
+                        variant="surface"
+                        marginTop="1em"
+                        disabled={
+                          memberAppearsInATransaction || member?.userId !== null
+                        }
+                        loading={deleteMemberMutation.isPending}
+                        onClick={() => {
+                          if (!group) return;
+                          deleteMemberMutation.mutate({
+                            groupId: group!.id,
+                            memberId,
+                          });
+                        }}
+                      >
+                        Delete group member "{member?.nickname}"
+                      </Button>
+                    </Card.Body>
+                  </Card.Root>
+                )}
               </VStack>
             </Dialog.Body>
 

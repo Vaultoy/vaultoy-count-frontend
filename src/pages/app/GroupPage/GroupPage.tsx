@@ -11,7 +11,6 @@ import {
   HStack,
   Tabs,
   Skeleton,
-  Flex,
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
 import { useContext } from "react";
@@ -91,31 +90,6 @@ export const GroupPage = () => {
         </Card.Header>
         <Card.Body>
           <VStack>
-            <Flex
-              gap="0.5em"
-              marginBottom="3em"
-              flexWrap="wrap"
-              alignItems="center"
-            >
-              <Text flexShrink={0} maxWidth="100%">
-                {!isError && "👥 Members: "}
-                {group?.members.map((member) => member.nickname).join(", ")}
-              </Text>
-
-              {!isError &&
-                !group &&
-                Array(2)
-                  .fill(0)
-                  .map((_, i) => (
-                    <Skeleton
-                      key={i}
-                      height="1em"
-                      width="5em"
-                      marginLeft="0.5em"
-                    />
-                  ))}
-            </Flex>
-
             <Tabs.Root
               defaultValue="transactions"
               width="100%"

@@ -81,3 +81,37 @@ export const postAddTransactionMutation = async ({
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/transaction`, transactionData);
 };
+
+export const patchEditGroupMemberNicknameMutation = async ({
+  groupId,
+  memberId,
+  newNickname,
+}: {
+  groupId: number;
+  memberId: number;
+  newNickname: string;
+}) => {
+  return fetchApi("PATCH", `/v1/group/${groupId}/member/${memberId}/nickname`, {
+    newNickname,
+  });
+};
+
+export const postKickGroupMemberMutation = async ({
+  groupId,
+  memberId,
+}: {
+  groupId: number;
+  memberId: number;
+}) => {
+  return fetchApi("POST", `/v1/group/${groupId}/member/${memberId}/kick`);
+};
+
+export const deleteGroupMemberMutation = async ({
+  groupId,
+  memberId,
+}: {
+  groupId: number;
+  memberId: number;
+}) => {
+  return fetchApi("DELETE", `/v1/group/${groupId}/member/${memberId}`);
+};

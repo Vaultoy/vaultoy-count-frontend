@@ -1,5 +1,5 @@
 export const fetchApi = (
-  method: "GET" | "POST" | "PUT" | "DELETE",
+  method: "GET" | "POST" | "PATCH" | "DELETE",
   url: string,
   body?: unknown,
   options?: RequestInit,
