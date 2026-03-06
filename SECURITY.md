@@ -1,7 +1,5 @@
-# Security Policy
-
-## Reporting a vulnerability
+# Security Policy: Reporting a vulnerability
 
 Please do not report security vulnerabilities through public GitHub issues.
 
-If you believe you have found a security vulnerability, please report it via email to security@vaultoy.com.
+If you believe you have found a security vulnerability, please report it via https://vaultoy.com/contact.

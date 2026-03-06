@@ -37,6 +37,7 @@ export const AddMemberDialog = () => {
   const {
     handleSubmit,
     register,
+    reset,
     formState: { errors },
   } = useForm<
     z.input<typeof formValuesSchema>,
@@ -68,6 +69,8 @@ export const AddMemberDialog = () => {
         queryKey: ["getGroup", group?.id.toString()],
       });
 
+      reset();
+
       setOpen(false);
     },
     onError: (error) => {
@@ -91,7 +94,7 @@ export const AddMemberDialog = () => {
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Dialog.Trigger asChild marginTop="1em">
+      <Dialog.Trigger asChild marginTop="0.5em">
         <Center>
           <Button>
             <FaPlus />
