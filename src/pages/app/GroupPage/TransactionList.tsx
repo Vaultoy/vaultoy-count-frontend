@@ -75,8 +75,8 @@ export const TransactionList = () => {
         );
       })}
 
-      {!isError &&
-        !group &&
+      {!group &&
+        !isError &&
         Array(3)
           .fill(0)
           .map((_, i) => (

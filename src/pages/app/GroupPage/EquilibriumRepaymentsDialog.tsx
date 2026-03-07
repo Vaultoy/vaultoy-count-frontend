@@ -11,6 +11,7 @@ import {
   Flex,
   Card,
   Text,
+  Skeleton,
 } from "@chakra-ui/react";
 import { useContext, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
@@ -45,7 +46,8 @@ const getDialogButtonText = (
 
 export const EquilibriumRepaymentsDialog = () => {
   const { user } = useContext(UserContext);
-  const { group, groupMembersIndex, selfMember } = useContext(GroupContext);
+  const { group, groupMembersIndex, selfMember, isError } =
+    useContext(GroupContext);
   const selfRepayments = selfMember?.repaymentsToMake;
 
   const [open, setOpen] = useState(false);
@@ -84,7 +86,8 @@ export const EquilibriumRepaymentsDialog = () => {
         <Card.Root width="100%" marginBottom="1em" cursor="pointer">
           <Card.Body>
             <Flex alignItems="center" justifyContent="space-between">
-              <Heading size="lg">{dialogButtonText}</Heading>
+              {group && <Heading size="lg">{dialogButtonText} </Heading>}
+              {!group && !isError && <Skeleton height="1.8em" width="10em" />}
               {(userHasRepaymentsToMake || othersHaveRepaymentsToMake) && (
                 <FaAnglesRight size="1.6em" />
               )}

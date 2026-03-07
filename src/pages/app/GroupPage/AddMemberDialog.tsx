@@ -96,7 +96,7 @@ export const AddMemberDialog = () => {
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild marginTop="0.5em">
         <Center>
-          <Button>
+          <Button disabled={!group}>
             <FaPlus />
             Add a member
           </Button>

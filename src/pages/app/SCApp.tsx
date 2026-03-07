@@ -7,7 +7,7 @@ export const SCApp = () => {
   return (
     <Routes>
       <Route path="/" element={<AppHomePage />} />
-      <Route path="/group/:groupId" element={<GroupPage />} />
+      <Route path="/group/:groupId/*" element={<GroupPage />} />
       <Route
         path="*"
         element={

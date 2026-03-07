@@ -215,7 +215,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Dialog.Trigger asChild marginTop="1em">
+      <Dialog.Trigger asChild>
         <Center>
           <Button variant="outline" size="sm">
             <MdOutlineEdit />

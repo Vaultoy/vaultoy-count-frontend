@@ -1,11 +1,11 @@
-import { Text, Card, VStack, HStack } from "@chakra-ui/react";
+import { Text, Card, VStack, HStack, Skeleton } from "@chakra-ui/react";
 import { CURRENCY_SYMBOL, floatCentsToString } from "@/utils/textGeneration";
 import { useContext } from "react";
 import { EquilibriumRepaymentsDialog } from "./EquilibriumRepaymentsDialog";
 import { GroupContext } from "@/contexts/GroupContext";
 
 export const Equilibrium = () => {
-  const { group } = useContext(GroupContext);
+  const { group, isError } = useContext(GroupContext);
 
   return (
     <VStack>
@@ -37,6 +37,26 @@ export const Equilibrium = () => {
           </Card.Body>
         </Card.Root>
       ))}
+
+      {!group &&
+        !isError &&
+        Array(3)
+          .fill(0)
+          .map((_, i) => (
+            <Card.Root key={i} width="100%">
+              <Card.Body padding="0">
+                <HStack
+                  justifyContent="space-between"
+                  alignItems="center"
+                  margin="1em"
+                >
+                  <Skeleton height="1.1em" width="10em" />
+
+                  <Skeleton height="1.1em" width="3em" />
+                </HStack>
+              </Card.Body>
+            </Card.Root>
+          ))}
     </VStack>
   );
 };

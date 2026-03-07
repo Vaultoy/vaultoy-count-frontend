@@ -1,9 +1,14 @@
 import { getGroupQuery } from "@/api/group";
-import { useNavigate, useParams } from "react-router";
+import {
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router";
 import { ErrorPage } from "../../ErrorPage";
 import {
   Card,
-  VStack,
   Text,
   Heading,
   Button,
@@ -13,7 +18,7 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { ShareGroupDialog } from "./ShareGroupDialog";
 import { TransactionList } from "./TransactionList";
 import { Equilibrium } from "./Equilibrium";
@@ -25,9 +30,12 @@ import { useQueryApi } from "@/api/useQueryApi";
 import { FcConferenceCall } from "react-icons/fc";
 import { Members } from "./Members";
 
+const validTabs = ["transactions", "balances", "members"] as const;
+
 export const GroupPage = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
+  const { pathname: currentPath } = useLocation();
 
   const { body, isError: isQueryError } = useQueryApi({
     queryKey: ["getGroup", groupId],
@@ -39,6 +47,17 @@ export const GroupPage = () => {
 
   useDecryptAndSaveGroupToContext(body?.group, isQueryError);
   const { group, isError } = useContext(GroupContext);
+
+  const currentTab =
+    currentPath.split("/")[currentPath.split("/").length - 1] !== ""
+      ? currentPath.split("/")[currentPath.split("/").length - 1]
+      : currentPath.split("/")[currentPath.split("/").length - 2];
+
+  useEffect(() => {
+    if (!validTabs.includes(currentTab as (typeof validTabs)[number])) {
+      navigate(`/app/group/${groupId}/transactions`);
+    }
+  }, [currentTab, groupId, navigate]);
 
   if (!groupId || isNaN(Number(groupId))) {
     return (
@@ -89,28 +108,28 @@ export const GroupPage = () => {
           </Center>
         </Card.Header>
         <Card.Body>
-          <VStack>
-            <Tabs.Root
-              defaultValue="transactions"
-              width="100%"
-              variant="enclosed"
-            >
-              <Tabs.List width="100%" justifyContent="center">
-                <Tabs.Trigger value="transactions">Transactions</Tabs.Trigger>
-                <Tabs.Trigger value="equilibrium">Balances</Tabs.Trigger>
-                <Tabs.Trigger value="members">Members</Tabs.Trigger>
-              </Tabs.List>
-              <Tabs.Content value="transactions">
-                <TransactionList />
-              </Tabs.Content>
-              <Tabs.Content value="equilibrium">
-                <Equilibrium />
-              </Tabs.Content>
-              <Tabs.Content value="members">
-                <Members />
-              </Tabs.Content>
-            </Tabs.Root>
-          </VStack>
+          <Tabs.Root
+            value={currentTab}
+            width="100%"
+            variant="enclosed"
+            marginBottom="2em"
+            onValueChange={(event) => {
+              navigate(`/app/group/${groupId}/${event.value}`);
+            }}
+          >
+            <Tabs.List width="100%" justifyContent="center">
+              <Tabs.Trigger value="transactions">Transactions</Tabs.Trigger>
+              <Tabs.Trigger value="balances">Balances</Tabs.Trigger>
+              <Tabs.Trigger value="members">Members</Tabs.Trigger>
+            </Tabs.List>
+          </Tabs.Root>
+
+          <Routes>
+            <Route path="/" element={<TransactionList />} />
+            <Route path="/transactions" element={<TransactionList />} />
+            <Route path="/balances" element={<Equilibrium />} />
+            <Route path="/members" element={<Members />} />
+          </Routes>
         </Card.Body>
         <Card.Footer />
       </Card.Root>
