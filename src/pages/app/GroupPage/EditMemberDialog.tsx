@@ -1,8 +1,10 @@
 import {
   deleteGroupMemberMutation,
   patchEditGroupMemberNicknameMutation,
+  patchMemberRightsMutation,
   postKickGroupMemberMutation,
 } from "@/api/group";
+import { InfoPopover } from "@/components/InfoPopover";
 import {
   unknownErrorToastWithStatus,
   UNKNOWN_ERROR_TOAST,
@@ -24,13 +26,14 @@ import {
   VStack,
   Editable,
   Field,
+  HStack,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useContext, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { FaUser } from "react-icons/fa";
-import { LuCheck, LuPencilLine, LuX } from "react-icons/lu";
+import { LuCheck, LuCrown, LuPencilLine, LuX } from "react-icons/lu";
 import { MdOutlineEdit } from "react-icons/md";
 import { useNavigate } from "react-router";
 import z from "zod";
@@ -86,6 +89,34 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
     },
     onError: (error) => {
       console.error("Editing nickname failed", error);
+      toaster.create(UNKNOWN_ERROR_TOAST);
+    },
+  });
+
+  const editRightsMutation = useMutation({
+    mutationFn: patchMemberRightsMutation,
+    onSuccess: async (data) => {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
+        return;
+      }
+
+      if (data.status !== 200) {
+        toaster.create(unknownErrorToastWithStatus(data.status));
+        return;
+      }
+
+      toaster.create({
+        title: "Member rights edited successfully",
+        type: "success",
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["getGroup", group?.id.toString()],
+      });
+    },
+    onError: (error) => {
+      console.error("Editing member rights failed", error);
       toaster.create(UNKNOWN_ERROR_TOAST);
     },
   });
@@ -200,9 +231,9 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
               <Dialog.Title>Edit member</Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
-              <VStack>
+              <VStack gap="1.5em">
                 <Field.Root invalid={!!errors.nickname} width="100%">
-                  <Field.Label>Member Nickname</Field.Label>
+                  <Field.Label>Member nickname</Field.Label>
                   <Controller
                     name="nickname"
                     control={control}
@@ -249,25 +280,89 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
 
                 {member?.userId !== null ? (
                   <Field.Root width="100%" invalid={!!errors.nickname}>
-                    <Field.Label>Associated username</Field.Label>
+                    <Field.Label>
+                      Associated username{" "}
+                      <InfoPopover>
+                        <Text fontWeight="normal">
+                          When joining the group, user "
+                          <Icon
+                            as={FaUser}
+                            height="0.85em"
+                            width="0.85em"
+                          />{" "}
+                          {member?.username}" has chosen the nickname "
+                          {member?.nickname}".
+                        </Text>
+                      </InfoPopover>
+                    </Field.Label>
 
-                    <Text margin="0.5em 0 0.5em 1em">
+                    <Text marginLeft="1em">
                       <Icon as={FaUser} size="xs" />{" "}
                       {member?.username ?? "Unknown"}
                     </Text>
-
-                    <Text color="gray.600" textAlign="center">
-                      The "associated username" is the username of the account
-                      who decided to join the group using this member nickname.
-                    </Text>
                   </Field.Root>
                 ) : (
-                  <Text color="gray.600" marginTop="1em" textAlign="center">
+                  <Text color="gray.600" textAlign="center">
                     No one joined the group with this nickname yet.{" "}
                     {selfMember?.rights == "admin"
                       ? "Send them a link to join the group!"
                       : "Ask an administrator to send them a link to join the group!"}
                   </Text>
+                )}
+
+                {member?.userId !== null && (
+                  <Field.Root width="100%" invalid={!!errors.nickname}>
+                    <Field.Label>Rights</Field.Label>
+
+                    <HStack gap="2em">
+                      <Text marginLeft="1em">
+                        {member?.rights === "admin" ? (
+                          <Icon as={LuCrown} size="xs" />
+                        ) : (
+                          <Icon as={FaUser} size="xs" />
+                        )}{" "}
+                        {member?.rights === "admin" ? "Admin" : "Member"}
+                      </Text>
+                      {selfMember?.rights === "admin" && (
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          loading={editRightsMutation.isPending}
+                          onClick={() => {
+                            if (!group) return;
+                            editRightsMutation.mutate({
+                              groupId: group!.id,
+                              memberId,
+                              newRights:
+                                member?.rights === "admin" ? "member" : "admin",
+                            });
+                          }}
+                        >
+                          {member?.rights === "admin" ? (
+                            <>
+                              Demote to{" "}
+                              <Icon
+                                as={FaUser}
+                                height="0.85em"
+                                width="0.85em"
+                              />{" "}
+                              member
+                            </>
+                          ) : (
+                            <>
+                              Promote to{" "}
+                              <Icon
+                                as={LuCrown}
+                                height="0.85em"
+                                width="0.85em"
+                              />{" "}
+                              admin
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </HStack>
+                  </Field.Root>
                 )}
 
                 {member?.userId && (

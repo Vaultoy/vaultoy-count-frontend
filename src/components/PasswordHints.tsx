@@ -16,7 +16,6 @@ export const PasswordHints = (props: PasswordStrengthMeterProps) => (
             style={{
               display: "inline",
               verticalAlign: "middle",
-              marginBottom: "0.2em",
             }}
           />
         </Text>

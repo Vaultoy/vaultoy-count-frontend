@@ -12,8 +12,8 @@ import { FaGear } from "react-icons/fa6";
 import { useNavigate } from "react-router";
 import { UserContext } from "@/contexts/UserContext";
 import { useContext } from "react";
-import { InfoTip } from "@/components/ui/toggle-tip";
 import { ChangePasswordDialog } from "./ChangePasswordDialog";
+import { InfoPopover } from "@/components/InfoPopover";
 
 export const SettingsPage = () => {
   const { user } = useContext(UserContext);
@@ -53,7 +53,7 @@ export const SettingsPage = () => {
             </Text>
             <HStack>
               <Text>{user?.username}</Text>
-              <InfoTip content="The username cannot be changed" />
+              <InfoPopover>Your username cannot be changed.</InfoPopover>
             </HStack>
 
             <Text textAlign="right" fontWeight="bold">
@@ -61,7 +61,10 @@ export const SettingsPage = () => {
             </Text>
             <HStack>
               <Text>{user?.email}</Text>
-              <InfoTip content="The email cannot be changed yet, please contact the support if you need to change it." />
+              <InfoPopover>
+                To change your email, please contact us. The contact page is
+                available in the menu.
+              </InfoPopover>
             </HStack>
 
             <Text textAlign="right" fontWeight="bold">
