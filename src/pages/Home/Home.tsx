@@ -138,7 +138,7 @@ export const Home = () => {
             description={
               <Text>
                 You data is stored securely in France, under the European
-                Union's GDPR regulations.
+                Union&apos;s GDPR regulations.
               </Text>
             }
           />

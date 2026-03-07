@@ -46,7 +46,7 @@ export const WhitepaperPage = () => (
             <br />
             <br />
             The encryption and decryption of data is done using a key that is{" "}
-            <strong>derived from the user's password</strong> using a key
+            <strong>derived from the user&apos;s password</strong> using a key
             derivation function. The{" "}
             <strong>
               user password and the decryption keys are never sent to the server
@@ -99,26 +99,28 @@ export const WhitepaperPage = () => (
           <Text textAlign="justify" marginTop="0.5em">
             In this section, we discuss how the <Italic>password key</Italic>{" "}
             and the <Italic>authentication token</Italic> shown in Figure{" "}
-            {FIGURE_LOGIN} are derived from the user's username and password.
-            This process is critical as the <Italic>password key</Italic> is
-            used (indirectly) to encrypt and decrypt all sensitive data, while
-            the <Italic>authentication token</Italic> is used to authenticate
-            the user to the server.
+            {FIGURE_LOGIN} are derived from the user&apos;s username and
+            password. This process is critical as the{" "}
+            <Italic>password key</Italic> is used (indirectly) to encrypt and
+            decrypt all sensitive data, while the{" "}
+            <Italic>authentication token</Italic> is used to authenticate the
+            user to the server.
             <br />
             <br />
             First, a salt is derived by applying a hash function (
             <Italic>sha256</Italic>) to a combination of a static string common
-            to all users of this application and the user's username. While a
-            random salt is generally recommended, it doesn't apply well to
-            end-to-end encrypted applications as the salt needs to be stored on
-            the backend. As such, the backend could perform a downgrade attack
-            by providing a known salt to the client. By deriving the salt from
-            the username, we ensure that the client is safe from such attacks.
+            to all users of this application and the user&apos;s username. While
+            a random salt is generally recommended, it doesn&apos;t apply well
+            to end-to-end encrypted applications as the salt needs to be stored
+            on the backend. As such, the backend could perform a downgrade
+            attack by providing a known salt to the client. By deriving the salt
+            from the username, we ensure that the client is safe from such
+            attacks.
             <br />
             <br />
             Next, the <strong>argon2id</strong> key derivation function is
-            applied to the user's password, using the aforementioned salt to
-            obtain the <Italic>input key material</Italic>. This process is
+            applied to the user&apos;s password, using the aforementioned salt
+            to obtain the <Italic>input key material</Italic>. This process is
             computationally expensive on purpose to make brute-force attacks
             more difficult. The parameters used for argon2id are as follows:
           </Text>
@@ -163,7 +165,7 @@ export const WhitepaperPage = () => (
             This way, the server can{" "}
             <strong>
               authenticate the user without ever having access to the{" "}
-              <Italic>password key</Italic> or the user's password
+              <Italic>password key</Italic> or the user&apos;s password
             </strong>
             .
             <br />
@@ -171,10 +173,10 @@ export const WhitepaperPage = () => (
             The <Italic>authentication token</Italic> is sent to the server in
             the login request. It is hashed once again on the server side using
             argon2id with a random salt and the same parameters as above. While
-            the confidentiality of the user's data does not rely on the
+            the confidentiality of the user&apos;s data does not rely on the
             protection of the authentication token, hashing it one more time on
             the server side adds an additional layer of security to protect the
-            user's account and password.
+            user&apos;s account and password.
           </Text>
 
           <Heading as="h2" textAlign="left" marginTop="2em">
@@ -247,19 +249,19 @@ export const WhitepaperPage = () => (
             <br />
             Then, the client can use his <Italic>invitation key</Italic> to
             decrypt the <Italic>invitation group key</Italic> included in the
-            server's response. The client can then decrypt the group data using
-            the <Italic>group key</Italic>. The user is then asked to choose who
-            he is in the list of group members. After this, the client encrypts
-            the <Italic>invitation group key</Italic> with the user's{" "}
-            <Italic>user key</Italic>. The way the <Italic>user key</Italic> is
-            derived from the user's password is described in the previous
-            section.
+            server&apos;s response. The client can then decrypt the group data
+            using the <Italic>group key</Italic>. The user is then asked to
+            choose who he is in the list of group members. After this, the
+            client encrypts the <Italic>invitation group key</Italic> with the
+            user&apos;s <Italic>user key</Italic>. The way the{" "}
+            <Italic>user key</Italic> is derived from the user&apos;s password
+            is described in the previous section.
             <br />
             <br />
             Finally, the client sends the newly encrypted{" "}
-            <Italic>group key</Italic>, the user's choice of group member, and
-            the <Italic>invitation authentication token</Italic> to the server
-            to complete the group joining process.
+            <Italic>group key</Italic>, the user&apos;s choice of group member,
+            and the <Italic>invitation authentication token</Italic> to the
+            server to complete the group joining process.
           </Text>
 
           <Heading as="h3" textAlign="left" marginTop="2em" size="lg">

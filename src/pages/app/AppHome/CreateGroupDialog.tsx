@@ -6,7 +6,6 @@ import {
   Dialog,
   Field,
   Input,
-  Text,
   Portal,
   HStack,
   VStack,
@@ -162,10 +161,12 @@ export const CreateGroupDialog = () => {
                   </Field.ErrorText>
                 </Field.Root>
 
-                <Text marginTop="1em" marginBottom="0.5em">
-                  Other members' nicknames
-                </Text>
-                <Field.Root invalid={!!errors.memberNicknames} width="100%">
+                <Field.Root
+                  invalid={!!errors.memberNicknames}
+                  width="100%"
+                  marginTop="1em"
+                >
+                  <Field.Label>Other members&apos; nicknames</Field.Label>
                   <VStack
                     justifyContent="center"
                     alignItems="center"
@@ -174,7 +175,7 @@ export const CreateGroupDialog = () => {
                     {fields.map((fieldItem, index) => (
                       <Field.Root
                         key={fieldItem.id}
-                        marginBottom="0.5em"
+                        marginBottom="0.1em"
                         invalid={!!errors.memberNicknames?.[index]}
                       >
                         <HStack gap="0.5em" alignItems="stretch" width="100%">

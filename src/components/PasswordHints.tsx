@@ -25,8 +25,8 @@ export const PasswordHints = (props: PasswordStrengthMeterProps) => (
           <Popover.CloseTrigger />
           <Popover.Arrow />
           <Popover.Body>
-            We recommend that you use a long and complex password that you don't
-            use anywhere else.
+            We recommend that you use a long and complex password that you
+            don&apos;t use anywhere else.
             <br />
             <br />A great password would be choosen randomly, 21 characters long
             from a-z, A-Z, 0-9 and !@#$%^&*.

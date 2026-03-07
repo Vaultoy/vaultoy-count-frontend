@@ -285,14 +285,15 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                       Associated user{" "}
                       <InfoPopover>
                         <Text fontWeight="normal">
-                          When joining the group, user "
+                          When joining the group, user &quot;
                           <Icon
                             as={FaUser}
                             height="0.85em"
                             width="0.85em"
                           />{" "}
-                          {member?.username}" has chosen the nickname "
-                          {member?.nickname}".
+                          {member?.username}&quot; has chosen the nickname
+                          &quot;
+                          {member?.nickname}&quot;.
                         </Text>
                       </InfoPopover>
                     </Field.Label>
@@ -353,26 +354,28 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                     <Card.Body padding="1em">
                       {selfMember?.memberId !== memberId && (
                         <Text textAlign="center">
-                          Kicking user "<Icon as={FaUser} size="xs" />{" "}
-                          {member?.username}" out of the group will remove him
-                          from this group, <strong>without deleting</strong> the
-                          group member with nickname "{member?.nickname}". This
-                          means that no data will be lost, only "
-                          <Icon as={FaUser} size="xs" /> {member?.username}"
-                          will loose access to the group.
+                          Kicking user &quot;
+                          <Icon as={FaUser} size="xs" /> {member?.username}
+                          &quot; out of the group will remove him from this
+                          group, <strong>without deleting</strong> the group
+                          member with nickname &quot;
+                          {member?.nickname}&quot;. This means that no data will
+                          be lost, only &quot;
+                          <Icon as={FaUser} size="xs" /> {member?.username}
+                          &quot; will loose access to the group.
                           <br />
-                          If you gave an invitation link to "
-                          <Icon as={FaUser} size="xs" /> {member?.username}",
-                          you might want to delete the link before kicking him
-                          out, or he will be able to come back.
+                          If you gave an invitation link to &quot;
+                          <Icon as={FaUser} size="xs" /> {member?.username}
+                          &quot;, you might want to delete the link before
+                          kicking him out, or he will be able to come back.
                         </Text>
                       )}
                       {selfMember?.memberId === memberId && (
                         <Text textAlign="center">
                           By leaving the group, you will loose access to it.
                           However, it will <strong>not delete</strong> the group
-                          member with nickname "{member?.nickname}". This means
-                          that no data will be lost.
+                          member with nickname &quot;{member?.nickname}&quot;.
+                          This means that no data will be lost.
                         </Text>
                       )}
                       {selfMember?.rights !== "admin" &&
@@ -405,14 +408,14 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                       >
                         {selfMember?.memberId !== memberId ? (
                           <>
-                            Kick user "
+                            Kick user &quot;
                             <Icon
                               as={FaUser}
                               height="0.85em"
                               width="0.85em"
                               marginRight="0.3em"
                             />{" "}
-                            {member?.username}" out of the group
+                            {member?.username}&quot; out of the group
                           </>
                         ) : (
                           "Leave this group"
@@ -426,8 +429,8 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                   <Card.Root borderColor="red" marginTop="1em">
                     <Card.Body padding="1em">
                       <Text textAlign="center">
-                        Deleteing group member "{member?.nickname}" will remove
-                        this nickname from the list of members.
+                        Deleteing group member &quot;{member?.nickname}&quot;
+                        will remove this nickname from the list of members.
                       </Text>
 
                       {memberAppearsInATransaction && (
@@ -448,13 +451,14 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                             color="red.700"
                             marginTop="1em"
                           >
-                            User "
-                            <Icon as={FaUser} size="xs" /> {member?.username}"
-                            has already joined the group choosing the nickname "
-                            {member?.nickname}". To delete the group member "
-                            {member?.nickname}", you must first kick user "
-                            <Icon as={FaUser} size="xs" /> {member?.username}"
-                            out of this group with the button above.
+                            User &quot;
+                            <Icon as={FaUser} size="xs" /> {member?.username}
+                            &quot; has already joined the group choosing the
+                            nickname &quot;{member?.nickname}&quot;. To delete
+                            the group member &quot;{member?.nickname}&quot;, you
+                            must first kick user &quot;
+                            <Icon as={FaUser} size="xs" /> {member?.username}
+                            &quot; out of this group with the button above.
                           </Text>
                         )}
 
@@ -474,7 +478,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                           });
                         }}
                       >
-                        Delete group member "{member?.nickname}"
+                        Delete group member &quot;{member?.nickname}&quot;
                       </Button>
                     </Card.Body>
                   </Card.Root>

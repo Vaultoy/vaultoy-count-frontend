@@ -112,7 +112,7 @@ export const AddMemberDialog = () => {
             <form onSubmit={onSubmit}>
               <Dialog.Body>
                 <Field.Root invalid={!!errors.nickname} width="100%">
-                  <Field.Label>Member's nickname</Field.Label>
+                  <Field.Label>Member&apos;s nickname</Field.Label>
                   <Input {...register("nickname")} />
                   <Field.ErrorText>{errors.nickname?.message}</Field.ErrorText>
                 </Field.Root>
