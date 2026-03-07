@@ -246,9 +246,9 @@ export const AddTransactionDialog = ({
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Dialog.Trigger asChild marginTop="1em">
+      <Dialog.Trigger asChild>
         <Center>
-          <Button variant="outline" width="fit-content" disabled={!groupData}>
+          <Button variant="outline" disabled={!groupData} marginBottom="1.5em">
             <FaPlus /> Add a transaction
           </Button>
         </Center>

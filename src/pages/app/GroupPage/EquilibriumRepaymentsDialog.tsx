@@ -82,8 +82,8 @@ export const EquilibriumRepaymentsDialog = () => {
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Dialog.Trigger asChild marginTop="1em">
-        <Card.Root width="100%" marginBottom="1em" cursor="pointer">
+      <Dialog.Trigger asChild marginBottom="1.5em">
+        <Card.Root width="100%" cursor="pointer">
           <Card.Body>
             <Flex alignItems="center" justifyContent="space-between">
               {group && <Heading size="lg">{dialogButtonText} </Heading>}

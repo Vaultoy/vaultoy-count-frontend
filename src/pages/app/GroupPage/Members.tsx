@@ -12,6 +12,8 @@ export const Members = () => {
 
   return (
     <VStack>
+      <AddMemberDialog />
+
       {group?.members.map((member) => (
         <Card.Root key={member.memberId} width="100%">
           <Card.Body padding="0">
@@ -78,8 +80,6 @@ export const Members = () => {
               </Card.Body>
             </Card.Root>
           ))}
-
-      <AddMemberDialog />
     </VStack>
   );
 };
