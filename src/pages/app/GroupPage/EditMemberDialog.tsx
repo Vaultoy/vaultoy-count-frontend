@@ -326,14 +326,14 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                           }}
                         >
                           {member?.rights === "admin" ? (
-                            <>
+                            <Text>
                               Demote to <Icon as={TbCrownOff} size="sm" />{" "}
                               member
-                            </>
+                            </Text>
                           ) : (
-                            <>
+                            <Text>
                               Promote to <Icon as={LuCrown} size="xs" /> admin
-                            </>
+                            </Text>
                           )}
                         </Button>
                       )}
