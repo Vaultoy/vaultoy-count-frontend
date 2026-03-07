@@ -35,6 +35,7 @@ import { useForm, Controller } from "react-hook-form";
 import { FaUser } from "react-icons/fa";
 import { LuCheck, LuCrown, LuPencilLine, LuX } from "react-icons/lu";
 import { MdOutlineEdit } from "react-icons/md";
+import { TbCrownOff } from "react-icons/tb";
 import { useNavigate } from "react-router";
 import z from "zod";
 
@@ -281,7 +282,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                 {member?.userId !== null ? (
                   <Field.Root width="100%" invalid={!!errors.nickname}>
                     <Field.Label>
-                      Associated username{" "}
+                      Associated user{" "}
                       <InfoPopover>
                         <Text fontWeight="normal">
                           When joining the group, user "
@@ -296,37 +297,23 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                       </InfoPopover>
                     </Field.Label>
 
-                    <Text marginLeft="1em">
-                      <Icon as={FaUser} size="xs" />{" "}
-                      {member?.username ?? "Unknown"}
-                    </Text>
-                  </Field.Root>
-                ) : (
-                  <Text color="gray.600" textAlign="center">
-                    No one joined the group with this nickname yet.{" "}
-                    {selfMember?.rights == "admin"
-                      ? "Send them a link to join the group!"
-                      : "Ask an administrator to send them a link to join the group!"}
-                  </Text>
-                )}
-
-                {member?.userId !== null && (
-                  <Field.Root width="100%" invalid={!!errors.nickname}>
-                    <Field.Label>Rights</Field.Label>
-
-                    <HStack gap="2em">
-                      <Text marginLeft="1em">
-                        {member?.rights === "admin" ? (
-                          <Icon as={LuCrown} size="xs" />
-                        ) : (
-                          <Icon as={FaUser} size="xs" />
-                        )}{" "}
-                        {member?.rights === "admin" ? "Admin" : "Member"}
+                    <HStack marginLeft="1em" gap="0.3em">
+                      <Text>
+                        <Icon as={FaUser} size="xs" />{" "}
+                        {member?.username ?? "Unknown"}
                       </Text>
+                      {member?.rights === "admin" && (
+                        <>
+                          <Text> • </Text>
+                          <LuCrown />
+                          <Text>Admin</Text>
+                        </>
+                      )}
                       {selfMember?.rights === "admin" && (
                         <Button
                           variant="outline"
                           size="xs"
+                          marginLeft="2em"
                           loading={editRightsMutation.isPending}
                           onClick={() => {
                             if (!group) return;
@@ -340,29 +327,25 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                         >
                           {member?.rights === "admin" ? (
                             <>
-                              Demote to{" "}
-                              <Icon
-                                as={FaUser}
-                                height="0.85em"
-                                width="0.85em"
-                              />{" "}
+                              Demote to <Icon as={TbCrownOff} size="sm" />{" "}
                               member
                             </>
                           ) : (
                             <>
-                              Promote to{" "}
-                              <Icon
-                                as={LuCrown}
-                                height="0.85em"
-                                width="0.85em"
-                              />{" "}
-                              admin
+                              Promote to <Icon as={LuCrown} size="xs" /> admin
                             </>
                           )}
                         </Button>
                       )}
                     </HStack>
                   </Field.Root>
+                ) : (
+                  <Text color="gray.600" textAlign="center">
+                    No one joined the group with this nickname yet.{" "}
+                    {selfMember?.rights == "admin"
+                      ? "Send them a link to join the group!"
+                      : "Ask an administrator to send them a link to join the group!"}
+                  </Text>
                 )}
 
                 {member?.userId && (
@@ -467,9 +450,9 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                           >
                             User "
                             <Icon as={FaUser} size="xs" /> {member?.username}"
-                            has already joined the group using this nickname. To
-                            delete the member "{member?.nickname}", you must
-                            first kick user "
+                            has already joined the group choosing the nickname "
+                            {member?.nickname}". To delete the group member "
+                            {member?.nickname}", you must first kick user "
                             <Icon as={FaUser} size="xs" /> {member?.username}"
                             out of this group with the button above.
                           </Text>
