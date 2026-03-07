@@ -431,7 +431,8 @@ export const AddTransactionDialog = ({
                                                   totalShares) *
                                                   100 *
                                                   Number(amount),
-                                          )}{" "}
+                                          )}
+                                          &nbsp;
                                           {CURRENCY_SYMBOL}
                                         </Text>
                                       </VStack>

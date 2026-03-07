@@ -66,7 +66,7 @@ export const TransactionList = () => {
                   </Text>
                 </VStack>
                 <Text>
-                  {floatCentsToString(amountSign * transaction.amount)}{" "}
+                  {floatCentsToString(amountSign * transaction.amount)}&nbsp;
                   {CURRENCY_SYMBOL}
                 </Text>
               </Flex>

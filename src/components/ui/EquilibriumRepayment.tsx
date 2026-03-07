@@ -19,7 +19,7 @@ export const EquilibriumRepayment = ({
           <VStack gap="0" margin="1.3em">
             <FaArrowRight size="1.5em" />
             <Text fontSize="0.9em" color="gray.500" height="0">
-              {floatCentsToString(amount)} {CURRENCY_SYMBOL}
+              {floatCentsToString(amount)}&nbsp;{CURRENCY_SYMBOL}
             </Text>
           </VStack>
           <Text>{toNickname}</Text>

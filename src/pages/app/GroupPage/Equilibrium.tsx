@@ -31,7 +31,7 @@ export const Equilibrium = () => {
                 }
                 fontWeight="bold"
               >
-                {floatCentsToString(member.balance)} {CURRENCY_SYMBOL}
+                {floatCentsToString(member.balance)}&nbsp;{CURRENCY_SYMBOL}
               </Text>
             </HStack>
           </Card.Body>
