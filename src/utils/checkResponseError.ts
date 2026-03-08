@@ -19,7 +19,11 @@ interface TooManyRequestsResponse {
 }
 
 interface ErrorWithoutDetailsResponse {
-  error: "USERNAME_ALREADY_EXISTS" | "EMAIL_ALREADY_EXISTS";
+  error:
+    | "USERNAME_ALREADY_EXISTS"
+    | "EMAIL_ALREADY_EXISTS"
+    | "LAST_ADMIN_DEMOTION"
+    | "LAST_ADMIN_KICK";
 }
 
 type ServerErrorResponse =
@@ -97,6 +101,27 @@ export const checkResponseError = async (
       toaster.create({
         title: "Email already taken",
         description: "Please choose a different email and try again",
+        type: "error",
+      });
+
+      return true;
+    }
+
+    case "LAST_ADMIN_DEMOTION": {
+      toaster.create({
+        title:
+          "You cannot demote yourself because you are the last admin in this group",
+        description: "Promote another member to admin before trying again",
+        type: "error",
+      });
+
+      return true;
+    }
+
+    case "LAST_ADMIN_KICK": {
+      toaster.create({
+        title: "You cannot leave because you are the last admin in this group",
+        description: "Promote another member to admin before trying again",
         type: "error",
       });
 
