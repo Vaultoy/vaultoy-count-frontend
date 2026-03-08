@@ -65,7 +65,7 @@ export const getGroupsQuery = async (): Promise<
 };
 
 export const getGroupQuery = async (
-  groupId: string,
+  groupId: number,
 ): Promise<ApiResponse<{ group: GroupExtended }>> => {
   const response = await fetchApi("GET", `/v1/group/${groupId}`);
   const bodyJson = await response.json();
@@ -78,7 +78,7 @@ export const postAddTransactionMutation = async ({
   groupId,
   transactionData,
 }: {
-  groupId: string;
+  groupId: number;
   transactionData: NewGroupTransaction;
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/transaction`, transactionData);

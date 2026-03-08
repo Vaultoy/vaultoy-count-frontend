@@ -33,7 +33,7 @@ export const TransactionsTab = () => {
 
   return (
     <VStack>
-      <AddTransactionDialog groupData={group} />
+      <AddTransactionDialog />
 
       {group?.transactions.length === 0 && <Text>🙅 No transactions yet.</Text>}
 

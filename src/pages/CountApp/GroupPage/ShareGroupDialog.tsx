@@ -40,12 +40,13 @@ import { checkResponseError } from "@/utils/checkResponseError";
 import { checkResponseJson } from "@/utils/checkResponseJson";
 
 const urlFromInvitationLinkSecret = (
-  groupId: string,
+  groupId: number,
   invitationLinkSecret: string,
 ) => {
   const url = new URL(
-    window.location.origin + "/join/" + groupId + "/" + invitationLinkSecret,
+    `${window.location.origin}/join/${groupId}/${invitationLinkSecret}`,
   );
+
   return url.toString();
 };
 
@@ -63,8 +64,8 @@ export const ShareGroupDialog = () => {
       queryKey: ["getInvitation", group?.id],
       queryFn: () =>
         // Only fetch invitation if user is an admin
-        group?.id && !isNaN(Number(group?.id)) && selfMember?.rights === "admin"
-          ? getInvitationQuery(group?.id.toString())
+        group && selfMember?.rights === "admin"
+          ? getInvitationQuery(group?.id)
           : Promise.resolve(null),
     });
 
@@ -81,10 +82,7 @@ export const ShareGroupDialog = () => {
         "invitation link secret from existing invitation",
       );
 
-      const url = urlFromInvitationLinkSecret(
-        group.id.toString(),
-        invitationLinkSecret,
-      );
+      const url = urlFromInvitationLinkSecret(group.id, invitationLinkSecret);
 
       setUrl(url);
     };
@@ -202,15 +200,12 @@ export const ShareGroupDialog = () => {
       "invitation group encryption key",
     );
 
-    const url = urlFromInvitationLinkSecret(
-      group!.id.toString(),
-      invitationLinkSecret,
-    );
+    const url = urlFromInvitationLinkSecret(group!.id, invitationLinkSecret);
 
     setUrl(url);
 
     createMutation.mutate({
-      groupId: group!.id.toString(),
+      groupId: group!.id,
       invitationData: {
         invitationAuthenticationToken,
         invitationGroupEncryptionKey: encryptedInvitationGroupEncryptionKey,
@@ -280,7 +275,7 @@ export const ShareGroupDialog = () => {
                     <Button
                       onClick={() => {
                         deleteMutation.mutate({
-                          groupId: group!.id.toString(),
+                          groupId: group!.id,
                         });
                       }}
                       colorScheme="red"

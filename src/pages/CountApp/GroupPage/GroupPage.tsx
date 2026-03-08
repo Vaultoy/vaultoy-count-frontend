@@ -33,16 +33,19 @@ import { MembersTab } from "./MembersTab/Members";
 const validTabs = ["transactions", "balances", "members"] as const;
 
 export const GroupPage = () => {
-  const { groupId } = useParams<{ groupId: string }>();
+  const { groupId: groupIdString } = useParams<{ groupId: string }>();
+  const groupId =
+    groupIdString !== undefined && !isNaN(Number(groupIdString))
+      ? Number(groupIdString)
+      : undefined;
+
   const navigate = useNavigate();
   const { pathname: currentPath } = useLocation();
 
   const { body, isError: isQueryError } = useQueryApi({
     queryKey: ["getGroup", groupId],
     queryFn: () =>
-      groupId && !isNaN(Number(groupId))
-        ? getGroupQuery(groupId)
-        : Promise.resolve(null),
+      groupId !== undefined ? getGroupQuery(groupId) : Promise.resolve(null),
   });
 
   useDecryptAndSaveGroupToContext(body?.group, isQueryError);
@@ -59,7 +62,7 @@ export const GroupPage = () => {
     }
   }, [currentTab, groupId, navigate]);
 
-  if (!groupId || isNaN(Number(groupId))) {
+  if (groupId === undefined) {
     return (
       <ErrorPage
         title="404 - Page Not Found"

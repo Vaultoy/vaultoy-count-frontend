@@ -4,10 +4,8 @@ import {
   REPAYMENT,
   REVENUE,
   TRANSACTION_TYPES,
-  type GroupExtended,
 } from "@/api/group";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router";
 import {
   VStack,
   Button,
@@ -32,7 +30,7 @@ import { toaster } from "@/components/ui/toast-store";
 import * as z from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { encryptNumber, encryptString } from "@/encryption/encryption";
 import {
@@ -47,6 +45,7 @@ import {
 } from "@/utils/textGeneration";
 import { checkResponseError } from "@/utils/checkResponseError";
 import { checkResponseJson } from "@/utils/checkResponseJson";
+import { GroupContext } from "@/contexts/GroupContext";
 
 const formValuesSchema = z
   .object({
@@ -118,12 +117,8 @@ const defaultValues = {
   >["transaction_type"],
 };
 
-export const AddTransactionDialog = ({
-  groupData,
-}: {
-  groupData: GroupExtended<false> | undefined;
-}) => {
-  const { groupId } = useParams<{ groupId: string }>();
+export const AddTransactionDialog = () => {
+  const { group } = useContext(GroupContext);
 
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -172,7 +167,9 @@ export const AddTransactionDialog = ({
       setOpen(false);
       // Also reset errors
       reset(defaultValues, { keepErrors: false });
-      queryClient.invalidateQueries({ queryKey: ["getGroup", groupId] });
+      queryClient.invalidateQueries({
+        queryKey: ["getGroup", group?.id],
+      });
     },
     onError: (error) => {
       console.error("Login failed", error);
@@ -181,7 +178,7 @@ export const AddTransactionDialog = ({
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!groupData) {
+    if (!group) {
       console.error("Group data is undefined");
       toaster.create(UNKNOWN_ERROR_TOAST);
       return;
@@ -190,33 +187,33 @@ export const AddTransactionDialog = ({
     const amountSign = transaction_type === REVENUE ? -1 : 1;
 
     mutation.mutate({
-      groupId: groupId as string,
+      groupId: group.id,
       transactionData: {
         name: await encryptString(
           data.transaction_type === REPAYMENT ? "Repayment" : data.name,
-          groupData.groupEncryptionKey,
+          group.groupEncryptionKey,
           "group transaction name",
         ),
         amount: await encryptNumber(
           Math.round(amountSign * data.amount * 100),
-          groupData.groupEncryptionKey,
+          group.groupEncryptionKey,
           "group transaction amount",
         ),
         fromMemberId: await encryptNumber(
           data.fromMemberId,
-          groupData.groupEncryptionKey,
+          group.groupEncryptionKey,
           "group transaction from member id",
         ),
         toMembers: await Promise.all(
           data.toMembers.map(async (toMember) => ({
             memberId: await encryptNumber(
               toMember.id,
-              groupData.groupEncryptionKey,
+              group.groupEncryptionKey,
               "group transaction to member id",
             ),
             share: await encryptNumber(
               toMember.share,
-              groupData.groupEncryptionKey,
+              group.groupEncryptionKey,
               "group transaction to member share",
             ),
           })),
@@ -224,12 +221,12 @@ export const AddTransactionDialog = ({
 
         transactionType: await encryptString(
           data.transaction_type,
-          groupData.groupEncryptionKey,
+          group.groupEncryptionKey,
           "group transaction type",
         ),
         date: await encryptNumber(
           Date.now(),
-          groupData.groupEncryptionKey,
+          group.groupEncryptionKey,
           "group transaction date",
         ),
       },
@@ -238,7 +235,7 @@ export const AddTransactionDialog = ({
 
   const membersSelector = createListCollection({
     items:
-      groupData?.members.map((member) => ({
+      group?.members.map((member) => ({
         label: member.nickname,
         value: member.memberId.toString(), // For some weird reason, Select only works with strings
       })) ?? [],
@@ -248,7 +245,7 @@ export const AddTransactionDialog = ({
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild>
         <Center>
-          <Button variant="outline" disabled={!groupData} marginBottom="1.5em">
+          <Button variant="outline" disabled={!group} marginBottom="1.5em">
             <FaPlus /> Add a transaction
           </Button>
         </Center>

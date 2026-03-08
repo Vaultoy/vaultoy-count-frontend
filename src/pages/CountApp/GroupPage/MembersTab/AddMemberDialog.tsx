@@ -66,7 +66,7 @@ export const AddMemberDialog = () => {
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["getGroup", group?.id.toString()],
+        queryKey: ["getGroup", group?.id],
       });
 
       reset();

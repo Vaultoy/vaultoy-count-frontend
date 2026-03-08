@@ -85,7 +85,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["getGroup", group?.id.toString()],
+        queryKey: ["getGroup", group?.id],
       });
     },
     onError: (error) => {
@@ -113,7 +113,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["getGroup", group?.id.toString()],
+        queryKey: ["getGroup", group?.id],
       });
     },
     onError: (error) => {
@@ -144,7 +144,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["getGroup", group?.id.toString()],
+        queryKey: ["getGroup", group?.id],
       });
 
       if (memberId === selfMember?.memberId) {
@@ -177,7 +177,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["getGroup", group?.id.toString()],
+        queryKey: ["getGroup", group?.id],
       });
 
       setOpen(false);

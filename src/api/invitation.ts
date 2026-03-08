@@ -17,7 +17,7 @@ export const joinInvitationInitiateMutation = async ({
   groupId,
   invitationData,
 }: {
-  groupId: string;
+  groupId: number;
   invitationData: GroupJoinInitiateBody;
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/join/initiate`, invitationData);
@@ -33,7 +33,7 @@ export const joinInvitationConcludeMutation = async ({
   groupId,
   invitationData,
 }: {
-  groupId: string;
+  groupId: number;
   invitationData: GroupJoinConcludeBody;
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/join/conclude`, invitationData);
@@ -43,7 +43,7 @@ export const createInvitationMutation = async ({
   groupId,
   invitationData,
 }: {
-  groupId: string;
+  groupId: number;
   invitationData: {
     invitationAuthenticationToken: string;
     invitationGroupEncryptionKey: string;
@@ -58,7 +58,7 @@ interface GroupInvitation {
 }
 
 export const getInvitationQuery = async (
-  groupId: string,
+  groupId: number,
 ): Promise<ApiResponse<GroupInvitation | null>> => {
   const response = await fetchApi("GET", `/v1/group/${groupId}/invitation`);
   const bodyJson = await response.json();
@@ -68,7 +68,7 @@ export const getInvitationQuery = async (
 export const deleteInvitationMutation = async ({
   groupId,
 }: {
-  groupId: string;
+  groupId: number;
 }) => {
   return fetchApi("DELETE", `/v1/group/${groupId}/invitation`);
 };

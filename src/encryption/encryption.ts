@@ -29,12 +29,10 @@ const encrypt = async (
       data,
     );
 
-    // Combine iv and encrypted data for storage/transmission
     const combined = new Uint8Array(iv.length + encryptedData.byteLength);
     combined.set(iv);
     combined.set(new Uint8Array(encryptedData), iv.length);
 
-    // Convert to base64 for easier handling
     return btoa(String.fromCharCode(...combined));
   } catch (error) {
     console.error(`Error while encrypting ${dataName}:`, error);

@@ -41,10 +41,14 @@ const formValuesSchema = z.object({
 });
 
 export const JoinInvitation = () => {
-  const { groupId, invitationLinkSecret } = useParams<{
+  const { groupId: groupIdString, invitationLinkSecret } = useParams<{
     groupId: string;
     invitationLinkSecret: string;
   }>();
+  const groupId =
+    groupIdString !== undefined && !isNaN(Number(groupIdString))
+      ? Number(groupIdString)
+      : undefined;
 
   const navigate = useNavigate();
 
@@ -85,7 +89,7 @@ export const JoinInvitation = () => {
           title: "You are already a member of this group",
           type: "warning",
         });
-        navigate("/app/group/" + groupId);
+        navigate(`/app/group/${groupId}`);
         return;
       }
 
@@ -151,7 +155,7 @@ export const JoinInvitation = () => {
           title: "You are already a member of this group",
           type: "warning",
         });
-        navigate("/app/group/" + groupId);
+        navigate(`/app/group/${groupId}`);
         return;
       }
 
@@ -165,7 +169,7 @@ export const JoinInvitation = () => {
         title: "Successfully joined the group",
         type: "success",
       });
-      navigate("/app/group/" + groupId);
+      navigate(`/app/group/${groupId}`);
 
       setGroupForJoining(undefined);
       reset();
