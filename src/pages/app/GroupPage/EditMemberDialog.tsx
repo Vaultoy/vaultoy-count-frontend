@@ -280,25 +280,18 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                 </Field.Root>
 
                 {member?.userId !== null ? (
-                  <Field.Root width="100%" invalid={!!errors.nickname}>
-                    <Field.Label>
-                      Associated user{" "}
+                  <VStack width="100%" alignItems="flex-start" gap="0.5em">
+                    <HStack>
+                      <Text fontWeight="medium">Associated user</Text>
                       <InfoPopover>
-                        <Text fontWeight="normal">
-                          When joining the group, user &quot;
-                          <Icon
-                            as={FaUser}
-                            height="0.85em"
-                            width="0.85em"
-                          />{" "}
-                          {member?.username}&quot; has chosen the nickname
-                          &quot;
-                          {member?.nickname}&quot;.
-                        </Text>
+                        When joining the group, user &quot;
+                        <Icon as={FaUser} height="0.85em" width="0.85em" />{" "}
+                        {member?.username}&quot; has chosen the nickname &quot;
+                        {member?.nickname}&quot;.
                       </InfoPopover>
-                    </Field.Label>
+                    </HStack>
 
-                    <HStack marginLeft="1em" gap="0.3em">
+                    <HStack marginLeft="1em" gap="0.3em" flexWrap="wrap">
                       <Text>
                         <Icon as={FaUser} size="xs" />{" "}
                         {member?.username ?? "Unknown"}
@@ -314,7 +307,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                         <Button
                           variant="outline"
                           size="xs"
-                          marginLeft="2em"
+                          marginLeft="1em"
                           loading={editRightsMutation.isPending}
                           onClick={() => {
                             if (!group) return;
@@ -339,7 +332,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                         </Button>
                       )}
                     </HStack>
-                  </Field.Root>
+                  </VStack>
                 ) : (
                   <Text color="gray.600" textAlign="center">
                     No one joined the group with this nickname yet.{" "}

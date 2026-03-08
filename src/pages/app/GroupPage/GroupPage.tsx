@@ -55,7 +55,7 @@ export const GroupPage = () => {
 
   useEffect(() => {
     if (!validTabs.includes(currentTab as (typeof validTabs)[number])) {
-      navigate(`/app/group/${groupId}/transactions`);
+      navigate(`/app/group/${groupId}/transactions`, { replace: true });
     }
   }, [currentTab, groupId, navigate]);
 

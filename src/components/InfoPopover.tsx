@@ -1,17 +1,15 @@
-import { Popover, Text } from "@chakra-ui/react";
+import { Popover } from "@chakra-ui/react";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 
 export const InfoPopover = ({ children }: { children: React.ReactNode }) => (
   <Popover.Root>
     <Popover.Trigger style={{ cursor: "pointer" }}>
-      <Text textAlign="left">
-        <HiOutlineInformationCircle
-          style={{
-            display: "inline",
-            verticalAlign: "middle",
-          }}
-        />
-      </Text>
+      <HiOutlineInformationCircle
+        style={{
+          display: "inline",
+          verticalAlign: "middle",
+        }}
+      />
     </Popover.Trigger>
     <Popover.Positioner>
       <Popover.Content>
