@@ -1,4 +1,4 @@
-import { getGroupsQuery, type Group } from "../../../api/group";
+import { getGroupsQuery, type Group } from "@/api/group";
 import {
   Card,
   Center,

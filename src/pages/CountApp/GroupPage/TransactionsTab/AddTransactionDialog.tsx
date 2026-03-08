@@ -5,7 +5,7 @@ import {
   REVENUE,
   TRANSACTION_TYPES,
   type GroupExtended,
-} from "../../../api/group";
+} from "@/api/group";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import {
@@ -28,7 +28,7 @@ import {
   IconButton,
   InputGroup,
 } from "@chakra-ui/react";
-import { toaster } from "../../../components/ui/toast-store";
+import { toaster } from "@/components/ui/toast-store";
 import * as z from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +44,7 @@ import {
   floatCentsToString,
   getForText,
   getPaidByText,
-} from "../../../utils/textGeneration";
+} from "@/utils/textGeneration";
 import { checkResponseError } from "@/utils/checkResponseError";
 import { checkResponseJson } from "@/utils/checkResponseJson";
 

@@ -1,9 +1,9 @@
 import { Route, Routes } from "react-router";
 import { AppHomePage } from "./AppHome/AppHome";
 import { GroupPage } from "./GroupPage/GroupPage";
-import { ErrorPage } from "../ErrorPage";
+import { ErrorPage } from "@/pages/ErrorPage";
 
-export const SCApp = () => {
+export const CountApp = () => {
   return (
     <Routes>
       <Route path="/" element={<AppHomePage />} />

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router";
-import { PasswordInput } from "../components/ui/password-input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Button,
   Card,
@@ -18,8 +18,8 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { toaster } from "../components/ui/toast-store";
-import { postSignupLoginMutation, type LoginSignupResponse } from "../api/auth";
+import { toaster } from "@/components/ui/toast-store";
+import { postSignupLoginMutation, type LoginSignupResponse } from "@/api/auth";
 import { UserContext } from "@/contexts/UserContext";
 import {
   UNKNOWN_ERROR_TOAST,

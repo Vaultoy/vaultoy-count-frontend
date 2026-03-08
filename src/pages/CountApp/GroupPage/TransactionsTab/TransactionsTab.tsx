@@ -14,7 +14,7 @@ import {
   floatCentsToString,
   getForText,
   getPaidByText,
-} from "../../../utils/textGeneration";
+} from "@/utils/textGeneration";
 import { GroupContext } from "@/contexts/GroupContext";
 import { useContext } from "react";
 
@@ -28,7 +28,7 @@ const getTransactionEmoji = (transactionType: TransactionType) => {
       return "💸";
   }
 };
-export const TransactionList = () => {
+export const TransactionsTab = () => {
   const { group, groupMembersIndex, isError } = useContext(GroupContext);
 
   return (

@@ -6,7 +6,7 @@ import {
   useNavigate,
   useParams,
 } from "react-router";
-import { ErrorPage } from "../../ErrorPage";
+import { ErrorPage } from "@/pages/ErrorPage";
 import {
   Card,
   Text,
@@ -20,15 +20,15 @@ import {
 import { MdArrowBack } from "react-icons/md";
 import { useContext, useEffect } from "react";
 import { ShareGroupDialog } from "./ShareGroupDialog";
-import { TransactionList } from "./TransactionList";
-import { Equilibrium } from "./Equilibrium";
+import { TransactionsTab } from "./TransactionsTab/TransactionsTab";
+import { EquilibriumTab } from "./EquilibriumTab/EquilibriumTab";
 import {
   GroupContext,
   useDecryptAndSaveGroupToContext,
 } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
 import { FcConferenceCall } from "react-icons/fc";
-import { Members } from "./Members";
+import { MembersTab } from "./MembersTab/Members";
 
 const validTabs = ["transactions", "balances", "members"] as const;
 
@@ -125,10 +125,10 @@ export const GroupPage = () => {
           </Tabs.Root>
 
           <Routes>
-            <Route path="/" element={<TransactionList />} />
-            <Route path="/transactions" element={<TransactionList />} />
-            <Route path="/balances" element={<Equilibrium />} />
-            <Route path="/members" element={<Members />} />
+            <Route path="/" element={<TransactionsTab />} />
+            <Route path="/transactions" element={<TransactionsTab />} />
+            <Route path="/balances" element={<EquilibriumTab />} />
+            <Route path="/members" element={<MembersTab />} />
           </Routes>
         </Card.Body>
         <Card.Footer />

@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { EquilibriumRepaymentsDialog } from "./EquilibriumRepaymentsDialog";
 import { GroupContext } from "@/contexts/GroupContext";
 
-export const Equilibrium = () => {
+export const EquilibriumTab = () => {
   const { group, isError } = useContext(GroupContext);
 
   return (

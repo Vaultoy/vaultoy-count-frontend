@@ -1,5 +1,5 @@
-import { toaster } from "../../../components/ui/toast-store";
-import { createGroupMutation } from "../../../api/group";
+import { toaster } from "@/components/ui/toast-store";
+import { createGroupMutation } from "@/api/group";
 import {
   Button,
   CloseButton,

@@ -11,8 +11,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
 import { ErrorPage } from "./pages/ErrorPage";
 import { UserContextProvider } from "./contexts/UserContextProvider";
-import { JoinInvitation } from "./pages/app/JoinInvitation";
-import { SCApp } from "./pages/app/SCApp";
+import { JoinInvitation } from "./pages/CountApp/JoinInvitation";
+import { CountApp } from "./pages/CountApp/CountApp";
 import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectContextProvider";
 import { GroupContextProvider } from "./contexts/GroupContextProvider";
 import { useEffect } from "react";
@@ -49,7 +49,7 @@ const RoutesWithNavbar = () => (
 
       <Route path="/settings" element={<SettingsPage />} />
 
-      <Route path="/app/*" element={<SCApp />} />
+      <Route path="/app/*" element={<CountApp />} />
 
       <Route
         path="/join/:groupId/:invitationLinkSecret"
