@@ -1,7 +1,6 @@
 import { REPAYMENT } from "@/api/group";
 import {
   VStack,
-  Button,
   Dialog,
   Portal,
   CloseButton,
@@ -21,8 +20,8 @@ import {
   getTransactionEmoji,
 } from "@/utils/textGeneration";
 import { GroupContext } from "@/contexts/GroupContext";
-import { LuPencilLine } from "react-icons/lu";
-import { FaLongArrowAltDown, FaLongArrowAltUp } from "react-icons/fa";
+import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
+import { AddEditTransactionDialog } from "./AddEditTransactionDialog";
 
 export const ViewTransactionDialog = ({
   transactionId,
@@ -35,45 +34,61 @@ export const ViewTransactionDialog = ({
 
   const [open, setOpen] = useState(false);
 
-  const { transaction, fromMember, toMembers, totalShares, fancyDate } =
-    useMemo(() => {
-      const transaction = group?.transactions.find(
-        (t) => t.id === transactionId,
-      );
+  const {
+    transaction,
+    fromMember,
+    toMembers,
+    totalShares,
+    fancyDate,
+    defaultValuesForEdit,
+  } = useMemo(() => {
+    const transaction = group?.transactions.find((t) => t.id === transactionId);
 
-      return {
-        transaction,
-        fromMember:
-          transaction && groupMembersIndex
-            ? groupMembersIndex[transaction.fromMemberId]
-            : null,
-        toMembers:
-          transaction && groupMembersIndex
-            ? transaction.toMembers.map((toMember) => ({
-                ...toMember,
-                ...groupMembersIndex![toMember.memberId],
-              }))
-            : [],
-        totalShares: transaction
-          ? transaction.toMembers.reduce(
-              (sum, toMember) => sum + toMember.share,
-              0,
-            )
-          : 0,
-        fancyDate: transaction
-          ? new Date(transaction.date).toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            }) +
-            " at " +
-            new Date(transaction.date).toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "numeric",
-            })
-          : "",
-      };
-    }, [group, groupMembersIndex, transactionId]);
+    return {
+      transaction,
+      fromMember:
+        transaction && groupMembersIndex
+          ? groupMembersIndex[transaction.fromMemberId]
+          : null,
+      toMembers:
+        transaction && groupMembersIndex
+          ? transaction.toMembers.map((toMember) => ({
+              ...toMember,
+              ...groupMembersIndex![toMember.memberId],
+            }))
+          : [],
+      totalShares: transaction
+        ? transaction.toMembers.reduce(
+            (sum, toMember) => sum + toMember.share,
+            0,
+          )
+        : 0,
+      fancyDate: transaction
+        ? new Date(transaction.date).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          }) +
+          " at " +
+          new Date(transaction.date).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "numeric",
+          })
+        : "",
+      defaultValuesForEdit: transaction
+        ? {
+            name: transaction.name,
+            fromMemberId: [transaction.fromMemberId.toString()],
+            toMembers: transaction.toMembers.map((toMember) => ({
+              memberId: toMember.memberId.toString(),
+              share: toMember.share,
+            })),
+            amount: floatCentsToString(Math.abs(transaction.amount)),
+            transactionType: transaction.transactionType,
+          }
+        : undefined,
+    };
+  }, [group, groupMembersIndex, transactionId]);
 
   if (!transaction) return <Text>Transaction not found</Text>;
 
@@ -84,9 +99,7 @@ export const ViewTransactionDialog = ({
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
-            <Dialog.Header>
-              <Dialog.Title></Dialog.Title>
-            </Dialog.Header>
+            <Dialog.Header />
             <Dialog.Body>
               <VStack width="100%">
                 <Heading>
@@ -118,19 +131,18 @@ export const ViewTransactionDialog = ({
                 >
                   <Icon
                     as={
-                      transaction.amount > 0
-                        ? FaLongArrowAltDown
-                        : FaLongArrowAltUp
+                      transaction.amount > 0 ? FaArrowDownLong : FaArrowUpLong
                     }
-                    height="6em"
-                    width="6em"
+                    height="5em"
+                    width="5em"
                     color="gray.200"
                   />
                   <Text
                     position="absolute"
                     fontWeight="bold"
-                    fontSize="xl"
+                    fontSize="lg"
                     color="gray.800"
+                    marginBottom={transaction.amount > 0 ? "0.5em" : "-0.5em"}
                   >
                     {floatCentsToString(Math.abs(transaction.amount))}&nbsp;
                     {CURRENCY_SYMBOL}
@@ -215,9 +227,10 @@ export const ViewTransactionDialog = ({
               </VStack>
             </Dialog.Body>
             <Dialog.Footer>
-              <Button variant="outline" disabled>
-                <LuPencilLine /> Edit
-              </Button>
+              <AddEditTransactionDialog
+                editTransactionId={transaction.id}
+                defaultValues={defaultValuesForEdit}
+              />
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
               <CloseButton size="sm" />

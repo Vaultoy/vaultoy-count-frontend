@@ -6,8 +6,9 @@ import {
   Skeleton,
   SkeletonCircle,
   HStack,
+  Center,
 } from "@chakra-ui/react";
-import { AddTransactionDialog } from "./AddTransactionDialog";
+import { AddEditTransactionDialog } from "./AddEditTransactionDialog";
 import {
   CURRENCY_SYMBOL,
   floatCentsToString,
@@ -24,7 +25,9 @@ export const TransactionsTab = () => {
 
   return (
     <VStack>
-      <AddTransactionDialog />
+      <Center marginBottom="1.5em">
+        <AddEditTransactionDialog />
+      </Center>
 
       {group?.transactions.length === 0 && <Text>🙅 No transactions yet.</Text>}
 

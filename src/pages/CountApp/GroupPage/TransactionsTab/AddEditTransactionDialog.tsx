@@ -46,6 +46,7 @@ import {
 import { checkResponseError } from "@/utils/checkResponseError";
 import { checkResponseJson } from "@/utils/checkResponseJson";
 import { GroupContext } from "@/contexts/GroupContext";
+import { LuPencilLine } from "react-icons/lu";
 
 const formValuesSchema = z
   .object({
@@ -57,10 +58,13 @@ const formValuesSchema = z
       .max(1, "Select exactly one member")
       .transform((val) => Number(val[0])),
     toMembers: z
-      .array(z.object({ id: z.string(), share: z.number() }))
+      .array(z.object({ memberId: z.string(), share: z.number() }))
       .min(1, "Select at least one member")
       .transform((vals) =>
-        vals.map((val) => ({ id: Number(val.id), share: val.share })),
+        vals.map((val) => ({
+          memberId: Number(val.memberId),
+          share: val.share,
+        })),
       ),
     amount: z
       .string()
@@ -72,11 +76,11 @@ const formValuesSchema = z
           })
           .min(0.01),
       ),
-    transaction_type: z.enum(TRANSACTION_TYPES),
+    transactionType: z.enum(TRANSACTION_TYPES),
   })
   .refine(
     (data): boolean => {
-      switch (data.transaction_type) {
+      switch (data.transactionType) {
         case EXPENSE:
           return true;
         case REPAYMENT:
@@ -93,7 +97,7 @@ const formValuesSchema = z
   )
   .refine(
     (data): boolean => {
-      switch (data.transaction_type) {
+      switch (data.transactionType) {
         case EXPENSE:
           return data.name.length >= 3 && data.name.length <= 100;
         case REPAYMENT:
@@ -107,17 +111,24 @@ const formValuesSchema = z
     },
   );
 
-const defaultValues = {
+const defaultValuesDefault: z.input<typeof formValuesSchema> = {
   name: "",
-  fromMemberId: undefined,
+  fromMemberId: [],
   toMembers: [],
   amount: "",
-  transaction_type: EXPENSE as z.infer<
-    typeof formValuesSchema
-  >["transaction_type"],
+  transactionType: EXPENSE,
 };
 
-export const AddTransactionDialog = () => {
+/**
+ * If editTransactionId is provided, the dialog will call the edit transaction API instead of the add transaction API.
+ */
+export const AddEditTransactionDialog = ({
+  defaultValues = defaultValuesDefault,
+  editTransactionId,
+}: {
+  defaultValues?: z.input<typeof formValuesSchema>;
+  editTransactionId?: number;
+}) => {
   const { group } = useContext(GroupContext);
 
   const [open, setOpen] = useState(false);
@@ -139,14 +150,14 @@ export const AddTransactionDialog = () => {
     defaultValues: defaultValues,
   });
 
-  const transaction_type = watch("transaction_type");
+  const transactionType = watch("transactionType");
   const totalShares = (watch("toMembers") ?? []).reduce(
     (acc, curr) => acc + curr.share,
     0,
   );
   const amount = watch("amount");
 
-  const mutation = useMutation({
+  const addMutation = useMutation({
     mutationFn: postAddTransactionMutation,
     onSuccess: async (data) => {
       const responseData = await checkResponseJson(data);
@@ -184,13 +195,21 @@ export const AddTransactionDialog = () => {
       return;
     }
 
-    const amountSign = transaction_type === REVENUE ? -1 : 1;
+    const amountSign = transactionType === REVENUE ? -1 : 1;
 
-    mutation.mutate({
+    if (editTransactionId !== undefined) {
+      toaster.create({
+        title: "Editing transactions is not implemented yet",
+        type: "warning",
+      });
+      return;
+    }
+
+    addMutation.mutate({
       groupId: group.id,
       transactionData: {
         name: await encryptString(
-          data.transaction_type === REPAYMENT ? "Repayment" : data.name,
+          data.transactionType === REPAYMENT ? "Repayment" : data.name,
           group.groupEncryptionKey,
           "group transaction name",
         ),
@@ -207,7 +226,7 @@ export const AddTransactionDialog = () => {
         toMembers: await Promise.all(
           data.toMembers.map(async (toMember) => ({
             memberId: await encryptNumber(
-              toMember.id,
+              toMember.memberId,
               group.groupEncryptionKey,
               "group transaction to member id",
             ),
@@ -220,7 +239,7 @@ export const AddTransactionDialog = () => {
         ),
 
         transactionType: await encryptString(
-          data.transaction_type,
+          data.transactionType,
           group.groupEncryptionKey,
           "group transaction type",
         ),
@@ -244,18 +263,26 @@ export const AddTransactionDialog = () => {
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild>
-        <Center>
-          <Button variant="outline" disabled={!group} marginBottom="1.5em">
+        {editTransactionId === undefined ? (
+          <Button variant="outline" disabled={!group}>
             <FaPlus /> Add a transaction
           </Button>
-        </Center>
+        ) : (
+          <Button variant="outline" disabled={!group}>
+            <LuPencilLine /> Edit
+          </Button>
+        )}
       </Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header>
-              <Dialog.Title>Add a transaction</Dialog.Title>
+              <Dialog.Title>
+                {editTransactionId === undefined
+                  ? "Add a transaction"
+                  : "Edit transaction"}
+              </Dialog.Title>
             </Dialog.Header>
             <form onSubmit={onSubmit}>
               <Dialog.Body>
@@ -263,9 +290,9 @@ export const AddTransactionDialog = () => {
                   <Center>
                     <Controller
                       control={control}
-                      name="transaction_type"
+                      name="transactionType"
                       render={({ field }) => (
-                        <Field.Root invalid={!!errors.transaction_type}>
+                        <Field.Root invalid={!!errors.transactionType}>
                           <SegmentGroup.Root
                             onBlur={field.onBlur}
                             name={field.name}
@@ -287,7 +314,7 @@ export const AddTransactionDialog = () => {
                     />
                   </Center>
 
-                  {transaction_type !== REPAYMENT && (
+                  {transactionType !== REPAYMENT && (
                     <Field.Root invalid={!!errors.name}>
                       <Field.Label>Title</Field.Label>
 
@@ -309,7 +336,7 @@ export const AddTransactionDialog = () => {
                   </Field.Root>
 
                   <Field.Root invalid={!!errors.fromMemberId}>
-                    <Field.Label>{getPaidByText(transaction_type)}</Field.Label>
+                    <Field.Label>{getPaidByText(transactionType)}</Field.Label>
                     <Controller
                       control={control}
                       name="fromMemberId"
@@ -353,9 +380,9 @@ export const AddTransactionDialog = () => {
 
                   <Fieldset.Root invalid={!!errors.toMembers}>
                     <HStack alignItems="center" justifyContent="space-between">
-                      <Text>{getForText(transaction_type, 42)}</Text>
+                      <Text>{getForText(transactionType, 42)}</Text>
 
-                      {transaction_type !== REPAYMENT && <Text>Shares</Text>}
+                      {transactionType !== REPAYMENT && <Text>Shares</Text>}
                     </HStack>
 
                     <Controller
@@ -363,18 +390,18 @@ export const AddTransactionDialog = () => {
                       name="toMembers"
                       render={({ field }) => {
                         if (
-                          transaction_type === EXPENSE ||
-                          transaction_type === REVENUE
+                          transactionType === EXPENSE ||
+                          transactionType === REVENUE
                         ) {
                           return (
                             <CheckboxGroup
                               invalid={!!errors.toMembers}
-                              value={field.value.map((val) => val.id)}
+                              value={field.value.map((val) => val.memberId)}
                               onValueChange={(value) =>
                                 field.onChange(
                                   value.map((val) => {
                                     const existing = field.value.find(
-                                      (v) => v.id === val,
+                                      (v) => v.memberId === val,
                                     );
                                     return {
                                       id: val,
@@ -410,7 +437,7 @@ export const AddTransactionDialog = () => {
                                           marginBottom="-0.2em"
                                         >
                                           {field.value.find(
-                                            (v) => v.id === item.value,
+                                            (v) => v.memberId === item.value,
                                           )?.share ?? 0}
                                           x
                                         </Text>
@@ -423,7 +450,8 @@ export const AddTransactionDialog = () => {
                                             totalShares === 0
                                               ? 0
                                               : ((field.value.find(
-                                                  (v) => v.id === item.value,
+                                                  (v) =>
+                                                    v.memberId === item.value,
                                                 )?.share ?? 0) /
                                                   totalShares) *
                                                   100 *
@@ -440,7 +468,7 @@ export const AddTransactionDialog = () => {
                                         onClick={(e) => {
                                           e.preventDefault();
                                           const existing = field.value.find(
-                                            (v) => v.id === item.value,
+                                            (v) => v.memberId === item.value,
                                           );
                                           if (!existing) {
                                             field.onChange([
@@ -455,7 +483,7 @@ export const AddTransactionDialog = () => {
                                           const newShare = existing.share + 1;
                                           field.onChange(
                                             field.value.map((v) =>
-                                              v.id === item.value
+                                              v.memberId === item.value
                                                 ? { ...v, share: newShare }
                                                 : v,
                                             ),
@@ -471,20 +499,21 @@ export const AddTransactionDialog = () => {
                                         onClick={(e) => {
                                           e.preventDefault();
                                           const existing = field.value.find(
-                                            (v) => v.id === item.value,
+                                            (v) => v.memberId === item.value,
                                           );
                                           if (!existing) return;
                                           const newShare = existing.share - 1;
                                           if (newShare <= 0) {
                                             field.onChange(
                                               field.value.filter(
-                                                (v) => v.id !== item.value,
+                                                (v) =>
+                                                  v.memberId !== item.value,
                                               ),
                                             );
                                           } else {
                                             field.onChange(
                                               field.value.map((v) =>
-                                                v.id === item.value
+                                                v.memberId === item.value
                                                   ? { ...v, share: newShare }
                                                   : v,
                                               ),
@@ -504,12 +533,12 @@ export const AddTransactionDialog = () => {
                           return (
                             <Select.Root
                               name={field.name}
-                              value={field.value.map((val) => val.id)}
+                              value={field.value.map((val) => val.memberId)}
                               onValueChange={({ value }) =>
                                 field.onChange(
                                   value.map((val) => {
                                     const existing = field.value.find(
-                                      (v) => v.id === val,
+                                      (v) => v.memberId === val,
                                     );
                                     return {
                                       id: val,
@@ -562,8 +591,8 @@ export const AddTransactionDialog = () => {
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancel</Button>
                 </Dialog.ActionTrigger>
-                <Button type="submit" loading={mutation.isPending}>
-                  Add
+                <Button type="submit" loading={addMutation.isPending}>
+                  {editTransactionId === undefined ? "Add" : "Edit"}
                 </Button>
               </Dialog.Footer>
             </form>
