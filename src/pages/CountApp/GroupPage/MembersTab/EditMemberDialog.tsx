@@ -349,7 +349,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                         <Text textAlign="center">
                           Kicking user &quot;
                           <Icon as={FaUser} size="xs" /> {member?.username}
-                          &quot; out of the group will remove him from this
+                          &quot; out of the group will remove them from this
                           group, <strong>without deleting</strong> the group
                           member with nickname &quot;
                           {member?.nickname}&quot;. This means that no data will
@@ -360,7 +360,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                           If you gave an invitation link to &quot;
                           <Icon as={FaUser} size="xs" /> {member?.username}
                           &quot;, you might want to delete the link before
-                          kicking him out, or he will be able to come back.
+                          kicking them out, or they will be able to come back.
                         </Text>
                       )}
                       {selfMember?.memberId === memberId && (
