@@ -353,7 +353,7 @@ export const AddTransactionDialog = () => {
 
                   <Fieldset.Root invalid={!!errors.toMembers}>
                     <HStack alignItems="center" justifyContent="space-between">
-                      <Text>{getForText(transaction_type)}</Text>
+                      <Text>{getForText(transaction_type, 42)}</Text>
 
                       {transaction_type !== REPAYMENT && <Text>Shares</Text>}
                     </HStack>

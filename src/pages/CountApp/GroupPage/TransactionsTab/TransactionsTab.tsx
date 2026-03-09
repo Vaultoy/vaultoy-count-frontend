@@ -1,4 +1,3 @@
-import { EXPENSE, REPAYMENT, REVENUE, type TransactionType } from "@/api/group";
 import {
   Text,
   Card,
@@ -14,20 +13,12 @@ import {
   floatCentsToString,
   getForText,
   getPaidByText,
+  getTransactionEmoji,
 } from "@/utils/textGeneration";
 import { GroupContext } from "@/contexts/GroupContext";
 import { useContext } from "react";
+import { ViewTransactionDialog } from "./ViewTransactionDialog";
 
-const getTransactionEmoji = (transactionType: TransactionType) => {
-  switch (transactionType) {
-    case EXPENSE:
-      return "🧾";
-    case REPAYMENT:
-      return "🤝";
-    case REVENUE:
-      return "💸";
-  }
-};
 export const TransactionsTab = () => {
   const { group, groupMembersIndex, isError } = useContext(GroupContext);
 
@@ -38,40 +29,50 @@ export const TransactionsTab = () => {
       {group?.transactions.length === 0 && <Text>🙅 No transactions yet.</Text>}
 
       {group?.transactions.map((transaction) => {
-        const amountSign = transaction.transactionType === REVENUE ? -1 : 1;
-
         return (
-          <Card.Root key={transaction.id} width="100%">
-            <Card.Body>
-              <Flex alignItems="center" justifyContent="space-between">
-                <VStack alignItems="flex-start" gap="0">
-                  <Text fontWeight="bold">
-                    {getTransactionEmoji(transaction.transactionType)}{" "}
-                    {transaction.name}
+          <ViewTransactionDialog
+            key={transaction.id}
+            transactionId={transaction.id}
+          >
+            <Card.Root key={transaction.id} width="100%" cursor="pointer">
+              <Card.Body>
+                <Flex alignItems="center" justifyContent="space-between">
+                  <VStack alignItems="flex-start" gap="0">
+                    <Text fontWeight="bold">
+                      {getTransactionEmoji(transaction.transactionType)}{" "}
+                      {transaction.name}
+                    </Text>
+                    <Text color="gray.500">
+                      <Text as="span" fontWeight="medium">
+                        {getPaidByText(transaction.transactionType)}
+                      </Text>{" "}
+                      {groupMembersIndex &&
+                        groupMembersIndex[transaction.fromMemberId].nickname}
+                    </Text>
+                    <Text color="gray.500">
+                      <Text as="span" fontWeight="medium">
+                        {getForText(
+                          transaction.transactionType,
+                          transaction.toMembers.length,
+                        )}
+                      </Text>{" "}
+                      {transaction.toMembers
+                        .map(
+                          ({ memberId }) =>
+                            groupMembersIndex &&
+                            groupMembersIndex[memberId].nickname,
+                        )
+                        .join(", ")}
+                    </Text>
+                  </VStack>
+                  <Text fontSize="lg" fontWeight="bold">
+                    {floatCentsToString(Math.abs(transaction.amount))}&nbsp;
+                    {CURRENCY_SYMBOL}
                   </Text>
-                  <Text color="gray.600">
-                    {getPaidByText(transaction.transactionType)}{" "}
-                    {groupMembersIndex &&
-                      groupMembersIndex[transaction.fromMemberId].nickname}
-                  </Text>
-                  <Text color="gray.600">
-                    {getForText(transaction.transactionType)}{" "}
-                    {transaction.toMembers
-                      .map(
-                        ({ memberId }) =>
-                          groupMembersIndex &&
-                          groupMembersIndex[memberId].nickname,
-                      )
-                      .join(", ")}
-                  </Text>
-                </VStack>
-                <Text>
-                  {floatCentsToString(amountSign * transaction.amount)}&nbsp;
-                  {CURRENCY_SYMBOL}
-                </Text>
-              </Flex>
-            </Card.Body>
-          </Card.Root>
+                </Flex>
+              </Card.Body>
+            </Card.Root>
+          </ViewTransactionDialog>
         );
       })}
 

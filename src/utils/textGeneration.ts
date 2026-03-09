@@ -11,14 +11,28 @@ export const getPaidByText = (transactionType: TransactionType): string => {
   }
 };
 
-export const getForText = (transactionType: TransactionType): string => {
+export const getForText = (
+  transactionType: TransactionType,
+  numberOfRecipients: number,
+): string => {
   switch (transactionType) {
     case EXPENSE:
       return "For";
     case REPAYMENT:
       return "To";
     case REVENUE:
-      return "Split among";
+      return numberOfRecipients === 1 ? "For" : "Split between";
+  }
+};
+
+export const getTransactionEmoji = (transactionType: TransactionType) => {
+  switch (transactionType) {
+    case EXPENSE:
+      return "🧾";
+    case REPAYMENT:
+      return "🤝";
+    case REVENUE:
+      return "💸";
   }
 };
 
