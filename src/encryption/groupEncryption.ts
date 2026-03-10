@@ -18,7 +18,7 @@ export const decryptGroup = async (
   const groupEncryptionKey = await decryptEncryptionKey(
     encryptedGroup.groupEncryptionKey,
     userEncryptionKey,
-    true, // TODO: Required for invitation links, not ideal for security
+    true,
     `group key for group ${encryptedGroup.id}`,
   );
 

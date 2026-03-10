@@ -1,4 +1,9 @@
-import { postChangePasswordMutation, useLogoutMutation } from "@/api/auth";
+import {
+  postChangePasswordMutation,
+  postSignupLoginMutation,
+  useLogoutMutation,
+  type LoginSignupResponse,
+} from "@/api/auth";
 import {
   UNKNOWN_ERROR_TOAST,
   unknownErrorToastWithStatus,
@@ -7,9 +12,15 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
 import { checkResponseError } from "@/utils/checkResponseError";
-import { encryptEncryptionKey } from "@/encryption/encryption";
+import {
+  decryptEncryptionKey,
+  encryptEncryptionKey,
+} from "@/encryption/encryption";
 import { PASSWORD_MINIMUM_LENGTH } from "@/utils/constants";
-import { useKeyDerivation } from "@/encryption/useKeyDerivation";
+import {
+  useKeyDerivation,
+  type DerivatedFromPasswordSecrets,
+} from "@/encryption/useKeyDerivation";
 import {
   Button,
   Dialog,
@@ -61,6 +72,14 @@ export const ChangePasswordDialog = () => {
     showSuccessToast: false,
     navigateToAfterLogout: "/login",
   });
+  // This is used to store the temporarily store the derived keys
+  // between login and change password mutation
+  const [loginInfoDuringPasswordChange, setLoginInfoDuringPasswordChange] =
+    useState<{
+      username: string;
+      oldKeys: DerivatedFromPasswordSecrets;
+      newKeys: DerivatedFromPasswordSecrets;
+    } | null>(null);
 
   const {
     register,
@@ -74,7 +93,7 @@ export const ChangePasswordDialog = () => {
     resolver: zodResolver(formValuesSchema),
   });
 
-  const mutation = useMutation({
+  const changePasswordMutation = useMutation({
     mutationFn: postChangePasswordMutation,
     onSuccess: async (data) => {
       const responseData = await checkResponseJson(data);
@@ -111,6 +130,70 @@ export const ChangePasswordDialog = () => {
     },
   });
 
+  const loginMutation = useMutation({
+    mutationFn: postSignupLoginMutation,
+    onSuccess: async (data) => {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
+        return;
+      }
+
+      if (data.status === 401) {
+        toaster.create({
+          title: "Failed to change password",
+          description: "The old password is incorrect",
+          type: "error",
+        });
+        return;
+      }
+
+      if (data.status !== 200) {
+        toaster.create(unknownErrorToastWithStatus(data.status));
+        return;
+      }
+
+      const typedResponse = responseData as LoginSignupResponse;
+
+      if (!loginInfoDuringPasswordChange) {
+        console.error(
+          "Temporary login data not set, yet it should have been set when user clicked login/signup",
+        );
+        toaster.create(UNKNOWN_ERROR_TOAST);
+        return undefined;
+      }
+
+      const userEncryptionKey = await decryptEncryptionKey(
+        typedResponse.userEncryptionKey,
+        loginInfoDuringPasswordChange.oldKeys.passwordEncryptionKey,
+        true, // Not a security issue as it is dropped immediately after
+        "old user key",
+      );
+
+      const userEncryptionKeyRaw = new Uint8Array(
+        await crypto.subtle.exportKey("raw", userEncryptionKey),
+      );
+
+      const newEncryptedUserEncryptionKey = await encryptEncryptionKey(
+        userEncryptionKeyRaw,
+        loginInfoDuringPasswordChange.newKeys.passwordEncryptionKey,
+        "new user encryption key for password change",
+      );
+
+      changePasswordMutation.mutate({
+        username: loginInfoDuringPasswordChange.username,
+        oldAuthenticationToken:
+          loginInfoDuringPasswordChange.oldKeys.authenticationToken,
+        newAuthenticationToken:
+          loginInfoDuringPasswordChange.newKeys.authenticationToken,
+        newUserEncryptionKey: newEncryptedUserEncryptionKey,
+      });
+    },
+    onError: (error) => {
+      console.error("Password change failed", error);
+      toaster.create(UNKNOWN_ERROR_TOAST);
+    },
+  });
+
   const onSubmit = handleSubmit(async (data) => {
     if (!user) {
       console.error(
@@ -134,23 +217,18 @@ export const ChangePasswordDialog = () => {
     );
     setKeyDerivationInProgress(false);
 
-    // TODO: This requires the user encryption key to be extractable, which is not ideal.
-    // We should change the encryption scheme to avoid this.
-    const userEncryptionKeyRaw = new Uint8Array(
-      await crypto.subtle.exportKey("raw", user.userEncryptionKey),
-    );
-
-    const newEncryptedUserEncryptionKey = await encryptEncryptionKey(
-      userEncryptionKeyRaw,
-      newKeys.passwordEncryptionKey,
-      "user encryption key for password change",
-    );
-
-    mutation.mutate({
+    setLoginInfoDuringPasswordChange({
       username: normalizedUsername,
-      oldAuthenticationToken: oldKeys.authenticationToken,
-      newAuthenticationToken: newKeys.authenticationToken,
-      newUserEncryptionKey: newEncryptedUserEncryptionKey,
+      oldKeys,
+      newKeys,
+    });
+
+    loginMutation.mutate({
+      isLogin: true,
+      username: normalizedUsername,
+      authenticationToken: oldKeys.authenticationToken,
+      email: null,
+      userEncryptionKey: null,
     });
   });
 
@@ -207,12 +285,16 @@ export const ChangePasswordDialog = () => {
               <Dialog.Footer>
                 <Text fontSize="lg" marginLeft="1em">
                   {keyDerivationInProgress && "🔐..."}
-                  {mutation.isPending && "🖥️..."}
+                  {changePasswordMutation.isPending && "🖥️..."}
                 </Text>
                 <Button
                   disabled={!user}
                   type="submit"
-                  loading={keyDerivationInProgress || mutation.isPending}
+                  loading={
+                    keyDerivationInProgress ||
+                    loginMutation.isPending ||
+                    changePasswordMutation.isPending
+                  }
                 >
                   Change Password
                 </Button>

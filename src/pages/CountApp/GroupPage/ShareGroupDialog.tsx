@@ -189,7 +189,6 @@ export const ShareGroupDialog = () => {
       "invitation link secret",
     );
 
-    // TODO: This requires the group encryption key to be exportable, which is currently the case, but is not ideal for security.
     const groupEncryptionKeyBuffer = new Uint8Array(
       await window.crypto.subtle.exportKey("raw", group!.groupEncryptionKey),
     );

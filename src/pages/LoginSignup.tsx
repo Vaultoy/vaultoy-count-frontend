@@ -148,7 +148,7 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       const userEncryptionKey = await decryptEncryptionKey(
         typedResponse.userEncryptionKey,
         tmpUserWaiting.passwordEncryptionKey,
-        true, // TODO: Extractability is required for password change, not ideal for security
+        false,
         "user key",
       );
 
