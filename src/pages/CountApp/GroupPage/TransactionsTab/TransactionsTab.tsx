@@ -7,6 +7,7 @@ import {
   SkeletonCircle,
   HStack,
   Center,
+  Button,
 } from "@chakra-ui/react";
 import { AddEditTransactionDialog } from "./AddEditTransactionDialog";
 import {
@@ -19,6 +20,7 @@ import {
 import { GroupContext } from "@/contexts/GroupContext";
 import { useContext } from "react";
 import { ViewTransactionDialog } from "./ViewTransactionDialog";
+import { FaPlus } from "react-icons/fa";
 
 export const TransactionsTab = () => {
   const { group, groupMembersIndex, isError } = useContext(GroupContext);
@@ -26,7 +28,11 @@ export const TransactionsTab = () => {
   return (
     <VStack>
       <Center marginBottom="1.5em">
-        <AddEditTransactionDialog />
+        <AddEditTransactionDialog>
+          <Button variant="outline" disabled={!group}>
+            <FaPlus /> Add a transaction
+          </Button>
+        </AddEditTransactionDialog>
       </Center>
 
       {group?.transactions.length === 0 && <Text>🙅 No transactions yet.</Text>}

@@ -1,4 +1,4 @@
-import { EquilibriumRepayment } from "@/components/ui/EquilibriumRepayment";
+import { EquilibriumRepayment } from "@/pages/CountApp/GroupPage/EquilibriumTab/EquilibriumRepayment";
 import { GroupContext } from "@/contexts/GroupContext";
 import { UserContext } from "@/contexts/UserContext";
 import {
@@ -46,8 +46,7 @@ const getDialogButtonText = (
 
 export const EquilibriumRepaymentsDialog = () => {
   const { user } = useContext(UserContext);
-  const { group, groupMembersIndex, selfMember, isError } =
-    useContext(GroupContext);
+  const { group, selfMember, isError } = useContext(GroupContext);
   const selfRepayments = selfMember?.repaymentsToMake;
 
   const [open, setOpen] = useState(false);
@@ -113,13 +112,8 @@ export const EquilibriumRepaymentsDialog = () => {
                 {selfRepayments?.map((repayment) => (
                   <EquilibriumRepayment
                     key={`${selfMember?.memberId}-${repayment.toMemberId}`}
-                    fromNickname={selfMember?.nickname ?? "Unknown User"}
-                    toNickname={
-                      groupMembersIndex
-                        ? groupMembersIndex[repayment.toMemberId]?.nickname ||
-                          "Unknown User"
-                        : "Unknown User"
-                    }
+                    fromMemberId={selfMember?.memberId}
+                    toMemberId={repayment.toMemberId}
                     amount={repayment.amount}
                   />
                 ))}
@@ -134,18 +128,8 @@ export const EquilibriumRepaymentsDialog = () => {
                 {othersRepayments?.map((repayment) => (
                   <EquilibriumRepayment
                     key={`${repayment.fromMemberId}-${repayment.toMemberId}`}
-                    fromNickname={
-                      groupMembersIndex
-                        ? groupMembersIndex[repayment.fromMemberId]?.nickname ||
-                          "Unknown User"
-                        : "Unknown User"
-                    }
-                    toNickname={
-                      groupMembersIndex
-                        ? groupMembersIndex[repayment.toMemberId]?.nickname ||
-                          "Unknown User"
-                        : "Unknown User"
-                    }
+                    fromMemberId={repayment.fromMemberId}
+                    toMemberId={repayment.toMemberId}
                     amount={repayment.amount}
                   />
                 ))}

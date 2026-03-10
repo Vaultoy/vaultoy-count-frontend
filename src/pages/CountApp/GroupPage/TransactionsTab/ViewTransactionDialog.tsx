@@ -10,6 +10,7 @@ import {
   Icon,
   Box,
   Heading,
+  Button,
 } from "@chakra-ui/react";
 import { useContext, useMemo, useState } from "react";
 import {
@@ -22,6 +23,7 @@ import {
 import { GroupContext } from "@/contexts/GroupContext";
 import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import { AddEditTransactionDialog } from "./AddEditTransactionDialog";
+import { LuPencilLine } from "react-icons/lu";
 
 export const ViewTransactionDialog = ({
   transactionId,
@@ -230,7 +232,11 @@ export const ViewTransactionDialog = ({
               <AddEditTransactionDialog
                 editTransactionId={transaction.id}
                 defaultValues={defaultValuesForEdit}
-              />
+              >
+                <Button variant="outline" disabled={!group}>
+                  <LuPencilLine /> Edit
+                </Button>
+              </AddEditTransactionDialog>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>
               <CloseButton size="sm" />

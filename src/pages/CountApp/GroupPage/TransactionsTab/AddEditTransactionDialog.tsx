@@ -46,8 +46,8 @@ import {
 import { checkResponseError } from "@/utils/checkResponseError";
 import { checkResponseJson } from "@/utils/checkResponseJson";
 import { GroupContext } from "@/contexts/GroupContext";
-import { LuPencilLine } from "react-icons/lu";
 import { encryptTransaction } from "@/encryption/transactionEncryption";
+import { LuPencilLine } from "react-icons/lu";
 
 const formValuesSchema = z
   .object({
@@ -124,9 +124,11 @@ const defaultValuesDefault: z.input<typeof formValuesSchema> = {
  * If editTransactionId is provided, the dialog will call the edit transaction API instead of the add transaction API.
  */
 export const AddEditTransactionDialog = ({
+  children,
   defaultValues = defaultValuesDefault,
   editTransactionId,
 }: {
+  children: React.ReactNode;
   defaultValues?: z.input<typeof formValuesSchema>;
   editTransactionId?: number;
 }) => {
@@ -271,17 +273,7 @@ export const AddEditTransactionDialog = ({
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Dialog.Trigger asChild>
-        {editTransactionId === undefined ? (
-          <Button variant="outline" disabled={!group}>
-            <FaPlus /> Add a transaction
-          </Button>
-        ) : (
-          <Button variant="outline" disabled={!group}>
-            <LuPencilLine /> Edit
-          </Button>
-        )}
-      </Dialog.Trigger>
+      <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
@@ -389,9 +381,13 @@ export const AddEditTransactionDialog = ({
 
                   <Fieldset.Root invalid={!!errors.toMembers}>
                     <HStack alignItems="center" justifyContent="space-between">
-                      <Text>{getForText(transactionType, 42)}</Text>
+                      <Text fontWeight="medium">
+                        {getForText(transactionType, 42)}
+                      </Text>
 
-                      {transactionType !== REPAYMENT && <Text>Shares</Text>}
+                      {transactionType !== REPAYMENT && (
+                        <Text fontWeight="medium">Shares</Text>
+                      )}
                     </HStack>
 
                     <Controller
@@ -604,7 +600,16 @@ export const AddEditTransactionDialog = ({
                   type="submit"
                   loading={addMutation.isPending || editMutation.isPending}
                 >
-                  {editTransactionId === undefined ? "Add" : "Edit"}
+                  {editTransactionId === undefined ? (
+                    <>
+                      <FaPlus /> Add
+                    </>
+                  ) : (
+                    <>
+                      <LuPencilLine />
+                      Edit
+                    </>
+                  )}
                 </Button>
               </Dialog.Footer>
             </form>
