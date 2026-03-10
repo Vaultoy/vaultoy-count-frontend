@@ -58,11 +58,11 @@ const formValuesSchema = z
       .max(1, "Select exactly one member")
       .transform((val) => Number(val[0])),
     toMembers: z
-      .array(z.object({ memberId: z.string(), share: z.number() }))
+      .array(z.object({ id: z.string(), share: z.number() }))
       .min(1, "Select at least one member")
       .transform((vals) =>
         vals.map((val) => ({
-          memberId: Number(val.memberId),
+          id: Number(val.id),
           share: val.share,
         })),
       ),
@@ -226,7 +226,7 @@ export const AddEditTransactionDialog = ({
         toMembers: await Promise.all(
           data.toMembers.map(async (toMember) => ({
             memberId: await encryptNumber(
-              toMember.memberId,
+              toMember.id,
               group.groupEncryptionKey,
               "group transaction to member id",
             ),
@@ -396,12 +396,12 @@ export const AddEditTransactionDialog = ({
                           return (
                             <CheckboxGroup
                               invalid={!!errors.toMembers}
-                              value={field.value.map((val) => val.memberId)}
+                              value={field.value.map((val) => val.id)}
                               onValueChange={(value) =>
                                 field.onChange(
                                   value.map((val) => {
                                     const existing = field.value.find(
-                                      (v) => v.memberId === val,
+                                      (v) => v.id === val,
                                     );
                                     return {
                                       id: val,
@@ -437,7 +437,7 @@ export const AddEditTransactionDialog = ({
                                           marginBottom="-0.2em"
                                         >
                                           {field.value.find(
-                                            (v) => v.memberId === item.value,
+                                            (v) => v.id === item.value,
                                           )?.share ?? 0}
                                           x
                                         </Text>
@@ -450,8 +450,7 @@ export const AddEditTransactionDialog = ({
                                             totalShares === 0
                                               ? 0
                                               : ((field.value.find(
-                                                  (v) =>
-                                                    v.memberId === item.value,
+                                                  (v) => v.id === item.value,
                                                 )?.share ?? 0) /
                                                   totalShares) *
                                                   100 *
@@ -468,7 +467,7 @@ export const AddEditTransactionDialog = ({
                                         onClick={(e) => {
                                           e.preventDefault();
                                           const existing = field.value.find(
-                                            (v) => v.memberId === item.value,
+                                            (v) => v.id === item.value,
                                           );
                                           if (!existing) {
                                             field.onChange([
@@ -483,7 +482,7 @@ export const AddEditTransactionDialog = ({
                                           const newShare = existing.share + 1;
                                           field.onChange(
                                             field.value.map((v) =>
-                                              v.memberId === item.value
+                                              v.id === item.value
                                                 ? { ...v, share: newShare }
                                                 : v,
                                             ),
@@ -499,21 +498,20 @@ export const AddEditTransactionDialog = ({
                                         onClick={(e) => {
                                           e.preventDefault();
                                           const existing = field.value.find(
-                                            (v) => v.memberId === item.value,
+                                            (v) => v.id === item.value,
                                           );
                                           if (!existing) return;
                                           const newShare = existing.share - 1;
                                           if (newShare <= 0) {
                                             field.onChange(
                                               field.value.filter(
-                                                (v) =>
-                                                  v.memberId !== item.value,
+                                                (v) => v.id !== item.value,
                                               ),
                                             );
                                           } else {
                                             field.onChange(
                                               field.value.map((v) =>
-                                                v.memberId === item.value
+                                                v.id === item.value
                                                   ? { ...v, share: newShare }
                                                   : v,
                                               ),
@@ -533,12 +531,12 @@ export const AddEditTransactionDialog = ({
                           return (
                             <Select.Root
                               name={field.name}
-                              value={field.value.map((val) => val.memberId)}
+                              value={field.value.map((val) => val.id)}
                               onValueChange={({ value }) =>
                                 field.onChange(
                                   value.map((val) => {
                                     const existing = field.value.find(
-                                      (v) => v.memberId === val,
+                                      (v) => v.id === val,
                                     );
                                     return {
                                       id: val,
