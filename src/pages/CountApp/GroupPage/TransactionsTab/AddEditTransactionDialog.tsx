@@ -1,5 +1,6 @@
 import {
   EXPENSE,
+  patchEditTransactionMutation,
   postAddTransactionMutation,
   REPAYMENT,
   REVENUE,
@@ -190,6 +191,37 @@ export const AddEditTransactionDialog = ({
     },
   });
 
+  const editMutation = useMutation({
+    mutationFn: patchEditTransactionMutation,
+    onSuccess: async (data) => {
+      const responseData = await checkResponseJson(data);
+      if (await checkResponseError(data.status, responseData)) {
+        return;
+      }
+
+      if (data.status !== 200) {
+        toaster.create(unknownErrorToastWithStatus(data.status));
+        return;
+      }
+
+      toaster.create({
+        title: "Transaction edited successfully",
+        type: "success",
+      });
+
+      setOpen(false);
+      // Also reset errors
+      reset(defaultValues, { keepErrors: false });
+      queryClient.invalidateQueries({
+        queryKey: ["getGroup", group?.id],
+      });
+    },
+    onError: (error) => {
+      console.error("Login failed", error);
+      toaster.create(UNKNOWN_ERROR_TOAST);
+    },
+  });
+
   const onSubmit = handleSubmit(async (data) => {
     if (!group) {
       console.error("Group data is undefined");
@@ -198,14 +230,6 @@ export const AddEditTransactionDialog = ({
     }
 
     const amountSign = transactionType === REVENUE ? -1 : 1;
-
-    if (editTransactionId !== undefined) {
-      toaster.create({
-        title: "Editing transactions is not implemented yet",
-        type: "warning",
-      });
-      return;
-    }
 
     const encryptedTransaction = await encryptTransaction(
       {
@@ -219,10 +243,18 @@ export const AddEditTransactionDialog = ({
       group.groupEncryptionKey,
     );
 
-    addMutation.mutate({
-      groupId: group.id,
-      transactionData: encryptedTransaction,
-    });
+    if (editTransactionId === undefined) {
+      addMutation.mutate({
+        groupId: group.id,
+        transactionData: encryptedTransaction,
+      });
+    } else {
+      editMutation.mutate({
+        transactionId: editTransactionId,
+        groupId: group.id,
+        transactionData: encryptedTransaction,
+      });
+    }
   });
 
   const membersSelector = useMemo(
@@ -568,7 +600,10 @@ export const AddEditTransactionDialog = ({
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancel</Button>
                 </Dialog.ActionTrigger>
-                <Button type="submit" loading={addMutation.isPending}>
+                <Button
+                  type="submit"
+                  loading={addMutation.isPending || editMutation.isPending}
+                >
                   {editTransactionId === undefined ? "Add" : "Edit"}
                 </Button>
               </Dialog.Footer>

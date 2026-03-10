@@ -87,6 +87,22 @@ export const postAddTransactionMutation = async ({
   return fetchApi("POST", `/v1/group/${groupId}/transaction`, transactionData);
 };
 
+export const patchEditTransactionMutation = async ({
+  groupId,
+  transactionId,
+  transactionData,
+}: {
+  groupId: number;
+  transactionId: number;
+  transactionData: NewGroupTransaction<true>;
+}) => {
+  return fetchApi(
+    "PATCH",
+    `/v1/group/${groupId}/transaction/${transactionId}`,
+    transactionData,
+  );
+};
+
 export const patchEditGroupMemberNicknameMutation = async ({
   groupId,
   memberId,
