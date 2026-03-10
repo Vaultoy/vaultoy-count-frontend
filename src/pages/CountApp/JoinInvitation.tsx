@@ -14,9 +14,8 @@ import { checkResponseError } from "@/utils/checkResponseError";
 import { checkResponseJson } from "@/utils/checkResponseJson";
 import {
   decryptGroupForJoining,
-  encryptEncryptionKey,
   type GroupForJoiningWithKey,
-} from "@/encryption/encryption";
+} from "@/encryption/groupEncryption";
 import { deriveInvitationAuthenticationToken } from "@/encryption/groupInvitationDerivation";
 import {
   Button,
@@ -35,6 +34,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import z from "zod";
+import { encryptEncryptionKey } from "@/encryption/encryption";
 
 const formValuesSchema = z.object({
   selfMemberId: z.string("Please select who you are in this list"),

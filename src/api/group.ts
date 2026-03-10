@@ -72,14 +72,17 @@ export const getGroupQuery = async (
   return Object.assign(response, { bodyJson });
 };
 
-type NewGroupTransaction = Omit<GroupTransaction, "id">;
+export type NewGroupTransaction<isEncrypted extends boolean> = Omit<
+  GroupTransaction<isEncrypted>,
+  "id"
+>;
 
 export const postAddTransactionMutation = async ({
   groupId,
   transactionData,
 }: {
   groupId: number;
-  transactionData: NewGroupTransaction;
+  transactionData: NewGroupTransaction<true>;
 }) => {
   return fetchApi("POST", `/v1/group/${groupId}/transaction`, transactionData);
 };

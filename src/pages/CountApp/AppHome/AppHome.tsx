@@ -13,11 +13,11 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
 import { NavLink } from "react-router";
-import { decryptEncryptionKey, decryptString } from "@/encryption/encryption";
 import { UserContext } from "@/contexts/UserContext";
 import { CreateGroupDialog } from "./CreateGroupDialog";
 import { useQueryApi } from "@/api/useQueryApi";
 import { FcConferenceCall, FcFolder } from "react-icons/fc";
+import { decryptGroupForAppHomePage } from "@/encryption/groupEncryption";
 
 export const AppHomePage = () => {
   const user = useContext(UserContext);
@@ -36,24 +36,9 @@ export const AppHomePage = () => {
       if (!user || !user.user || !body || !body.groups) return;
 
       const groups = await Promise.all(
-        body.groups.map(async (group) => {
-          const groupEncryptionKey = await decryptEncryptionKey(
-            group.groupEncryptionKey,
-            user.user?.userEncryptionKey as CryptoKey,
-            false,
-            "group key for group list",
-          );
-
-          return {
-            id: group.id,
-            name: await decryptString(
-              group.name,
-              groupEncryptionKey,
-              "a group name of the group list",
-            ),
-            groupEncryptionKey,
-          };
-        }),
+        body.groups.map(async (group) =>
+          decryptGroupForAppHomePage(group, user!.user!.userEncryptionKey),
+        ),
       );
 
       if (!active) return;

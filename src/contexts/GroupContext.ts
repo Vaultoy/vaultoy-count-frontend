@@ -1,5 +1,5 @@
 import { type GroupExtended, type GroupMember } from "@/api/group";
-import { decryptGroup } from "@/encryption/encryption";
+import { decryptGroup } from "@/encryption/groupEncryption";
 import React, { createContext, useContext, useEffect } from "react";
 import { UserContext } from "./UserContext";
 import {
