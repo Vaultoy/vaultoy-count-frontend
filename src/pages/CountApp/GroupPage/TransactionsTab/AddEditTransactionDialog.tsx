@@ -380,16 +380,6 @@ export const AddEditTransactionDialog = ({
                   </Field.Root>
 
                   <Fieldset.Root invalid={!!errors.toMembers}>
-                    <HStack alignItems="center" justifyContent="space-between">
-                      <Text fontWeight="medium">
-                        {getForText(transactionType, 42)}
-                      </Text>
-
-                      {transactionType !== REPAYMENT && (
-                        <Text fontWeight="medium">Shares</Text>
-                      )}
-                    </HStack>
-
                     <Controller
                       control={control}
                       name="toMembers"
@@ -398,6 +388,20 @@ export const AddEditTransactionDialog = ({
                           transactionType === EXPENSE ||
                           transactionType === REVENUE
                         ) {
+                          const allMemberValues = membersSelector.items.map(
+                            (item) => item.value,
+                          );
+                          const selectedMemberValues = field.value.map(
+                            (val) => val.memberId,
+                          );
+                          const allSelected =
+                            allMemberValues.length > 0 &&
+                            allMemberValues.every((val) =>
+                              selectedMemberValues.includes(val),
+                            );
+                          const someSelectedButNotAll =
+                            !allSelected && selectedMemberValues.length > 0;
+
                           return (
                             <CheckboxGroup
                               invalid={!!errors.toMembers}
@@ -419,6 +423,53 @@ export const AddEditTransactionDialog = ({
                               marginTop="0.5em"
                             >
                               <Fieldset.Content>
+                                <HStack
+                                  alignItems="center"
+                                  justifyContent="space-between"
+                                >
+                                  <Checkbox.Root
+                                    variant={
+                                      someSelectedButNotAll
+                                        ? "outline"
+                                        : undefined
+                                    }
+                                    checked={
+                                      allSelected
+                                        ? true
+                                        : someSelectedButNotAll
+                                          ? "indeterminate"
+                                          : false
+                                    }
+                                    onCheckedChange={({ checked }) => {
+                                      if (checked) {
+                                        field.onChange(
+                                          allMemberValues.map((val) => {
+                                            const existing = field.value.find(
+                                              (v) => v.memberId === val,
+                                            );
+                                            return {
+                                              memberId: val,
+                                              share: existing
+                                                ? existing.share
+                                                : 1,
+                                            };
+                                          }),
+                                        );
+                                      } else {
+                                        field.onChange([]);
+                                      }
+                                    }}
+                                  >
+                                    <Checkbox.HiddenInput />
+                                    <Checkbox.Control />
+                                    <Checkbox.Label fontWeight="medium">
+                                      {getForText(transactionType, 42)}
+                                    </Checkbox.Label>
+                                  </Checkbox.Root>
+
+                                  <Text fontWeight="medium">Shares</Text>
+                                </HStack>
+
                                 {membersSelector.items.map((item) => (
                                   <HStack
                                     key={item.value}
@@ -427,7 +478,7 @@ export const AddEditTransactionDialog = ({
                                     <Checkbox.Root value={item.value}>
                                       <Checkbox.HiddenInput />
                                       <Checkbox.Control />
-                                      <Checkbox.Label>
+                                      <Checkbox.Label fontWeight="normal">
                                         {item.label}
                                       </Checkbox.Label>
                                     </Checkbox.Root>
@@ -536,51 +587,57 @@ export const AddEditTransactionDialog = ({
                           );
                         } else {
                           return (
-                            <Select.Root
-                              name={field.name}
-                              value={field.value.map((val) => val.memberId)}
-                              onValueChange={({ value }) =>
-                                field.onChange(
-                                  value.map((val) => {
-                                    const existing = field.value.find(
-                                      (v) => v.memberId === val,
-                                    );
-                                    return {
-                                      memberId: val,
-                                      share: existing ? existing.share : 1,
-                                    };
-                                  }),
-                                )
-                              }
-                              onInteractOutside={() => field.onBlur()}
-                              collection={membersSelector}
-                              marginTop="0.5em"
-                            >
-                              <Select.HiddenSelect />
-                              <Select.Control>
-                                <Select.Trigger>
-                                  <Select.ValueText placeholder="Select member" />
-                                </Select.Trigger>
-                                <Select.IndicatorGroup>
-                                  <Select.Indicator />
-                                </Select.IndicatorGroup>
-                              </Select.Control>
-                              <Portal>
-                                <Select.Positioner>
-                                  <Select.Content zIndex={2000}>
-                                    {membersSelector.items.map((member) => (
-                                      <Select.Item
-                                        item={member}
-                                        key={member.value}
-                                      >
-                                        {member.label}
-                                        <Select.ItemIndicator />
-                                      </Select.Item>
-                                    ))}
-                                  </Select.Content>
-                                </Select.Positioner>
-                              </Portal>
-                            </Select.Root>
+                            <>
+                              <Text fontWeight="medium">
+                                {getForText(transactionType, 42)}
+                              </Text>
+
+                              <Select.Root
+                                name={field.name}
+                                value={field.value.map((val) => val.memberId)}
+                                onValueChange={({ value }) =>
+                                  field.onChange(
+                                    value.map((val) => {
+                                      const existing = field.value.find(
+                                        (v) => v.memberId === val,
+                                      );
+                                      return {
+                                        memberId: val,
+                                        share: existing ? existing.share : 1,
+                                      };
+                                    }),
+                                  )
+                                }
+                                onInteractOutside={() => field.onBlur()}
+                                collection={membersSelector}
+                                marginTop="0.5em"
+                              >
+                                <Select.HiddenSelect />
+                                <Select.Control>
+                                  <Select.Trigger>
+                                    <Select.ValueText placeholder="Select member" />
+                                  </Select.Trigger>
+                                  <Select.IndicatorGroup>
+                                    <Select.Indicator />
+                                  </Select.IndicatorGroup>
+                                </Select.Control>
+                                <Portal>
+                                  <Select.Positioner>
+                                    <Select.Content zIndex={2000}>
+                                      {membersSelector.items.map((member) => (
+                                        <Select.Item
+                                          item={member}
+                                          key={member.value}
+                                        >
+                                          {member.label}
+                                          <Select.ItemIndicator />
+                                        </Select.Item>
+                                      ))}
+                                    </Select.Content>
+                                  </Select.Positioner>
+                                </Portal>
+                              </Select.Root>
+                            </>
                           );
                         }
                       }}
