@@ -28,12 +28,6 @@ const queryClient = new QueryClient();
 const config = defineConfig({
   theme: {
     tokens: {
-      fonts: {
-        body: { value: '"Roboto", "Noto Color Emoji", system-ui, sans-serif' },
-        heading: {
-          value: '"Roboto", "Noto Color Emoji", system-ui, sans-serif',
-        },
-      },
       colors: {},
     },
   },

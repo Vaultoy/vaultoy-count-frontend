@@ -15,6 +15,7 @@ export const Logo = ({ size, showText, ...rest }: LogoProps) => {
         src="/vaultoy_count_logo.svg"
         alt="Vaultoy Count Logo"
         height={size === "small" ? "2.2em" : "3em"}
+        width={size === "small" ? "2.2em" : "3em"}
       />
       {showText && (
         <Heading
