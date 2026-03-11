@@ -14,6 +14,9 @@ import {
 const FIGURE_LOGIN = 1;
 const FIGURE_JOIN = 2;
 
+const SECTION_JOINING_GROUPS = "II";
+const SECTION_SECRET_STORAGE = "III";
+
 export const WhitepaperPage = () => (
   <Center>
     <Card.Root
@@ -55,7 +58,7 @@ export const WhitepaperPage = () => (
           </Text>
 
           <Heading as="h2" textAlign="left" marginTop="2em">
-            Encryption and Decryption Flow
+            I. Encryption and Decryption Flow
           </Heading>
           <Text textAlign="justify">
             Figure {FIGURE_LOGIN} below illustrates how the encryption keys are
@@ -78,7 +81,7 @@ export const WhitepaperPage = () => (
             alignSelf="center"
           />
           <Heading as="h3" textAlign="left" marginTop="2em" size="lg">
-            Key derivation
+            I. A. Key derivation
           </Heading>
           <Text
             color="gray.500"
@@ -89,7 +92,7 @@ export const WhitepaperPage = () => (
             The implementation of the key derivation process can be found on{" "}
             <Link
               color="gray.500"
-              href="https://github.com/Vaultoy/vaultoy-count-frontend/blob/main/src/utils/keyDerivation.worker.ts"
+              href="https://github.com/Vaultoy/vaultoy-count-frontend/blob/main/src/encryption/keyDerivation.worker.ts"
               variant="underline"
               target="_blank"
             >
@@ -179,8 +182,31 @@ export const WhitepaperPage = () => (
             user&apos;s account and password.
           </Text>
 
+          <Heading as="h3" textAlign="left" marginTop="2em" size="lg">
+            I. B. Encryption scheme
+          </Heading>
+
+          <Text textAlign="justify" marginTop="0.5em">
+            Figure {FIGURE_LOGIN} also describes how the{" "}
+            <Italic>password key</Italic> is used to subsequently decrypt the{" "}
+            <Italic>user key</Italic> and the <Italic>group keys</Italic>. Using
+            multiple keys allows to easily change the user password without
+            having to re-encrypt all the data. It also allows to securely share
+            group keys when users join a group, as described in section{" "}
+            {SECTION_JOINING_GROUPS} of this document.
+            <br />
+            <br />
+            For symmetric encryption, Vaultoy Count uses AES256-GCM, which
+            provides authenticated encryption, ensuring both the confidentiality
+            and integrity of the data. The encryption and decryption processes
+            are implemented using the Web Crypto API. The way keys are stored in
+            the browser is described in section {SECTION_SECRET_STORAGE} of this
+            document.
+          </Text>
+
           <Heading as="h2" textAlign="left" marginTop="2em">
-            Joining a group and creating group invitation links
+            {SECTION_JOINING_GROUPS}. Joining a group and creating group
+            invitation links
           </Heading>
           <Text
             color="gray.500"
@@ -231,7 +257,7 @@ export const WhitepaperPage = () => (
           />
 
           <Heading as="h3" textAlign="left" marginTop="2em" size="lg">
-            Joining a group using an invitation link
+            II. A. Joining a group using an invitation link
           </Heading>
 
           <Text textAlign="justify" marginTop="0.5em">
@@ -265,7 +291,7 @@ export const WhitepaperPage = () => (
           </Text>
 
           <Heading as="h3" textAlign="left" marginTop="2em" size="lg">
-            Creating the group invitation link
+            II. B. Creating the group invitation link
           </Heading>
 
           <Text textAlign="justify" marginTop="0.5em">
@@ -296,6 +322,86 @@ export const WhitepaperPage = () => (
             server can store the encrypted{" "}
             <Italic>invitation link secret</Italic> without ever having access
             to it, and send it back to the client when needed.
+          </Text>
+
+          <Heading as="h2" textAlign="left" marginTop="2em">
+            {SECTION_SECRET_STORAGE}. Client-side keys and secrets storage
+          </Heading>
+          <Text textAlign="justify">
+            As described in the previous sections, encryption keys never leave
+            the client and are not accessible to the server. Only encrypted
+            versions of the keys are sent to the server. This section describes
+            how those keys are stored on the client and protected against
+            potential attacks.
+            <br />
+            <br />
+            The <Italic>password key</Italic> and the{" "}
+            <Italic>authentication token</Italic> are stored a very short time
+            in memory between the moment the user enters his password and the
+            moment it receives the server&apos;s response. This is particularly
+            important because the <Italic>password key</Italic> and the{" "}
+            <Italic>authentication token</Italic> are the only two secrets that
+            are directly derived from the user&apos;s password and could be used
+            by an attacker to brute-force the user&apos;s password.
+            <br />
+            <br />
+            The <Italic>user key</Italic> is stored in the long-term memory of
+            the browser for as long as the user is logged in. To protect this
+            key, it is imported as a non-extractable key in the Web Crypto API.
+            This means that even if an attacker was able to execute malicious
+            code in the context of the application, they would not be able to
+            extract the <Italic>user key</Italic> from the browser.
+            <br />
+            <br />
+            Finally the <Italic>group key</Italic>,{" "}
+            <Italic>invitation link secret</Italic>, and{" "}
+            <Italic>invitation key</Italic> are stored in the short-term memory
+            of the browser for as long as the user is on the relevant page.
+          </Text>
+
+          <Heading as="h2" textAlign="left" marginTop="2em">
+            IV. Securely serving the frontend code and protecting data in
+            transit
+          </Heading>
+          <Text textAlign="justify">
+            While the the main security gain of Vaultoy Count comes from the
+            end-to-end encryption, the application must also ensure the
+            protection of data in transit, notably to prevent the modification
+            of the frontend code by an attacker. Firstly, the use of DNSSEC adds
+            a layer of authenticity to the domain name resolution process, which
+            helps prevent DNS spoofing attacks. Moreover, the server is
+            configured to only accept HTTPS connections with modern TLS versions
+            (TLS v1.2 and above).
+            <br />
+            <br />
+            Finally, to protect against downgrade attacks, the frontend code is
+            served with preloaded HTTP Strict Transport Security (HSTS) headers.
+            This ensures that the browser will only connect to the server using
+            HTTPS, even if an attacker attempts to force a downgrade. The domain
+            name <Italic>vaultoy.com</Italic> is marked as HTTPS-only directly
+            in the{" "}
+            <Link
+              href="https://github.com/chromium/chromium/blob/dc7016d1ef67e3e1281dce92bf27ed1f9743ea2f/net/http/transport_security_state_static.json"
+              variant="underline"
+              target="_blank"
+            >
+              source code
+            </Link>{" "}
+            of most modern browsers (such as Chrome, Firefox, Safari, Vivaldi,
+            Brave, etc.). This ensures that downgrade attacks are not possible
+            even for the first visit of the user to the site.
+          </Text>
+
+          <Heading as="h2" textAlign="left" marginTop="2em">
+            V. Reporting security vulnerabilities
+          </Heading>
+          <Text textAlign="justify">
+            If you believe you have found a security vulnerability, or if you
+            have any security concerns, please contact us through our{" "}
+            <Link href="/contact" variant="underline">
+              contact page
+            </Link>
+            .
           </Text>
         </VStack>
       </Card.Body>
