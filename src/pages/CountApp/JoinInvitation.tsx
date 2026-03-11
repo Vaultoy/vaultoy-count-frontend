@@ -40,7 +40,7 @@ const formValuesSchema = z.object({
   selfMemberId: z.string("Please select who you are in this list"),
 });
 
-export const JoinInvitation = () => {
+const JoinInvitation = () => {
   const { groupId: groupIdString, invitationLinkSecret } = useParams<{
     groupId: string;
     invitationLinkSecret: string;
@@ -401,3 +401,5 @@ export const JoinInvitation = () => {
     </Center>
   );
 };
+
+export default JoinInvitation;

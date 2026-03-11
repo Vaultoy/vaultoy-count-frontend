@@ -3,7 +3,7 @@ import { AppHomePage } from "./AppHome/AppHome";
 import { GroupPage } from "./GroupPage/GroupPage";
 import { ErrorPage } from "@/pages/ErrorPage";
 
-export const CountApp = () => {
+const CountApp = () => {
   return (
     <Routes>
       <Route path="/" element={<AppHomePage />} />
@@ -20,3 +20,5 @@ export const CountApp = () => {
     </Routes>
   );
 };
+
+export default CountApp;

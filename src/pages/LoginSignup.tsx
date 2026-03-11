@@ -47,7 +47,7 @@ interface TemporaryUserWaitingForServerResponse {
   passwordEncryptionKey: CryptoKey;
 }
 
-export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
+const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const [passwordLength, setPasswordLength] = useState(0);
   const [keyDerivationInProgress, setKeyDerivationInProgress] = useState(false);
   const [tmpUserWaiting, setTmpUserWaiting] = useState<
@@ -391,3 +391,5 @@ export const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     </Flex>
   );
 };
+
+export default LoginSignup;

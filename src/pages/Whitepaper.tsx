@@ -17,7 +17,7 @@ const FIGURE_JOIN = 2;
 const SECTION_JOINING_GROUPS = "II";
 const SECTION_SECRET_STORAGE = "III";
 
-export const WhitepaperPage = () => (
+const WhitepaperPage = () => (
   <Center>
     <Card.Root
       marginTop="2em"
@@ -408,3 +408,5 @@ export const WhitepaperPage = () => (
     </Card.Root>
   </Center>
 );
+
+export default WhitepaperPage;

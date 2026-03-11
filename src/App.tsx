@@ -5,23 +5,25 @@ import {
   ChakraProvider,
 } from "@chakra-ui/react";
 import { BrowserRouter, Route, Routes } from "react-router";
-import { Home } from "./pages/Home/Home";
-import { LoginSignup } from "./pages/LoginSignup";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
 import { ErrorPage } from "./pages/ErrorPage";
 import { UserContextProvider } from "./contexts/UserContextProvider";
-import { JoinInvitation } from "./pages/CountApp/JoinInvitation";
-import { CountApp } from "./pages/CountApp/CountApp";
 import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectContextProvider";
 import { GroupContextProvider } from "./contexts/GroupContextProvider";
-import { useEffect } from "react";
-import { WhitepaperPage } from "./pages/Whitepaper";
-import { Navbar } from "./pages/Navbar/Navbar";
-import { SettingsPage } from "./pages/Settings/Settings";
-import { ContactPage } from "./pages/ContactPage/ContactPage";
+import { lazy, useEffect } from "react";
 import { LanguageContextProvider } from "./contexts/LanguageContextProvider";
-import { LegalPage } from "./pages/LegalPage/LegalPage";
+import { LazyPage } from "./components/LazyPage";
+import { Home } from "./pages/Home/Home";
+import { Navbar } from "./pages/Navbar/Navbar";
+
+const CountApp = lazy(() => import("./pages/CountApp/CountApp"));
+const SettingsPage = lazy(() => import("./pages/Settings/Settings"));
+const LoginSignup = lazy(() => import("./pages/LoginSignup"));
+const JoinInvitation = lazy(() => import("./pages/CountApp/JoinInvitation"));
+const WhitepaperPage = lazy(() => import("./pages/Whitepaper"));
+const ContactPage = lazy(() => import("./pages/ContactPage/ContactPage"));
+const LegalPage = lazy(() => import("./pages/LegalPage/LegalPage"));
 
 const queryClient = new QueryClient();
 
@@ -41,18 +43,57 @@ const RoutesWithNavbar = () => (
     <Routes>
       <Route path="/" element={<Home />} />
 
-      <Route path="/settings" element={<SettingsPage />} />
+      <Route
+        path="/settings"
+        element={
+          <LazyPage>
+            <SettingsPage />
+          </LazyPage>
+        }
+      />
 
-      <Route path="/app/*" element={<CountApp />} />
+      <Route
+        path="/app/*"
+        element={
+          <LazyPage>
+            <CountApp />
+          </LazyPage>
+        }
+      />
 
       <Route
         path="/join/:groupId/:invitationLinkSecret"
-        element={<JoinInvitation />}
+        element={
+          <LazyPage>
+            <JoinInvitation />
+          </LazyPage>
+        }
       />
 
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/whitepaper" element={<WhitepaperPage />} />
-      <Route path="/legal" element={<LegalPage />} />
+      <Route
+        path="/contact"
+        element={
+          <LazyPage>
+            <ContactPage />
+          </LazyPage>
+        }
+      />
+      <Route
+        path="/whitepaper"
+        element={
+          <LazyPage>
+            <WhitepaperPage />
+          </LazyPage>
+        }
+      />
+      <Route
+        path="/legal"
+        element={
+          <LazyPage>
+            <LegalPage />
+          </LazyPage>
+        }
+      />
 
       <Route
         path="*"
@@ -82,10 +123,21 @@ const App = () => {
                 <Toaster />
                 <BrowserRouter>
                   <Routes>
-                    <Route path="/login" element={<LoginSignup isLogin />} />
+                    <Route
+                      path="/login"
+                      element={
+                        <LazyPage>
+                          <LoginSignup isLogin />
+                        </LazyPage>
+                      }
+                    />
                     <Route
                       path="/signup"
-                      element={<LoginSignup isLogin={false} />}
+                      element={
+                        <LazyPage>
+                          <LoginSignup isLogin={false} />
+                        </LazyPage>
+                      }
                     />
                     <Route path="*" element={<RoutesWithNavbar />} />
                   </Routes>

@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { PGPKey } from "./PGPKey";
 
-export const ContactPage = () => (
+const ContactPage = () => (
   <Center>
     <Card.Root
       marginTop="2em"
@@ -59,3 +59,5 @@ export const ContactPage = () => (
     </Card.Root>
   </Center>
 );
+
+export default ContactPage;

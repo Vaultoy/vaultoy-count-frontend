@@ -7,7 +7,7 @@ import { PrivacyPolicy } from "./PrivacyPolicy";
 import { TermsService } from "./TermsService";
 import { EmailAddress } from "@/components/EmailAddress";
 
-export const LegalPage = () => (
+const LegalPage = () => (
   <Center>
     <Card.Root
       marginTop="2em"
@@ -120,3 +120,4 @@ export const LegalPage = () => (
     </Card.Root>
   </Center>
 );
+export default LegalPage;

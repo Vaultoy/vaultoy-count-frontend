@@ -15,7 +15,7 @@ import { useContext } from "react";
 import { ChangePasswordDialog } from "./ChangePasswordDialog";
 import { InfoPopover } from "@/components/InfoPopover";
 
-export const SettingsPage = () => {
+const SettingsPage = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -77,3 +77,5 @@ export const SettingsPage = () => {
     </Center>
   );
 };
+
+export default SettingsPage;
