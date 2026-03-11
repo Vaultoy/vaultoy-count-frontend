@@ -2,13 +2,54 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vaultoy_count_logo_adaptative.svg" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/vaultoy_count_logo_adaptative.svg"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vaultoy Count | Privatly split group expenses with end-to-end encryption</title>
-    <meta name="description" content="Vaultoy Count is a group expense splitting app with end-to-end encryption, built as an alternative to apps like Tricount and Splitwise." />
+    <title>
+      Vaultoy Count | Privatly split group expenses with end-to-end encryption
+    </title>
+    <meta
+      name="description"
+      content="Vaultoy Count is a group expense splitting app with end-to-end encryption, built as an alternative to apps like Tricount and Splitwise."
+    />
+    <style>
+      .index-loader-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .index-loader {
+        width: 48px;
+        height: 48px;
+        border: 5px solid #6b7280;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+      }
+
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="index-loader-container">
+        <div class="index-loader"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
