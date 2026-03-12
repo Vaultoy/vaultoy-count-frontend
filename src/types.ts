@@ -4,3 +4,7 @@ export type Encrypted<
 > = isEncrypted extends true
   ? string // Base64 encoded encrypted data
   : T;
+
+export type Result<T> = T & {
+  isOk: boolean;
+};

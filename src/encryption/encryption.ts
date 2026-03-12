@@ -33,14 +33,14 @@ const decrypt = async (
   key: CryptoKey,
   dataName: string, // Only used for error logging
 ): Promise<Uint8Array<ArrayBuffer>> => {
-  const combined = Uint8Array.from(atob(encryptedDataBase64), (c) =>
-    c.charCodeAt(0),
-  );
-
-  const iv = combined.slice(0, 12);
-  const encryptedData = combined.slice(12);
-
   try {
+    const combined = Uint8Array.from(atob(encryptedDataBase64), (c) =>
+      c.charCodeAt(0),
+    );
+
+    const iv = combined.slice(0, 12);
+    const encryptedData = combined.slice(12);
+
     const decryptedData = await crypto.subtle.decrypt(
       {
         name: "AES-GCM",

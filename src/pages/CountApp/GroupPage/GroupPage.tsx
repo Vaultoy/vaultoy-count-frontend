@@ -16,6 +16,8 @@ import {
   HStack,
   Tabs,
   Skeleton,
+  VStack,
+  Icon,
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
 import { useContext, useEffect } from "react";
@@ -29,6 +31,7 @@ import {
 import { useQueryApi } from "@/api/useQueryApi";
 import { FcConferenceCall } from "react-icons/fc";
 import { MembersTab } from "./MembersTab/Members";
+import { TbFaceIdError } from "react-icons/tb";
 
 const validTabs = ["transactions", "balances", "members"] as const;
 
@@ -103,14 +106,32 @@ export const GroupPage = () => {
             )}{" "}
             {!isError && !group && <Skeleton height="2em" width="50%" />}
             {isError && (
-              <Text marginBottom="1em">
-                ❌ An unknown error occurred while loading the group. Please try
-                again later.
-              </Text>
+              <VStack>
+                <Icon
+                  as={TbFaceIdError}
+                  height="4em"
+                  width="4em"
+                  color="gray.500"
+                />
+                <Text color="gray.600" textAlign="center">
+                  {isError === "QUERY_ERROR" && (
+                    <>
+                      There was an error while loading the group data. Please
+                      try to refresh the page, or contact the support for help.
+                    </>
+                  )}
+                  {isError === "DECRYPTION_ERROR" && (
+                    <>
+                      There was an error while decrypting the group data. Please
+                      try to refresh the page, or contact the support for help.
+                    </>
+                  )}
+                </Text>
+              </VStack>
             )}
           </Center>
         </Card.Header>
-        <Card.Body>
+        <Card.Body display={isError ? "none" : undefined}>
           <Tabs.Root
             value={currentTab}
             width="100%"

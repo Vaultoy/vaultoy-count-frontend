@@ -18,6 +18,8 @@ import { CreateGroupDialog } from "./CreateGroupDialog";
 import { useQueryApi } from "@/api/useQueryApi";
 import { FcConferenceCall, FcFolder } from "react-icons/fc";
 import { decryptGroupForAppHomePage } from "@/encryption/groupEncryption";
+import { type Result } from "@/types";
+import { TbFaceIdError } from "react-icons/tb";
 
 export const AppHomePage = () => {
   const user = useContext(UserContext);
@@ -28,7 +30,7 @@ export const AppHomePage = () => {
   });
 
   const [decryptedGroups, setDecryptedGroups] = useState<
-    Group<false>[] | undefined
+    Result<Group<false>>[] | undefined
   >(undefined);
 
   useEffect(() => {
@@ -69,21 +71,36 @@ export const AppHomePage = () => {
         )}
         {decryptedGroups?.map((group) => (
           <NavLink
-            to={`/app/group/${group.id}`}
+            to={group.isOk ? `/app/group/${group.id}` : "#"}
             key={group.id}
-            style={{ width: "100%" }}
+            style={{
+              width: "100%",
+              cursor: group.isOk ? "pointer" : "not-allowed",
+            }}
           >
-            <Card.Root>
+            <Card.Root color={group.isOk ? "black" : "gray.400"}>
               <Card.Body>
                 <Flex alignItems="center" justifyContent="space-between">
-                  <Heading
-                    marginRight="1em"
-                    display="flex"
-                    alignItems="center"
-                    gap="0.5em"
-                  >
-                    <FcConferenceCall size="1.7em" /> {group.name}
-                  </Heading>
+                  <VStack alignItems="flex-start">
+                    <Heading
+                      marginRight="1em"
+                      display="flex"
+                      alignItems="center"
+                      gap="0.5em"
+                    >
+                      {group.isOk ? (
+                        <FcConferenceCall size="1.7em" />
+                      ) : (
+                        <TbFaceIdError size="1.7em" />
+                      )}{" "}
+                      {group.name}
+                    </Heading>
+                    {!group.isOk && (
+                      <Text fontSize="sm" color="gray.400">
+                        Please contact the support for help.
+                      </Text>
+                    )}
+                  </VStack>
                   <FaAnglesRight size="1.6em" />
                 </Flex>
               </Card.Body>

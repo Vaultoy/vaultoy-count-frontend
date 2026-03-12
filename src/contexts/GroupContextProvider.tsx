@@ -4,6 +4,7 @@ import {
   type GroupMembersComputedIndex,
   type GroupExtendedComputed,
   type GroupMemberComputed,
+  type GroupContextIsError,
 } from "./GroupContext";
 
 export const GroupContextProvider = ({ children }: { children: ReactNode }) => {
@@ -19,7 +20,7 @@ export const GroupContextProvider = ({ children }: { children: ReactNode }) => {
     undefined,
   );
 
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState<GroupContextIsError>(null);
 
   return (
     <GroupContext.Provider

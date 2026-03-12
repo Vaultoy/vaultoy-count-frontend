@@ -29,6 +29,8 @@ export interface GroupExtendedComputed extends GroupExtended<false> {
  */
 export type GroupMembersComputedIndex = Record<number, GroupMemberComputed>;
 
+export type GroupContextIsError = "DECRYPTION_ERROR" | "QUERY_ERROR" | null;
+
 export interface GroupContextType {
   group: GroupExtendedComputed | undefined;
   setGroup: React.Dispatch<
@@ -42,8 +44,8 @@ export interface GroupContextType {
   setGroupMembersIndex: React.Dispatch<
     React.SetStateAction<Record<number, GroupMemberComputed> | undefined>
   >;
-  isError: boolean;
-  setIsError: React.Dispatch<React.SetStateAction<boolean>>;
+  isError: GroupContextIsError;
+  setIsError: React.Dispatch<React.SetStateAction<GroupContextIsError>>;
 }
 
 export const GroupContext = createContext<GroupContextType>({
@@ -53,7 +55,7 @@ export const GroupContext = createContext<GroupContextType>({
   setSelfMember: () => {},
   groupMembersIndex: undefined,
   setGroupMembersIndex: () => {},
-  isError: false,
+  isError: null,
   setIsError: () => {},
 });
 
@@ -66,40 +68,50 @@ export const useDecryptAndSaveGroupToContext = (
   const user = useContext(UserContext);
 
   useEffect(() => {
+    let active = false;
     const doDecryptAndCompute = async () => {
       if (!encryptedGroup) {
         setGroup(undefined);
         setGroupMembersIndex(undefined);
         setSelfMember(undefined);
-        setIsError(isQueryError);
+        setIsError(isQueryError ? "QUERY_ERROR" : null);
         return;
       }
       if (!user || !user.user) return;
 
-      const decryptedGroup = await decryptGroup(
-        encryptedGroup,
-        user.user.userEncryptionKey,
-      );
+      try {
+        const decryptedGroup = await decryptGroup(
+          encryptedGroup,
+          user.user.userEncryptionKey,
+        );
 
-      const decryptedComputedGroup =
-        computeMembersBalanceAndRepayments(decryptedGroup);
+        const decryptedComputedGroup =
+          computeMembersBalanceAndRepayments(decryptedGroup);
 
-      const groupMembersIndex = computeGroupMembersIndex(
-        decryptedComputedGroup,
-      );
+        const groupMembersIndex = computeGroupMembersIndex(
+          decryptedComputedGroup,
+        );
 
-      const selfMember = decryptedComputedGroup?.members.find(
-        (member) => member.userId === user.user?.id,
-      );
+        const selfMember = decryptedComputedGroup?.members.find(
+          (member) => member.userId === user.user?.id,
+        );
 
-      if (!active) return;
-      setGroup(decryptedComputedGroup);
-      setSelfMember(selfMember);
-      setGroupMembersIndex(groupMembersIndex);
-      setIsError(isQueryError);
+        if (!active) return;
+        setGroup(decryptedComputedGroup);
+        setSelfMember(selfMember);
+        setGroupMembersIndex(groupMembersIndex);
+        setIsError(isQueryError ? "QUERY_ERROR" : null);
+      } catch (error) {
+        console.error("Failed to decrypt group:", error);
+        if (!active) return;
+        setGroup(undefined);
+        setGroupMembersIndex(undefined);
+        setSelfMember(undefined);
+        setIsError("DECRYPTION_ERROR");
+      }
     };
 
-    let active = true;
+    active = true;
     doDecryptAndCompute();
     return () => {
       active = false;

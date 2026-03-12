@@ -1,6 +1,6 @@
 import { type Group, type GroupExtended, type GroupMember } from "@/api/group";
 import type { GroupForJoiningInitiate } from "@/api/invitation";
-import type { Encrypted } from "@/types";
+import { type Encrypted, type Result } from "@/types";
 import {
   deriveInvitationAuthenticationToken,
   deriveInvitationEncryptionKey,
@@ -23,7 +23,7 @@ export const decryptGroup = async (
   );
 
   const decryptedGroup: GroupExtended<false> = {
-    ...encryptedGroup,
+    id: encryptedGroup.id,
     name: await decryptString(
       encryptedGroup.name,
       groupEncryptionKey,
@@ -32,17 +32,11 @@ export const decryptGroup = async (
     groupEncryptionKey,
     members: (
       await Promise.all(
-        encryptedGroup.members.map(async (member) => ({
-          ...member,
-          nickname: await decryptString(
-            member.nickname,
-            groupEncryptionKey,
-            "group member nickname",
-          ),
-        })),
+        encryptedGroup.members.map(async (member) =>
+          decryptGroupMember(member, groupEncryptionKey),
+        ),
       )
     ).sort((a, b) => a.memberId - b.memberId),
-
     transactions: (
       await Promise.all(
         encryptedGroup.transactions.map(async (transaction) =>
@@ -53,6 +47,23 @@ export const decryptGroup = async (
   };
 
   return decryptedGroup;
+};
+
+const decryptGroupMember = async (
+  member: GroupMember<true>,
+  groupEncryptionKey: CryptoKey,
+): Promise<GroupMember<false>> => {
+  return {
+    memberId: member.memberId,
+    userId: member.userId,
+    username: member.username,
+    rights: member.rights,
+    nickname: await decryptString(
+      member.nickname,
+      groupEncryptionKey,
+      "group member nickname",
+    ),
+  };
 };
 
 export interface GroupForJoiningWithKey {
@@ -92,14 +103,9 @@ export const decryptGroupForJoining = async (
     ),
     members: (
       await Promise.all(
-        encryptedGroup.members.map(async (member) => ({
-          ...member,
-          nickname: await decryptString(
-            member.nickname,
-            groupEncryptionKey,
-            "group member nickname",
-          ),
-        })),
+        encryptedGroup.members.map(async (member) =>
+          decryptGroupMember(member, groupEncryptionKey),
+        ),
       )
     ).sort((a, b) => a.memberId - b.memberId),
     groupEncryptionKey,
@@ -112,23 +118,36 @@ export const decryptGroupForJoining = async (
 export const decryptGroupForAppHomePage = async (
   encryptedGroup: Group<true>,
   userEncryptionKey: CryptoKey,
-): Promise<Group<false>> => {
-  const groupEncryptionKey = await decryptEncryptionKey(
-    encryptedGroup.groupEncryptionKey,
-    userEncryptionKey,
-    false,
-    `group key for group ${encryptedGroup.id} in group list`,
-  );
+): Promise<Result<Group<false>>> => {
+  try {
+    const groupEncryptionKey = await decryptEncryptionKey(
+      encryptedGroup.groupEncryptionKey,
+      userEncryptionKey,
+      false,
+      `group key for group ${encryptedGroup.id} in group list`,
+    );
 
-  const decryptedGroup: Group<false> = {
-    id: encryptedGroup.id,
-    name: await decryptString(
-      encryptedGroup.name,
+    const decryptedGroup: Group<false> = {
+      id: encryptedGroup.id,
+      name: await decryptString(
+        encryptedGroup.name,
+        groupEncryptionKey,
+        "a group name of the group list",
+      ),
       groupEncryptionKey,
-      "a group name of the group list",
-    ),
-    groupEncryptionKey,
-  };
+    };
 
-  return decryptedGroup;
+    return { ...decryptedGroup, isOk: true };
+  } catch (error) {
+    console.error(
+      `Failed to decrypt group ${encryptedGroup.id} for app home page:`,
+      error,
+    );
+    return {
+      id: encryptedGroup.id,
+      name: "Failed to decrypt",
+      groupEncryptionKey: null as unknown as CryptoKey,
+      isOk: false,
+    };
+  }
 };
