@@ -23,9 +23,20 @@ export const computeEquilibriumRepayments = (
     .fill(0)
     .map(() => new Array(balances.length).fill(0));
 
-  // Compute repayments until all balances are zero
-  let iterationCount = 0;
+  // Add all perfect repayments
+  for (let i = 0; i < balances.length; i++) {
+    for (let j = 0; j < balances.length; j++) {
+      if (i !== j && balances[i] > 0 && balances[i] === -balances[j]) {
+        paymentMatrix[j][i] += balances[i];
+        balances[i] = 0;
+        balances[j] = 0;
+      }
+    }
+  }
+
+  // Add other repayments
   // We stop even if there is still one non-zero balance, as it can be the case with rounding issues.
+  let iterationCount = 0;
   while (balances.filter((balance) => balance !== 0).length > 1) {
     const maxIndex = balances.reduce(
       (maxIdx, value, idx, arr) => (value > arr[maxIdx] ? idx : maxIdx),
