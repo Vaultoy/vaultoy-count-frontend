@@ -29,7 +29,11 @@ export interface GroupExtendedComputed extends GroupExtended<false> {
  */
 export type GroupMembersComputedIndex = Record<number, GroupMemberComputed>;
 
-export type GroupContextIsError = "DECRYPTION_ERROR" | "QUERY_ERROR" | null;
+export type GroupContextIsError =
+  | "DECRYPTION_ERROR"
+  | "NOT_AUTHORIZED"
+  | "OTHER_ERROR"
+  | null;
 
 export interface GroupContextType {
   group: GroupExtendedComputed | undefined;
@@ -59,8 +63,27 @@ export const GroupContext = createContext<GroupContextType>({
   setIsError: () => {},
 });
 
+type GroupBody =
+  | { group: GroupExtended<true> }
+  | { error: string }
+  | null
+  | undefined;
+
+const errorCodeFromQuery = (
+  isQueryError: boolean,
+  groupBody: GroupBody,
+): GroupContextIsError => {
+  if (isQueryError) return "OTHER_ERROR";
+  if (groupBody && "error" in groupBody) {
+    if (groupBody.error === "NOT_AUTHORIZED") return "NOT_AUTHORIZED";
+    return "OTHER_ERROR";
+  }
+
+  return null;
+};
+
 export const useDecryptAndSaveGroupToContext = (
-  encryptedGroup: GroupExtended<true> | undefined,
+  groupBody: GroupBody,
   isQueryError: boolean,
 ) => {
   const { setGroup, setGroupMembersIndex, setIsError, setSelfMember } =
@@ -70,18 +93,18 @@ export const useDecryptAndSaveGroupToContext = (
   useEffect(() => {
     let active = false;
     const doDecryptAndCompute = async () => {
-      if (!encryptedGroup) {
+      if (!groupBody || "error" in groupBody || isQueryError) {
         setGroup(undefined);
         setGroupMembersIndex(undefined);
         setSelfMember(undefined);
-        setIsError(isQueryError ? "QUERY_ERROR" : null);
+        setIsError(errorCodeFromQuery(isQueryError, groupBody));
         return;
       }
       if (!user || !user.user) return;
 
       try {
         const decryptedGroup = await decryptGroup(
-          encryptedGroup,
+          groupBody.group,
           user.user.userEncryptionKey,
         );
 
@@ -100,7 +123,7 @@ export const useDecryptAndSaveGroupToContext = (
         setGroup(decryptedComputedGroup);
         setSelfMember(selfMember);
         setGroupMembersIndex(groupMembersIndex);
-        setIsError(isQueryError ? "QUERY_ERROR" : null);
+        setIsError(errorCodeFromQuery(isQueryError, groupBody));
       } catch (error) {
         console.error("Failed to decrypt group:", error);
         if (!active) return;
@@ -118,7 +141,7 @@ export const useDecryptAndSaveGroupToContext = (
     };
   }, [
     user,
-    encryptedGroup,
+    groupBody,
     setGroup,
     setGroupMembersIndex,
     isQueryError,

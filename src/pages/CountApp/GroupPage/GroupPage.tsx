@@ -45,13 +45,16 @@ export const GroupPage = () => {
   const navigate = useNavigate();
   const { pathname: currentPath } = useLocation();
 
-  const { body, isError: isQueryError } = useQueryApi({
-    queryKey: ["getGroup", groupId],
-    queryFn: () =>
-      groupId !== undefined ? getGroupQuery(groupId) : Promise.resolve(null),
-  });
+  const { body, isError: isQueryError } = useQueryApi(
+    {
+      queryKey: ["getGroup", groupId],
+      queryFn: () =>
+        groupId !== undefined ? getGroupQuery(groupId) : Promise.resolve(null),
+    },
+    [403],
+  );
 
-  useDecryptAndSaveGroupToContext(body?.group, isQueryError);
+  useDecryptAndSaveGroupToContext(body, isQueryError);
   const { group, isError } = useContext(GroupContext);
 
   const currentTab =
@@ -114,15 +117,22 @@ export const GroupPage = () => {
                   color="gray.500"
                 />
                 <Text color="gray.600" textAlign="center">
-                  {isError === "QUERY_ERROR" && (
+                  {isError === "NOT_AUTHORIZED" && (
                     <>
-                      There was an error while loading the group data. Please
-                      try to refresh the page, or contact the support for help.
+                      You are not authorized to view this group. <br />
+                      The link you used might be invalid, or you might have been
+                      kicked out of the group.
                     </>
                   )}
                   {isError === "DECRYPTION_ERROR" && (
                     <>
                       There was an error while decrypting the group data. Please
+                      try to refresh the page, or contact the support for help.
+                    </>
+                  )}
+                  {isError === "OTHER_ERROR" && (
+                    <>
+                      There was an error while loading the group data. Please
                       try to refresh the page, or contact the support for help.
                     </>
                   )}

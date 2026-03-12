@@ -23,6 +23,7 @@ import {
   Center,
   Fieldset,
   Heading,
+  Icon,
   ProgressCircle,
   RadioGroup,
   Text,
@@ -35,10 +36,13 @@ import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import z from "zod";
 import { encryptEncryptionKey } from "@/encryption/encryption";
+import { TbFaceIdError } from "react-icons/tb";
 
 const formValuesSchema = z.object({
   selfMemberId: z.string("Please select who you are in this list"),
 });
+
+type JoiningError = "INVALID_LINK" | "UNKNOWN_ERROR";
 
 const JoinInvitation = () => {
   const { groupId: groupIdString, invitationLinkSecret } = useParams<{
@@ -55,7 +59,7 @@ const JoinInvitation = () => {
   const { user, userDataRetrievedFromLocalDB } = useContext(UserContext);
   const { setPostLoginRedirectInfos } = useContext(PostLoginRedirectContext);
 
-  const [isStatusError, setIsStatusError] = useState(false);
+  const [isOtherError, setIsOtherError] = useState<JoiningError | null>(null);
 
   const hasExecuted = useRef(false);
 
@@ -93,9 +97,14 @@ const JoinInvitation = () => {
         return;
       }
 
+      if (data.status === 403) {
+        setIsOtherError("INVALID_LINK");
+        return;
+      }
+
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
-        setIsStatusError(true);
+        setIsOtherError("UNKNOWN_ERROR");
         return;
       }
 
@@ -161,7 +170,7 @@ const JoinInvitation = () => {
 
       if (data.status !== 200) {
         toaster.create(unknownErrorToastWithStatus(data.status));
-        setIsStatusError(true);
+        setIsOtherError("UNKNOWN_ERROR");
         return;
       }
 
@@ -195,7 +204,7 @@ const JoinInvitation = () => {
       const invitationAuthenticationToken =
         await deriveInvitationAuthenticationToken(invitationLinkSecret);
 
-      setIsStatusError(false);
+      setIsOtherError(null);
       joinInitiateMutation.mutate({
         groupId,
         invitationData: {
@@ -290,14 +299,21 @@ const JoinInvitation = () => {
         marginBottom="4em"
         width={{ base: "94%", md: "70%", lg: "60%" }}
       >
-        <Card.Header>
-          <Center marginTop="1em">
-            <Heading>
-              👋 Someone invited you to join{" "}
-              {groupForJoining?.name ? `"${groupForJoining.name}"` : "a group"}!
-            </Heading>
-          </Center>
-        </Card.Header>
+        {!joinInitiateMutation.isError &&
+          !joinConcludeMutation.isError &&
+          !isOtherError && (
+            <Card.Header>
+              <Center marginTop="1em">
+                <Heading>
+                  👋 Someone invited you to join{" "}
+                  {groupForJoining?.name
+                    ? `"${groupForJoining.name}"`
+                    : "a group"}
+                  !
+                </Heading>
+              </Center>
+            </Card.Header>
+          )}
         <Card.Body>
           {joinInitiateMutation.isPending && (
             <ProgressCircle.Root value={null} size="xl">
@@ -308,14 +324,34 @@ const JoinInvitation = () => {
             </ProgressCircle.Root>
           )}
 
-          {(joinInitiateMutation.isError ||
+          {joinInitiateMutation.isError ||
             joinConcludeMutation.isError ||
-            isStatusError) && (
-            <Heading size="xl">
-              ❌ There was an error while joining the group. Please try again
-              later.
-            </Heading>
-          )}
+            (isOtherError && (
+              <VStack>
+                <Icon
+                  as={TbFaceIdError}
+                  height="4em"
+                  width="4em"
+                  color="gray.500"
+                />
+                <Text color="gray.600" textAlign="center">
+                  {isOtherError === "INVALID_LINK" && (
+                    <>
+                      The invitation link you just used is invalid. The group
+                      admin may have revoked it, or it might have been copied
+                      incorrectly.
+                      <br />
+                      Please ask the group admin for a new invitation link.
+                    </>
+                  )}
+                  {joinInitiateMutation.isError ||
+                    joinConcludeMutation.isError ||
+                    (isOtherError === "UNKNOWN_ERROR" && (
+                      <>There was an unknown error. Please try again later.</>
+                    ))}
+                </Text>
+              </VStack>
+            ))}
 
           {groupForJoining && (
             <form onSubmit={onSubmit}>

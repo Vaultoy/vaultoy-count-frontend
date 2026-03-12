@@ -29,6 +29,7 @@ export const useQueryApi = <
     ApiResponse<TBody> | null,
     TQueryKey
   >,
+  knownErrorStatusCodes: number[] = [],
 ): UseQueryApiResult<TBody | undefined, TError> => {
   const logoutMutation = useLogoutMutation({
     showSuccessToast: false,
@@ -79,7 +80,8 @@ export const useQueryApi = <
     } else if (
       queryResult.data?.status &&
       queryResult.data.status >= 400 &&
-      !queryResult.isFetching
+      !queryResult.isFetching &&
+      !knownErrorStatusCodes.includes(queryResult.data.status)
     ) {
       toaster.create(unknownErrorToastWithStatus(queryResult.data.status));
     }
