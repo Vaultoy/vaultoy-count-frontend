@@ -24,6 +24,7 @@ export default defineConfig({
         overrideManifestIcons: true,
       },
       manifest: {
+        id: "com.vaultoy.count",
         name: "Vaultoy Count",
         short_name: "Vaultoy Count",
         description: "Privately split expenses with end-to-end encryption.",
@@ -32,7 +33,7 @@ export default defineConfig({
         display: "standalone",
         start_url: "/",
         scope: "/",
-        icons: [],
+        icons: [], // Generated in pwaAssets configuration above
       },
     }),
   ],
