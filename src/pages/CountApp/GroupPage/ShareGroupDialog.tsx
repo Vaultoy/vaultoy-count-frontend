@@ -23,7 +23,6 @@ import {
   encryptEncryptionKey,
   encryptString,
 } from "@/encryption/encryption";
-import { unknownErrorToastWithStatus } from "@/components/toastMessages";
 import { FaShareNodes } from "react-icons/fa6";
 import {
   deriveInvitationAuthenticationToken,
@@ -88,22 +87,7 @@ export const ShareGroupDialog = () => {
 
   const createMutation = useMutationApi({
     mutationFn: createInvitationMutation,
-    onSuccess: async (data) => {
-      if (data.status === 403) {
-        toaster.create({
-          title: "You are not allowed to share this group",
-          description: "Only group administrators can create sharing links.",
-          type: "error",
-        });
-        setUrl(null);
-        return;
-      }
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        setUrl(null);
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Sharing link created successfully",
         type: "success",
