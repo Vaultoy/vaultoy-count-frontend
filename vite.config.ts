@@ -20,7 +20,7 @@ export default defineConfig({
       ],
       manifest: {
         name: "Vaultoy Count",
-        short_name: "Vaultoy",
+        short_name: "Vaultoy Count",
         description: "Privately split expenses with end-to-end encryption.",
         theme_color: "#ffffff",
         background_color: "#ffffff",
