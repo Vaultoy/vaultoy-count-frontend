@@ -21,6 +21,7 @@ export default defineConfig({
       pwaAssets: {
         disabled: false,
         image: "public/vaultoy_count_logo_with_bg.svg",
+        overrideManifestIcons: true,
       },
       manifest: {
         name: "Vaultoy Count",
