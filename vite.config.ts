@@ -18,6 +18,10 @@ export default defineConfig({
         "vaultoy_count_logo_adaptative.svg",
         "at.png",
       ],
+      pwaAssets: {
+        disabled: false,
+        image: "public/vaultoy_count_logo_with_bg.svg",
+      },
       manifest: {
         name: "Vaultoy Count",
         short_name: "Vaultoy Count",
@@ -27,15 +31,7 @@ export default defineConfig({
         display: "standalone",
         start_url: "/",
         scope: "/",
-        icons: [
-          // TODO: Add more icons
-          {
-            src: "/vaultoy_count_logo_with_bg.svg",
-            sizes: "any",
-            type: "image/svg+xml",
-            purpose: "any",
-          },
-        ],
+        icons: [],
       },
     }),
   ],

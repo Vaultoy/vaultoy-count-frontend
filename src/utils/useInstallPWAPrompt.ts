@@ -8,6 +8,13 @@ interface BeforeInstallPromptEvent extends Event {
   }>;
 }
 
+// Global variable to capture the event early before React mounts
+let globalDeferredPrompt: BeforeInstallPromptEvent | null = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  globalDeferredPrompt = e as BeforeInstallPromptEvent;
+});
+
 const isStandaloneMode = () => {
   const mediaStandalone = window.matchMedia(
     "(display-mode: standalone)",
@@ -23,7 +30,7 @@ const isStandaloneMode = () => {
 
 export const useInstallPWAPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+    useState<BeforeInstallPromptEvent | null>(globalDeferredPrompt);
   const [isInstalled, setIsInstalled] = useState<boolean>(() =>
     isStandaloneMode(),
   );
