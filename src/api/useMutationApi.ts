@@ -2,7 +2,10 @@ import { useMutation } from "@tanstack/react-query";
 import type { ApiResponse } from "./fetch";
 import type { ServerErrorResponse } from "./errors";
 import { toaster } from "@/components/ui/toast-store";
-import { UNKNOWN_ERROR_TOAST } from "@/components/toastMessages";
+import {
+  UNEXPECTED_ERROR_TOAST,
+  unexpectedErrorToastWithServerError,
+} from "@/components/toastMessages";
 
 export interface UseMutationApiProps<TBody, TVariables> {
   mutationFn: (variables: TVariables) => Promise<ApiResponse<TBody>>;
@@ -10,6 +13,11 @@ export interface UseMutationApiProps<TBody, TVariables> {
   onSuccess?: (body: TBody) => void;
   onOtherError?: (serverError: ServerErrorResponse) => void;
 }
+
+export const onUnknownError = (serverError: ServerErrorResponse) => {
+  console.error("An unknown error occurred during the mutation:", serverError);
+  toaster.create(unexpectedErrorToastWithServerError(serverError.error));
+};
 
 /**
  * A custom hook that wraps useMutation from react-query to handle API mutations with standardized success and error handling.
@@ -20,6 +28,7 @@ export const useMutationApi = <TBody, TVariables>(
   props: UseMutationApiProps<TBody, TVariables>,
 ) => {
   const successCode = props.successCode ?? 200;
+  const onOtherError = props.onOtherError ?? onUnknownError;
 
   return useMutation({
     mutationFn: props.mutationFn,
@@ -45,7 +54,7 @@ export const useMutationApi = <TBody, TVariables>(
           "Received an error response with an unexpected format:",
           data.bodyJson,
         );
-        toaster.create(UNKNOWN_ERROR_TOAST);
+        toaster.create(UNEXPECTED_ERROR_TOAST);
         return;
       }
 
@@ -125,16 +134,50 @@ export const useMutationApi = <TBody, TVariables>(
         }
 
         default: {
-          props.onOtherError?.(serverError);
+          onOtherError(serverError);
           return;
         }
       }
     },
 
     onError: (error) => {
-      // TODO: Handle network error, JSON parsing error...
-      console.error("An error occurred during the mutation:", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      const errorMessage =
+        typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof error.message === "string"
+          ? error.message
+          : undefined;
+
+      if (
+        error instanceof TypeError &&
+        errorMessage?.includes("Failed to fetch")
+      ) {
+        console.error("A network error occurred during the mutation:", error);
+        toaster.create({
+          title: "Could not connect to the server",
+          description: "Please check your internet connection and try again.",
+          type: "error",
+        });
+        return;
+      }
+
+      // JSON errors
+      if (error instanceof SyntaxError && errorMessage?.includes("JSON")) {
+        console.error(
+          "Could not parse the server response as JSON during the mutation:",
+          error,
+        );
+        toaster.create({
+          title: "Received an unexpected response from the server",
+          description: "Please try again later.",
+          type: "error",
+        });
+        return;
+      }
+
+      console.error("An unexpected error occurred during the mutation:", error);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 };

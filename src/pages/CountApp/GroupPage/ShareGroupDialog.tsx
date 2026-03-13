@@ -24,7 +24,7 @@ import {
   encryptString,
 } from "@/encryption/encryption";
 import {
-  UNKNOWN_ERROR_TOAST,
+  UNEXPECTED_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { FaShareNodes } from "react-icons/fa6";
@@ -124,7 +124,7 @@ export const ShareGroupDialog = () => {
     },
     onError: (error) => {
       console.error("Mutation failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
       setUrl(null);
     },
   });
@@ -166,7 +166,7 @@ export const ShareGroupDialog = () => {
     },
     onError: (error) => {
       console.error("Mutation failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
       setUrl(null);
     },
   });

@@ -5,7 +5,7 @@ import {
   type LoginSignupResponse,
 } from "@/api/auth";
 import {
-  UNKNOWN_ERROR_TOAST,
+  UNEXPECTED_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -126,7 +126,7 @@ export const ChangePasswordDialog = () => {
     },
     onError: (error) => {
       console.error("Password change failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 
@@ -158,7 +158,7 @@ export const ChangePasswordDialog = () => {
         console.error(
           "Temporary login data not set, yet it should have been set when user clicked login/signup",
         );
-        toaster.create(UNKNOWN_ERROR_TOAST);
+        toaster.create(UNEXPECTED_ERROR_TOAST);
         return undefined;
       }
 
@@ -190,7 +190,7 @@ export const ChangePasswordDialog = () => {
     },
     onError: (error) => {
       console.error("Password change failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 

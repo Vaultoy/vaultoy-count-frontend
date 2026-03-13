@@ -23,10 +23,7 @@ import {
   encryptString,
 } from "@/encryption/encryption";
 import { UserContext } from "@/contexts/UserContext";
-import {
-  UNKNOWN_ERROR_TOAST,
-  unknownErrorToastWithServerError,
-} from "@/components/toastMessages";
+import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
 import { useMutationApi } from "@/api/useMutationApi";
 
 const formValuesSchema = z.object({
@@ -70,15 +67,11 @@ export const CreateGroupDialog = () => {
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ["getGroupsAll"] });
     },
-    onOtherError: (error) => {
-      console.error("Mutation failed: ", error);
-      toaster.create(unknownErrorToastWithServerError(error.error));
-    },
   });
 
   const onSubmit = handleSubmit(async (data) => {
     if (!user || !user.user?.userEncryptionKey) {
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
       return;
     }
 
@@ -210,7 +203,9 @@ export const CreateGroupDialog = () => {
                 <Dialog.ActionTrigger asChild>
                   <Button variant="outline">Cancel</Button>
                 </Dialog.ActionTrigger>
-                <Button type="submit">Create</Button>
+                <Button type="submit" loading={mutation.isPending}>
+                  Create
+                </Button>
               </Dialog.Footer>
             </form>
             <Dialog.CloseTrigger asChild>

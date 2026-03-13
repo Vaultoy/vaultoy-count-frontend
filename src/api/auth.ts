@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchApi } from "./fetch";
 import {
-  UNKNOWN_ERROR_TOAST,
+  UNEXPECTED_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toast-store";
@@ -101,7 +101,7 @@ export const useLogoutMutation = ({
     },
     onError: (error) => {
       console.error("Logout failed:", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 };

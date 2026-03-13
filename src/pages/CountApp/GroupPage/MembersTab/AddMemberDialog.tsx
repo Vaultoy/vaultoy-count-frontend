@@ -1,7 +1,7 @@
 import { postAddMemberMutation } from "@/api/group";
 import {
   unknownErrorToastWithStatus,
-  UNKNOWN_ERROR_TOAST,
+  UNEXPECTED_ERROR_TOAST,
 } from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toast-store";
 import { GroupContext } from "@/contexts/GroupContext";
@@ -75,7 +75,7 @@ export const AddMemberDialog = () => {
     },
     onError: (error) => {
       console.error("Adding member failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 

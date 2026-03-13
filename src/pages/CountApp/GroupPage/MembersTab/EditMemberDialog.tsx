@@ -7,7 +7,7 @@ import {
 import { InfoPopover } from "@/components/InfoPopover";
 import {
   unknownErrorToastWithStatus,
-  UNKNOWN_ERROR_TOAST,
+  UNEXPECTED_ERROR_TOAST,
 } from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toast-store";
 import { GroupContext } from "@/contexts/GroupContext";
@@ -90,7 +90,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
     },
     onError: (error) => {
       console.error("Editing nickname failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 
@@ -118,7 +118,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
     },
     onError: (error) => {
       console.error("Editing member rights failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 
@@ -154,7 +154,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
     },
     onError: (error) => {
       console.error("Kicking member failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 
@@ -184,7 +184,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
     },
     onError: (error) => {
       console.error("Removing member failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 

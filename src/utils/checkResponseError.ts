@@ -1,5 +1,5 @@
 import type { ServerErrorResponse } from "@/api/errors";
-import { UNKNOWN_ERROR_TOAST } from "@/components/toastMessages";
+import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toast-store";
 
 /**
@@ -22,7 +22,7 @@ export const checkResponseError = async (
       "Received an error response with an unexpected format:",
       dataJson,
     );
-    toaster.create(UNKNOWN_ERROR_TOAST);
+    toaster.create(UNEXPECTED_ERROR_TOAST);
     return true;
   }
 

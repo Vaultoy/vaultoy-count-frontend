@@ -22,7 +22,7 @@ import { toaster } from "@/components/ui/toast-store";
 import { postSignupLoginMutation, type LoginSignupResponse } from "@/api/auth";
 import { UserContext } from "@/contexts/UserContext";
 import {
-  UNKNOWN_ERROR_TOAST,
+  UNEXPECTED_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
@@ -140,7 +140,7 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         console.error(
           "Temporary user data not set, yet it should have been set when user clicked login/signup",
         );
-        toaster.create(UNKNOWN_ERROR_TOAST);
+        toaster.create(UNEXPECTED_ERROR_TOAST);
 
         return undefined;
       }
@@ -177,7 +177,7 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     },
     onError: (error) => {
       console.error("Login failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
       setTmpUserWaiting(undefined);
     },
   });
@@ -234,7 +234,7 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     } catch (error) {
       setKeyDerivationInProgress(false);
       console.error("Key derivation failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     }
   });
 

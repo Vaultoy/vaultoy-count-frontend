@@ -34,7 +34,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState, useMemo } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import {
-  UNKNOWN_ERROR_TOAST,
+  UNEXPECTED_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import {
@@ -190,7 +190,7 @@ export const AddEditTransactionDialog = ({
     },
     onError: (error) => {
       console.error("Login failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 
@@ -221,14 +221,14 @@ export const AddEditTransactionDialog = ({
     },
     onError: (error) => {
       console.error("Login failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 
   const onSubmit = handleSubmit(async (data) => {
     if (!group) {
       console.error("Group data is undefined");
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
       return;
     }
 

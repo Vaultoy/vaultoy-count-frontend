@@ -4,7 +4,7 @@ import {
   type GroupForJoiningInitiate,
 } from "@/api/invitation";
 import {
-  UNKNOWN_ERROR_TOAST,
+  UNEXPECTED_ERROR_TOAST,
   unknownErrorToastWithStatus,
 } from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toast-store";
@@ -147,7 +147,7 @@ const JoinInvitation = () => {
     },
     onError: (error) => {
       console.error("Mutation failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 
@@ -186,7 +186,7 @@ const JoinInvitation = () => {
 
     onError: (error) => {
       console.error("Mutation failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 
