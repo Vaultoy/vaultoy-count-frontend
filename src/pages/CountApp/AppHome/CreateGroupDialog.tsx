@@ -11,7 +11,7 @@ import {
   VStack,
   Center,
 } from "@chakra-ui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,10 +25,9 @@ import {
 import { UserContext } from "@/contexts/UserContext";
 import {
   UNKNOWN_ERROR_TOAST,
-  unknownErrorToastWithStatus,
+  unknownErrorToastWithServerError,
 } from "@/components/toastMessages";
-import { checkResponseError } from "@/utils/checkResponseError";
-import { checkResponseJson } from "@/utils/checkResponseJson";
+import { useMutationApi } from "@/api/useMutationApi";
 
 const formValuesSchema = z.object({
   name: z.string().min(3).max(100),
@@ -60,19 +59,9 @@ export const CreateGroupDialog = () => {
     name: "memberNicknames" as never,
   });
 
-  const mutation = useMutation({
+  const mutation = useMutationApi({
     mutationFn: createGroupMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Group created successfully",
         type: "success",
@@ -81,9 +70,9 @@ export const CreateGroupDialog = () => {
       setOpen(false);
       queryClient.invalidateQueries({ queryKey: ["getGroupsAll"] });
     },
-    onError: (error) => {
-      console.error("Login failed", error);
-      toaster.create(UNKNOWN_ERROR_TOAST);
+    onOtherError: (error) => {
+      console.error("Mutation failed: ", error);
+      toaster.create(unknownErrorToastWithServerError(error.error));
     },
   });
 

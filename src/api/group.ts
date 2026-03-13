@@ -8,8 +8,12 @@ interface CreateGroupBody {
   memberNicknames: string[];
 }
 
-export const createGroupMutation = async (data: CreateGroupBody) => {
-  return fetchApi("POST", "/v1/group", data);
+export const createGroupMutation = async (
+  data: CreateGroupBody,
+): Promise<ApiResponse<{ id: number }>> => {
+  const response = await fetchApi("POST", "/v1/group", data);
+  const bodyJson = await response.json();
+  return Object.assign(response, { bodyJson });
 };
 
 export interface Group<isEncrypted extends boolean = true> {

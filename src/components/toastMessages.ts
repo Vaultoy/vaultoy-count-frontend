@@ -9,3 +9,9 @@ export const unknownErrorToastWithStatus = (status: number) => ({
   description: `Try to refresh your page or try again later. Status: ${status}.`,
   type: "error",
 });
+
+export const unknownErrorToastWithServerError = (error: string) => ({
+  title: "An unknown error occurred",
+  description: `Try to refresh your page or try again later. Error code: ${error}.`,
+  type: "error",
+});
