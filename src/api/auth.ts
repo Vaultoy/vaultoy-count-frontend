@@ -1,15 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchApi } from "./fetch";
-import {
-  UNEXPECTED_ERROR_TOAST,
-  unknownErrorToastWithStatus,
-} from "@/components/toastMessages";
+import { useQueryClient } from "@tanstack/react-query";
+import { fetchJsonApi, type ApiResponse } from "./fetch";
 import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
 import { useContext } from "react";
 import { useNavigate } from "react-router";
-import { checkResponseError } from "@/utils/checkResponseError";
-import { checkResponseJson } from "@/utils/checkResponseJson";
+import { useMutationApi } from "./useMutationApi";
 
 type LoginSignupBody =
   | ({
@@ -41,14 +36,14 @@ export const postSignupLoginMutation = async ({
   email,
   authenticationToken,
   userEncryptionKey,
-}: LoginSignupBody) => {
+}: LoginSignupBody): Promise<ApiResponse<LoginSignupResponse>> => {
   if (isLogin) {
-    return fetchApi("POST", "/v1/login", {
+    return fetchJsonApi("POST", "/v1/login", {
       username,
       authenticationToken,
     });
   } else {
-    return fetchApi("POST", "/v1/signup", {
+    return fetchJsonApi("POST", "/v1/signup", {
       username,
       email,
       authenticationToken,
@@ -57,8 +52,8 @@ export const postSignupLoginMutation = async ({
   }
 };
 
-const postLogoutMutation = async () => {
-  return fetchApi("POST", "/v1/logout");
+const postLogoutMutation = async (): Promise<ApiResponse<object>> => {
+  return fetchJsonApi("POST", "/v1/logout");
 };
 
 export const useLogoutMutation = ({
@@ -72,19 +67,9 @@ export const useLogoutMutation = ({
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  return useMutation({
+  return useMutationApi({
     mutationFn: postLogoutMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       if (showSuccessToast) {
         toaster.create({
           title: "Logged out successfully",
@@ -99,10 +84,6 @@ export const useLogoutMutation = ({
       await queryClient.cancelQueries();
       queryClient.removeQueries();
     },
-    onError: (error) => {
-      console.error("Logout failed:", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
-    },
   });
 };
 
@@ -112,5 +93,5 @@ export const postChangePasswordMutation = async (body: {
   newAuthenticationToken: string;
   newUserEncryptionKey: string;
 }) => {
-  return fetchApi("POST", "/v1/change-password", body);
+  return fetchJsonApi("POST", "/v1/change-password", body);
 };

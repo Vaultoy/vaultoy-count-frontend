@@ -3,7 +3,7 @@ import {
   deleteInvitationMutation,
   getInvitationQuery,
 } from "@/api/invitation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Center,
@@ -23,10 +23,7 @@ import {
   encryptEncryptionKey,
   encryptString,
 } from "@/encryption/encryption";
-import {
-  UNEXPECTED_ERROR_TOAST,
-  unknownErrorToastWithStatus,
-} from "@/components/toastMessages";
+import { unknownErrorToastWithStatus } from "@/components/toastMessages";
 import { FaShareNodes } from "react-icons/fa6";
 import {
   deriveInvitationAuthenticationToken,
@@ -36,8 +33,7 @@ import {
 import { LuClipboardCheck, LuClipboardCopy, LuDelete } from "react-icons/lu";
 import { GroupContext } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
-import { checkResponseError } from "@/utils/checkResponseError";
-import { checkResponseJson } from "@/utils/checkResponseJson";
+import { onUnknownError, useMutationApi } from "@/api/useMutationApi";
 
 const urlFromInvitationLinkSecret = (
   groupId: number,
@@ -90,14 +86,9 @@ export const ShareGroupDialog = () => {
     existingInvitationDecrypt();
   }, [existingInvitation, group]);
 
-  const createMutation = useMutation({
+  const createMutation = useMutationApi({
     mutationFn: createInvitationMutation,
     onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
       if (data.status === 403) {
         toaster.create({
           title: "You are not allowed to share this group",
@@ -122,36 +113,25 @@ export const ShareGroupDialog = () => {
         queryKey: ["getInvitation", group?.id],
       });
     },
-    onError: (error) => {
-      console.error("Mutation failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
+    onOtherError: (error) => {
       setUrl(null);
+
+      if (error.error === "GROUP_MEMBER_NOT_ADMIN") {
+        toaster.create({
+          title: "You are not allowed to share this group",
+          description: "Only group administrators can create sharing links.",
+          type: "error",
+        });
+        return;
+      }
+
+      onUnknownError(error);
     },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutationApi({
     mutationFn: deleteInvitationMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status === 403) {
-        toaster.create({
-          title: "You are not allowed to delete this invitation",
-          description: "Only group administrators can delete sharing links.",
-          type: "error",
-        });
-        setUrl(null);
-        return;
-      }
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        setUrl(null);
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Sharing link deleted successfully",
         type: "success",
@@ -164,10 +144,19 @@ export const ShareGroupDialog = () => {
         queryKey: ["getInvitation", group?.id],
       });
     },
-    onError: (error) => {
-      console.error("Mutation failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
+    onOtherError: (error) => {
       setUrl(null);
+
+      if (error.error === "GROUP_MEMBER_NOT_ADMIN") {
+        toaster.create({
+          title: "You are not allowed to delete the sharing link",
+          description: "Only group administrators can delete sharing links.",
+          type: "error",
+        });
+        return;
+      }
+
+      onUnknownError(error);
     },
   });
 

@@ -1,17 +1,10 @@
 import {
   joinInvitationConcludeMutation,
   joinInvitationInitiateMutation,
-  type GroupForJoiningInitiate,
 } from "@/api/invitation";
-import {
-  UNEXPECTED_ERROR_TOAST,
-  unknownErrorToastWithStatus,
-} from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toast-store";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { UserContext } from "@/contexts/UserContext";
-import { checkResponseError } from "@/utils/checkResponseError";
-import { checkResponseJson } from "@/utils/checkResponseJson";
 import {
   decryptGroupForJoining,
   type GroupForJoiningWithKey,
@@ -30,13 +23,13 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import z from "zod";
 import { encryptEncryptionKey } from "@/encryption/encryption";
 import { TbFaceIdError } from "react-icons/tb";
+import { onUnknownError, useMutationApi } from "@/api/useMutationApi";
 
 const formValuesSchema = z.object({
   selfMemberId: z.string("Please select who you are in this list"),
@@ -80,36 +73,9 @@ const JoinInvitation = () => {
     resolver: zodResolver(formValuesSchema),
   });
 
-  const joinInitiateMutation = useMutation({
+  const joinInitiateMutation = useMutationApi({
     mutationFn: joinInvitationInitiateMutation,
     onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status === 409) {
-        toaster.create({
-          title: "You are already a member of this group",
-          type: "warning",
-        });
-        navigate(`/app/group/${groupId}`);
-        return;
-      }
-
-      if (data.status === 403) {
-        setIsOtherError("INVALID_LINK");
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        setIsOtherError("UNKNOWN_ERROR");
-        return;
-      }
-
-      const typedResponse = responseData as GroupForJoiningInitiate;
-
       if (!groupId || !invitationLinkSecret) {
         toaster.create({
           title: "Invalid invitation link",
@@ -128,7 +94,7 @@ const JoinInvitation = () => {
         return;
       }
 
-      if (!typedResponse.invitationGroupEncryptionKey) {
+      if (!data.invitationGroupEncryptionKey) {
         toaster.create({
           title: "Invalid response from server",
           description:
@@ -138,28 +104,12 @@ const JoinInvitation = () => {
         return;
       }
 
-      const group = await decryptGroupForJoining(
-        typedResponse,
-        invitationLinkSecret,
-      );
+      const group = await decryptGroupForJoining(data, invitationLinkSecret);
 
       setGroupForJoining(group);
     },
-    onError: (error) => {
-      console.error("Mutation failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
-    },
-  });
-
-  const joinConcludeMutation = useMutation({
-    mutationFn: joinInvitationConcludeMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status === 409) {
+    onOtherError: (error) => {
+      if (error.error === "USER_ALREADY_IN_GROUP") {
         toaster.create({
           title: "You are already a member of this group",
           type: "warning",
@@ -168,12 +118,18 @@ const JoinInvitation = () => {
         return;
       }
 
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        setIsOtherError("UNKNOWN_ERROR");
+      if (error.error === "INCORRECT_INVITATION_AUTHENTICATION_TOKEN") {
+        setIsOtherError("INVALID_LINK");
         return;
       }
 
+      onUnknownError(error);
+    },
+  });
+
+  const joinConcludeMutation = useMutationApi({
+    mutationFn: joinInvitationConcludeMutation,
+    onSuccess: async () => {
       toaster.create({
         title: "Successfully joined the group",
         type: "success",
@@ -183,10 +139,22 @@ const JoinInvitation = () => {
       setGroupForJoining(undefined);
       reset();
     },
+    onOtherError: (error) => {
+      if (error.error === "USER_ALREADY_IN_GROUP") {
+        toaster.create({
+          title: "You are already a member of this group",
+          type: "warning",
+        });
+        navigate(`/app/group/${groupId}`);
+        return;
+      }
 
-    onError: (error) => {
-      console.error("Mutation failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
+      if (error.error === "INCORRECT_INVITATION_AUTHENTICATION_TOKEN") {
+        setIsOtherError("INVALID_LINK");
+        return;
+      }
+
+      onUnknownError(error);
     },
   });
 

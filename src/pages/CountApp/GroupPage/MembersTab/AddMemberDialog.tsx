@@ -1,13 +1,8 @@
 import { postAddMemberMutation } from "@/api/group";
-import {
-  unknownErrorToastWithStatus,
-  UNEXPECTED_ERROR_TOAST,
-} from "@/components/toastMessages";
+import { useMutationApi } from "@/api/useMutationApi";
 import { toaster } from "@/components/ui/toast-store";
 import { GroupContext } from "@/contexts/GroupContext";
 import { encryptString } from "@/encryption/encryption";
-import { checkResponseError } from "@/utils/checkResponseError";
-import { checkResponseJson } from "@/utils/checkResponseJson";
 import {
   Button,
   Center,
@@ -18,7 +13,7 @@ import {
   Input,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
@@ -47,19 +42,9 @@ export const AddMemberDialog = () => {
     resolver: zodResolver(formValuesSchema),
   });
 
-  const addMemberMutation = useMutation({
+  const addMemberMutation = useMutationApi({
     mutationFn: postAddMemberMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Member added successfully",
         type: "success",
@@ -72,10 +57,6 @@ export const AddMemberDialog = () => {
       reset();
 
       setOpen(false);
-    },
-    onError: (error) => {
-      console.error("Adding member failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 

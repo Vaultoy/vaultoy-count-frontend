@@ -1,6 +1,6 @@
 import type { ServerErrorResponse } from "./errors";
 
-export const fetchApi = (
+const fetchApi = (
   method: "GET" | "POST" | "PATCH" | "DELETE",
   url: string,
   body?: unknown,
@@ -16,6 +16,17 @@ export const fetchApi = (
     credentials: "include",
     body: JSON.stringify(body),
   });
+};
+
+export const fetchJsonApi = async <T>(
+  method: "GET" | "POST" | "PATCH" | "DELETE",
+  url: string,
+  body?: unknown,
+  options?: RequestInit,
+): Promise<ApiResponse<T>> => {
+  const response = await fetchApi(method, url, body, options);
+  const bodyJson = await response.json();
+  return Object.assign(response, { bodyJson });
 };
 
 export interface ApiResponse<T> extends Response {

@@ -8,3 +8,5 @@ export type Encrypted<
 export type Result<T> = T & {
   isOk: boolean;
 };
+
+export type EmptyObject = Record<string, never>;

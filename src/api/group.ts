@@ -1,5 +1,5 @@
-import type { Encrypted } from "@/types";
-import { fetchApi, type ApiResponse } from "./fetch";
+import type { EmptyObject, Encrypted } from "@/types";
+import { fetchJsonApi, type ApiResponse } from "./fetch";
 
 interface CreateGroupBody {
   name: string;
@@ -11,9 +11,7 @@ interface CreateGroupBody {
 export const createGroupMutation = async (
   data: CreateGroupBody,
 ): Promise<ApiResponse<{ id: number }>> => {
-  const response = await fetchApi("POST", "/v1/group", data);
-  const bodyJson = await response.json();
-  return Object.assign(response, { bodyJson });
+  return fetchJsonApi("POST", "/v1/group", data);
 };
 
 export interface Group<isEncrypted extends boolean = true> {
@@ -63,17 +61,13 @@ export interface GroupExtended<
 export const getGroupsQuery = async (): Promise<
   ApiResponse<{ groups: Group[] }>
 > => {
-  const response = await fetchApi("GET", "/v1/group/all");
-  const bodyJson = await response.json();
-  return Object.assign(response, { bodyJson });
+  return fetchJsonApi("GET", "/v1/group/all");
 };
 
 export const getGroupQuery = async (
   groupId: number,
 ): Promise<ApiResponse<{ group: GroupExtended }>> => {
-  const response = await fetchApi("GET", `/v1/group/${groupId}`);
-  const bodyJson = await response.json();
-  return Object.assign(response, { bodyJson });
+  return fetchJsonApi("GET", `/v1/group/${groupId}`);
 };
 
 export type NewGroupTransaction<isEncrypted extends boolean> = Omit<
@@ -87,8 +81,12 @@ export const postAddTransactionMutation = async ({
 }: {
   groupId: number;
   transactionData: NewGroupTransaction<true>;
-}) => {
-  return fetchApi("POST", `/v1/group/${groupId}/transaction`, transactionData);
+}): Promise<ApiResponse<{ id: number }>> => {
+  return fetchJsonApi(
+    "POST",
+    `/v1/group/${groupId}/transaction`,
+    transactionData,
+  );
 };
 
 export const patchEditTransactionMutation = async ({
@@ -99,8 +97,8 @@ export const patchEditTransactionMutation = async ({
   groupId: number;
   transactionId: number;
   transactionData: NewGroupTransaction<true>;
-}) => {
-  return fetchApi(
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi(
     "PATCH",
     `/v1/group/${groupId}/transaction/${transactionId}`,
     transactionData,
@@ -115,10 +113,14 @@ export const patchEditGroupMemberNicknameMutation = async ({
   groupId: number;
   memberId: number;
   newNickname: string;
-}) => {
-  return fetchApi("PATCH", `/v1/group/${groupId}/member/${memberId}/nickname`, {
-    newNickname,
-  });
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi(
+    "PATCH",
+    `/v1/group/${groupId}/member/${memberId}/nickname`,
+    {
+      newNickname,
+    },
+  );
 };
 
 export const postKickGroupMemberMutation = async ({
@@ -127,8 +129,8 @@ export const postKickGroupMemberMutation = async ({
 }: {
   groupId: number;
   memberId: number;
-}) => {
-  return fetchApi("POST", `/v1/group/${groupId}/member/${memberId}/kick`);
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi("POST", `/v1/group/${groupId}/member/${memberId}/kick`);
 };
 
 export const deleteGroupMemberMutation = async ({
@@ -137,8 +139,8 @@ export const deleteGroupMemberMutation = async ({
 }: {
   groupId: number;
   memberId: number;
-}) => {
-  return fetchApi("DELETE", `/v1/group/${groupId}/member/${memberId}`);
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi("DELETE", `/v1/group/${groupId}/member/${memberId}`);
 };
 
 export const postAddMemberMutation = async ({
@@ -147,8 +149,8 @@ export const postAddMemberMutation = async ({
 }: {
   groupId: number;
   nickname: string;
-}) => {
-  return fetchApi("POST", `/v1/group/${groupId}/member`, {
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi("POST", `/v1/group/${groupId}/member`, {
     nickname,
   });
 };
@@ -161,8 +163,12 @@ export const patchMemberRightsMutation = async ({
   groupId: number;
   memberId: number;
   newRights: GroupMemberRights;
-}) => {
-  return fetchApi("PATCH", `/v1/group/${groupId}/member/${memberId}/rights`, {
-    newRights,
-  });
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi(
+    "PATCH",
+    `/v1/group/${groupId}/member/${memberId}/rights`,
+    {
+      newRights,
+    },
+  );
 };

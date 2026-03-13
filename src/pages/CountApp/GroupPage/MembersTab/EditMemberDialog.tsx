@@ -4,16 +4,11 @@ import {
   patchMemberRightsMutation,
   postKickGroupMemberMutation,
 } from "@/api/group";
+import { useMutationApi } from "@/api/useMutationApi";
 import { InfoPopover } from "@/components/InfoPopover";
-import {
-  unknownErrorToastWithStatus,
-  UNEXPECTED_ERROR_TOAST,
-} from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toast-store";
 import { GroupContext } from "@/contexts/GroupContext";
 import { encryptString } from "@/encryption/encryption";
-import { checkResponseError } from "@/utils/checkResponseError";
-import { checkResponseJson } from "@/utils/checkResponseJson";
 import {
   Button,
   Center,
@@ -29,7 +24,7 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useContext, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { FaUser } from "react-icons/fa";
@@ -66,19 +61,9 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
     },
   });
 
-  const editNicknameMutation = useMutation({
+  const editNicknameMutation = useMutationApi({
     mutationFn: patchEditGroupMemberNicknameMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Nickname edited successfully",
         type: "success",
@@ -88,25 +73,11 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
         queryKey: ["getGroup", group?.id],
       });
     },
-    onError: (error) => {
-      console.error("Editing nickname failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
-    },
   });
 
-  const editRightsMutation = useMutation({
+  const editRightsMutation = useMutationApi({
     mutationFn: patchMemberRightsMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Member rights edited successfully",
         type: "success",
@@ -116,25 +87,11 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
         queryKey: ["getGroup", group?.id],
       });
     },
-    onError: (error) => {
-      console.error("Editing member rights failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
-    },
   });
 
-  const kickMemberMutation = useMutation({
+  const kickMemberMutation = useMutationApi({
     mutationFn: postKickGroupMemberMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title:
           memberId === selfMember?.memberId
@@ -152,25 +109,11 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
         navigate("/app");
       }
     },
-    onError: (error) => {
-      console.error("Kicking member failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
-    },
   });
 
-  const deleteMemberMutation = useMutation({
+  const deleteMemberMutation = useMutationApi({
     mutationFn: deleteGroupMemberMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Member removed successfully",
         type: "success",
@@ -181,10 +124,6 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
       });
 
       setOpen(false);
-    },
-    onError: (error) => {
-      console.error("Removing member failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 

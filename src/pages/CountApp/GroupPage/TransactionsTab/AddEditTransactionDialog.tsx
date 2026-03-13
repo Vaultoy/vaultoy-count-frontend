@@ -6,7 +6,7 @@ import {
   REVENUE,
   TRANSACTION_TYPES,
 } from "@/api/group";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   VStack,
   Button,
@@ -33,21 +33,17 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState, useMemo } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import {
-  UNEXPECTED_ERROR_TOAST,
-  unknownErrorToastWithStatus,
-} from "@/components/toastMessages";
+import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
 import {
   CURRENCY_SYMBOL,
   floatCentsToString,
   getForText,
   getPaidByText,
 } from "@/utils/textGeneration";
-import { checkResponseError } from "@/utils/checkResponseError";
-import { checkResponseJson } from "@/utils/checkResponseJson";
 import { GroupContext } from "@/contexts/GroupContext";
 import { encryptTransaction } from "@/encryption/transactionEncryption";
 import { LuPencilLine } from "react-icons/lu";
+import { useMutationApi } from "@/api/useMutationApi";
 
 const formValuesSchema = z
   .object({
@@ -163,19 +159,9 @@ export const AddEditTransactionDialog = ({
     [toMembers],
   );
 
-  const addMutation = useMutation({
+  const addMutation = useMutationApi({
     mutationFn: postAddTransactionMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Transaction added successfully",
         type: "success",
@@ -188,25 +174,11 @@ export const AddEditTransactionDialog = ({
         queryKey: ["getGroup", group?.id],
       });
     },
-    onError: (error) => {
-      console.error("Login failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
-    },
   });
 
-  const editMutation = useMutation({
+  const editMutation = useMutationApi({
     mutationFn: patchEditTransactionMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Transaction edited successfully",
         type: "success",
@@ -218,10 +190,6 @@ export const AddEditTransactionDialog = ({
       queryClient.invalidateQueries({
         queryKey: ["getGroup", group?.id],
       });
-    },
-    onError: (error) => {
-      console.error("Login failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
     },
   });
 

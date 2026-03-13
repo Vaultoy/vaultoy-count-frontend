@@ -17,14 +17,10 @@ import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { toaster } from "@/components/ui/toast-store";
-import { postSignupLoginMutation, type LoginSignupResponse } from "@/api/auth";
+import { postSignupLoginMutation } from "@/api/auth";
 import { UserContext } from "@/contexts/UserContext";
-import {
-  UNEXPECTED_ERROR_TOAST,
-  unknownErrorToastWithStatus,
-} from "@/components/toastMessages";
+import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
 import { PostLoginRedirectContext } from "@/contexts/PostLoginRedirectContext";
 import { useKeyDerivation } from "@/encryption/useKeyDerivation";
 import {
@@ -36,11 +32,10 @@ import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
 } from "@/utils/constants";
-import { checkResponseError } from "@/utils/checkResponseError";
-import { checkResponseJson } from "@/utils/checkResponseJson";
 import { MdArrowBack } from "react-icons/md";
 import { LuExternalLink } from "react-icons/lu";
 import { PasswordHints } from "@/components/PasswordHints";
+import { onUnknownError, useMutationApi } from "@/api/useMutationApi";
 
 interface TemporaryUserWaitingForServerResponse {
   username: string;
@@ -110,32 +105,9 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     resolver: zodResolver(formValuesSchema),
   });
 
-  const mutation = useMutation({
+  const mutation = useMutationApi({
     mutationFn: postSignupLoginMutation,
     onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (isLogin && data.status === 401) {
-        toaster.create({
-          title: "Login failed",
-          description: `Invalid username or password`,
-          type: "error",
-        });
-
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-
-        return;
-      }
-
-      const typedResponse = responseData as LoginSignupResponse;
-
       if (!tmpUserWaiting) {
         console.error(
           "Temporary user data not set, yet it should have been set when user clicked login/signup",
@@ -146,16 +118,16 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
       }
 
       const userEncryptionKey = await decryptEncryptionKey(
-        typedResponse.userEncryptionKey,
+        data.userEncryptionKey,
         tmpUserWaiting.passwordEncryptionKey,
         false,
         "user key",
       );
 
       user.setUser({
-        id: typedResponse.userId as number,
+        id: data.userId as number,
         username: tmpUserWaiting.username,
-        email: typedResponse.email,
+        email: data.email,
         userEncryptionKey,
       });
 
@@ -175,10 +147,20 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
 
       await navigate("/app");
     },
-    onError: (error) => {
-      console.error("Login failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
+    onOtherError: (error) => {
       setTmpUserWaiting(undefined);
+
+      if (isLogin && error.error === "NOT_AUTHENTICATED") {
+        toaster.create({
+          title: "Login failed",
+          description: `Invalid username or password`,
+          type: "error",
+        });
+
+        return;
+      }
+
+      onUnknownError(error);
     },
   });
 

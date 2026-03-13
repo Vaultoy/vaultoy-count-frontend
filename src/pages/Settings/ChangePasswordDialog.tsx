@@ -2,16 +2,11 @@ import {
   postChangePasswordMutation,
   postSignupLoginMutation,
   useLogoutMutation,
-  type LoginSignupResponse,
 } from "@/api/auth";
-import {
-  UNEXPECTED_ERROR_TOAST,
-  unknownErrorToastWithStatus,
-} from "@/components/toastMessages";
+import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
 import { PasswordInput } from "@/components/ui/password-input";
 import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
-import { checkResponseError } from "@/utils/checkResponseError";
 import {
   decryptEncryptionKey,
   encryptEncryptionKey,
@@ -30,12 +25,11 @@ import {
   Field,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { checkResponseJson } from "@/utils/checkResponseJson";
 import { PasswordHints } from "@/components/PasswordHints";
+import { useMutationApi } from "@/api/useMutationApi";
 
 const formValuesSchema = z
   .object({
@@ -72,6 +66,7 @@ export const ChangePasswordDialog = () => {
     showSuccessToast: false,
     navigateToAfterLogout: "/login",
   });
+
   // This is used to store the temporarily store the derived keys
   // between login and change password mutation
   const [loginInfoDuringPasswordChange, setLoginInfoDuringPasswordChange] =
@@ -93,52 +88,19 @@ export const ChangePasswordDialog = () => {
     resolver: zodResolver(formValuesSchema),
   });
 
-  const changePasswordMutation = useMutation({
+  const changePasswordMutation = useMutationApi({
     mutationFn: postChangePasswordMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status === 401) {
-        toaster.create({
-          title: "Failed to change password",
-          description: "The old password is incorrect",
-          type: "error",
-        });
-
-        return;
-      }
-
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-
-        return;
-      }
-
+    onSuccess: async () => {
       toaster.create({
         title: "Password changed successfully",
         description: "Please log in again with your new password",
         type: "success",
       });
+
       logoutMutation.mutate();
     },
-    onError: (error) => {
-      console.error("Password change failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
-    },
-  });
-
-  const loginMutation = useMutation({
-    mutationFn: postSignupLoginMutation,
-    onSuccess: async (data) => {
-      const responseData = await checkResponseJson(data);
-      if (await checkResponseError(data.status, responseData)) {
-        return;
-      }
-
-      if (data.status === 401) {
+    onOtherError: (error) => {
+      if (error.error === "NOT_AUTHENTICATED") {
         toaster.create({
           title: "Failed to change password",
           description: "The old password is incorrect",
@@ -146,14 +108,12 @@ export const ChangePasswordDialog = () => {
         });
         return;
       }
+    },
+  });
 
-      if (data.status !== 200) {
-        toaster.create(unknownErrorToastWithStatus(data.status));
-        return;
-      }
-
-      const typedResponse = responseData as LoginSignupResponse;
-
+  const loginMutation = useMutationApi({
+    mutationFn: postSignupLoginMutation,
+    onSuccess: async (data) => {
       if (!loginInfoDuringPasswordChange) {
         console.error(
           "Temporary login data not set, yet it should have been set when user clicked login/signup",
@@ -163,7 +123,7 @@ export const ChangePasswordDialog = () => {
       }
 
       const userEncryptionKey = await decryptEncryptionKey(
-        typedResponse.userEncryptionKey,
+        data.userEncryptionKey,
         loginInfoDuringPasswordChange.oldKeys.passwordEncryptionKey,
         true, // Not a security issue as it is dropped immediately after
         "old user key",
@@ -188,9 +148,15 @@ export const ChangePasswordDialog = () => {
         newUserEncryptionKey: newEncryptedUserEncryptionKey,
       });
     },
-    onError: (error) => {
-      console.error("Password change failed", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
+    onOtherError: (error) => {
+      if (error.error === "NOT_AUTHENTICATED") {
+        toaster.create({
+          title: "Failed to change password",
+          description: "The old password is incorrect",
+          type: "error",
+        });
+        return;
+      }
     },
   });
 

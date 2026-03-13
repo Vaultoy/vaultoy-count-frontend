@@ -24,7 +24,7 @@ export const onUnknownError = (serverError: ServerErrorResponse) => {
  *
  *  successCode: The HTTP status code that indicates a successful response (default is 200).
  */
-export const useMutationApi = <TBody, TVariables>(
+export const useMutationApi = <TBody, TVariables = void>(
   props: UseMutationApiProps<TBody, TVariables>,
 ) => {
   const successCode = props.successCode ?? 200;

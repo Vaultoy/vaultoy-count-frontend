@@ -1,6 +1,7 @@
 import type { Encrypted } from "@/types";
-import { fetchApi, type ApiResponse } from "./fetch";
+import { fetchJsonApi, type ApiResponse } from "./fetch";
 import type { GroupMember } from "./group";
+import type { EmptyObject } from "react-hook-form";
 
 export interface GroupJoinInitiateBody {
   invitationAuthenticationToken: string;
@@ -19,8 +20,12 @@ export const joinInvitationInitiateMutation = async ({
 }: {
   groupId: number;
   invitationData: GroupJoinInitiateBody;
-}) => {
-  return fetchApi("POST", `/v1/group/${groupId}/join/initiate`, invitationData);
+}): Promise<ApiResponse<GroupForJoiningInitiate>> => {
+  return fetchJsonApi(
+    "POST",
+    `/v1/group/${groupId}/join/initiate`,
+    invitationData,
+  );
 };
 
 export interface GroupJoinConcludeBody {
@@ -35,8 +40,12 @@ export const joinInvitationConcludeMutation = async ({
 }: {
   groupId: number;
   invitationData: GroupJoinConcludeBody;
-}) => {
-  return fetchApi("POST", `/v1/group/${groupId}/join/conclude`, invitationData);
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi(
+    "POST",
+    `/v1/group/${groupId}/join/conclude`,
+    invitationData,
+  );
 };
 
 export const createInvitationMutation = async ({
@@ -49,8 +58,12 @@ export const createInvitationMutation = async ({
     invitationGroupEncryptionKey: string;
     invitationLinkSecret: string;
   };
-}) => {
-  return fetchApi("POST", `/v1/group/${groupId}/invitation`, invitationData);
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi(
+    "POST",
+    `/v1/group/${groupId}/invitation`,
+    invitationData,
+  );
 };
 
 interface GroupInvitation {
@@ -60,15 +73,13 @@ interface GroupInvitation {
 export const getInvitationQuery = async (
   groupId: number,
 ): Promise<ApiResponse<GroupInvitation | null>> => {
-  const response = await fetchApi("GET", `/v1/group/${groupId}/invitation`);
-  const bodyJson = await response.json();
-  return Object.assign(response, { bodyJson });
+  return fetchJsonApi("GET", `/v1/group/${groupId}/invitation`);
 };
 
 export const deleteInvitationMutation = async ({
   groupId,
 }: {
   groupId: number;
-}) => {
-  return fetchApi("DELETE", `/v1/group/${groupId}/invitation`);
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi("DELETE", `/v1/group/${groupId}/invitation`);
 };
