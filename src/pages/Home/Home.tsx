@@ -18,6 +18,7 @@ import { FiLogIn } from "react-icons/fi";
 import { LuExternalLink, LuScrollText } from "react-icons/lu";
 import { Link } from "react-router";
 import { FeatureCard } from "./FeatureCard";
+import { InstallAppButton } from "@/components/ui/InstallAppButton";
 
 export const Home = () => {
   const { user } = useContext(UserContext);
@@ -64,6 +65,10 @@ export const Home = () => {
               </Link>
             )}
           </HStack>
+
+          <Center marginTop="1em">
+            <InstallAppButton />
+          </Center>
 
           <VStack gap={4} marginTop="2em">
             <Heading size="lg" textAlign="center">
