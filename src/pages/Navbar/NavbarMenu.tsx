@@ -7,7 +7,7 @@ import { AiOutlineMenu } from "react-icons/ai";
 import { FaBalanceScale, FaHome, FaScroll } from "react-icons/fa";
 import { FaArrowRightArrowLeft, FaGear } from "react-icons/fa6";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
-import { IoMdMail } from "react-icons/io";
+import { IoIosPricetags, IoMdMail } from "react-icons/io";
 import { IoLogInSharp } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router";
 
@@ -30,6 +30,7 @@ const menuItems: MenuItemOrSeparator[] = [
   { path: "/settings", icon: FaGear, label: "Account settings" },
   { path: "LOGOUT", icon: FiLogOut, label: "Logout" },
   SEPARATOR,
+  { path: "/pricing", icon: IoIosPricetags, label: "Pricing" },
   { path: "/contact", icon: IoMdMail, label: "Contact" },
   { path: "/whitepaper", icon: FaScroll, label: "Security whitepaper" },
   { path: "/legal", icon: FaBalanceScale, label: "Legal information" },
@@ -44,12 +45,21 @@ export const NavbarMenu = () => {
     navigateToAfterLogout: "/",
   });
 
-  const getPath = (path: string) => `${path !== "/" ? path : ""}`;
+  const currentPathIs = (path: string) => {
+    const normalizedActualPath = actualPath.endsWith("/")
+      ? actualPath.slice(0, -1)
+      : actualPath;
 
-  const currentPathIs = (path: string) =>
-    actualPath === getPath(path) ||
-    actualPath === `${getPath(path)}/` ||
-    (path === "/" && actualPath === "/");
+    if (path === "/") {
+      return normalizedActualPath === "";
+    }
+
+    if (path === "/app") {
+      return normalizedActualPath.startsWith("/app");
+    }
+
+    return normalizedActualPath === path;
+  };
 
   const filteredMenuItems = useMemo(() => {
     if (user) {
@@ -99,8 +109,11 @@ export const NavbarMenu = () => {
                   color={
                     currentPathIs(item.path) ? currentPageColor : "inherit"
                   }
+                  padding="0.7em"
+                  fontSize="md"
                 >
                   <item.icon
+                    size="1.2em"
                     color={
                       currentPathIs(item.path) ? currentPageColor : "inherit"
                     }

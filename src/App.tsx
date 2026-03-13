@@ -21,8 +21,9 @@ const CountApp = lazy(() => import("./pages/CountApp/CountApp"));
 const SettingsPage = lazy(() => import("./pages/Settings/Settings"));
 const LoginSignup = lazy(() => import("./pages/LoginSignup"));
 const JoinInvitation = lazy(() => import("./pages/CountApp/JoinInvitation"));
-const WhitepaperPage = lazy(() => import("./pages/Whitepaper"));
+const PricingPage = lazy(() => import("./pages/Pricing"));
 const ContactPage = lazy(() => import("./pages/ContactPage/ContactPage"));
+const WhitepaperPage = lazy(() => import("./pages/Whitepaper"));
 const LegalPage = lazy(() => import("./pages/LegalPage/LegalPage"));
 
 const queryClient = new QueryClient();
@@ -66,6 +67,15 @@ const RoutesWithNavbar = () => (
         element={
           <LazyPage>
             <JoinInvitation />
+          </LazyPage>
+        }
+      />
+
+      <Route
+        path="/pricing"
+        element={
+          <LazyPage>
+            <PricingPage />
           </LazyPage>
         }
       />
