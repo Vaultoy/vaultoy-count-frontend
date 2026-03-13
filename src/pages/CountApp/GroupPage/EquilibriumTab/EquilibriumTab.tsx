@@ -5,7 +5,7 @@ import { EquilibriumRepaymentsDialog } from "./EquilibriumRepaymentsDialog";
 import { GroupContext } from "@/contexts/GroupContext";
 
 export const EquilibriumTab = () => {
-  const { group, isError } = useContext(GroupContext);
+  const { group, groupError } = useContext(GroupContext);
 
   const numberOfNonZeroBalances = useMemo(() => {
     if (!group) return 0;
@@ -65,7 +65,7 @@ export const EquilibriumTab = () => {
       })}
 
       {!group &&
-        !isError &&
+        !groupError &&
         Array(3)
           .fill(0)
           .map((_, i) => (

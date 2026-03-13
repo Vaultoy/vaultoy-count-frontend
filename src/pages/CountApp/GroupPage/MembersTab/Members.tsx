@@ -8,7 +8,7 @@ import { AddMemberDialog } from "./AddMemberDialog";
 import { MdOutlineEdit } from "react-icons/md";
 
 export const MembersTab = () => {
-  const { group, isError } = useContext(GroupContext);
+  const { group, groupError } = useContext(GroupContext);
 
   return (
     <VStack>
@@ -50,7 +50,7 @@ export const MembersTab = () => {
       ))}
 
       {!group &&
-        !isError &&
+        !groupError &&
         Array(3)
           .fill(0)
           .map((_, i) => (

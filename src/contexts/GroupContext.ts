@@ -6,6 +6,7 @@ import {
   computeGroupMembersIndex,
   computeMembersBalanceAndRepayments,
 } from "@/utils/balanceComputation";
+import type { QueryErrorResponse } from "@/api/errors";
 
 export interface RepaymentsToMake {
   toMemberId: number;
@@ -29,10 +30,9 @@ export interface GroupExtendedComputed extends GroupExtended<false> {
  */
 export type GroupMembersComputedIndex = Record<number, GroupMemberComputed>;
 
-export type GroupContextIsError =
-  | "DECRYPTION_ERROR"
-  | "NOT_AUTHORIZED"
-  | "OTHER_ERROR"
+export type GroupContextError =
+  | QueryErrorResponse
+  | { error: "DECRYPTION_ERROR" }
   | null;
 
 export interface GroupContextType {
@@ -48,8 +48,8 @@ export interface GroupContextType {
   setGroupMembersIndex: React.Dispatch<
     React.SetStateAction<Record<number, GroupMemberComputed> | undefined>
   >;
-  isError: GroupContextIsError;
-  setIsError: React.Dispatch<React.SetStateAction<GroupContextIsError>>;
+  groupError: GroupContextError;
+  setGroupError: React.Dispatch<React.SetStateAction<GroupContextError>>;
 }
 
 export const GroupContext = createContext<GroupContextType>({
@@ -59,45 +59,35 @@ export const GroupContext = createContext<GroupContextType>({
   setSelfMember: () => {},
   groupMembersIndex: undefined,
   setGroupMembersIndex: () => {},
-  isError: null,
-  setIsError: () => {},
+  groupError: null,
+  setGroupError: () => {},
 });
 
-type GroupBody =
-  | { group: GroupExtended<true> }
-  | { error: string }
-  | null
-  | undefined;
-
-const errorCodeFromQuery = (
-  isQueryError: boolean,
-  groupBody: GroupBody,
-): GroupContextIsError => {
-  if (isQueryError) return "OTHER_ERROR";
-  if (groupBody && "error" in groupBody) {
-    if (groupBody.error === "NOT_AUTHORIZED") return "NOT_AUTHORIZED";
-    return "OTHER_ERROR";
-  }
-
-  return null;
-};
+type GroupBody = { group: GroupExtended<true> } | null | undefined;
 
 export const useDecryptAndSaveGroupToContext = (
   groupBody: GroupBody,
-  isQueryError: boolean,
+  queryError: QueryErrorResponse | null,
 ) => {
-  const { setGroup, setGroupMembersIndex, setIsError, setSelfMember } =
+  const { setGroup, setGroupMembersIndex, setGroupError, setSelfMember } =
     useContext(GroupContext);
   const user = useContext(UserContext);
 
   useEffect(() => {
     let active = false;
     const doDecryptAndCompute = async () => {
-      if (!groupBody || "error" in groupBody || isQueryError) {
+      if (!groupBody || queryError) {
         setGroup(undefined);
         setGroupMembersIndex(undefined);
         setSelfMember(undefined);
-        setIsError(errorCodeFromQuery(isQueryError, groupBody));
+        setGroupError((prev) => {
+          // If the error is the same as before,
+          // keep the previous state to avoid unnecessary re-renders
+          if (JSON.stringify(prev) === JSON.stringify(queryError)) {
+            return prev;
+          }
+          return queryError;
+        });
         return;
       }
       if (!user || !user.user) return;
@@ -123,14 +113,22 @@ export const useDecryptAndSaveGroupToContext = (
         setGroup(decryptedComputedGroup);
         setSelfMember(selfMember);
         setGroupMembersIndex(groupMembersIndex);
-        setIsError(errorCodeFromQuery(isQueryError, groupBody));
+        setGroupError(null);
       } catch (error) {
         console.error("Failed to decrypt group:", error);
         if (!active) return;
         setGroup(undefined);
         setGroupMembersIndex(undefined);
         setSelfMember(undefined);
-        setIsError("DECRYPTION_ERROR");
+        setGroupError((prev) => {
+          // If the error is the same as before,
+          // keep the previous state to avoid unnecessary re-renders
+          const newError = { error: "DECRYPTION_ERROR" as const };
+          if (JSON.stringify(prev) === JSON.stringify(newError)) {
+            return prev;
+          }
+          return newError;
+        });
       }
     };
 
@@ -144,8 +142,8 @@ export const useDecryptAndSaveGroupToContext = (
     groupBody,
     setGroup,
     setGroupMembersIndex,
-    isQueryError,
-    setIsError,
+    queryError,
+    setGroupError,
     setSelfMember,
   ]);
 };

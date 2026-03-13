@@ -6,17 +6,19 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 import type { ApiResponse } from "./fetch";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { toaster } from "@/components/ui/toast-store";
-import {
-  UNKNOWN_ERROR_TOAST,
-  unknownErrorToastWithStatus,
-} from "@/components/toastMessages";
 import { useLogoutMutation } from "./auth";
+import type { QueryErrorResponse } from "./errors";
 
 export type UseQueryApiResult<TBody, TError> = {
   body: TBody | null;
+  queryError: QueryErrorResponse | null;
 } & UseQueryResult<ApiResponse<TBody> | null, TError>;
+
+export const JSON_PARSE_ERROR = "JSON_PARSE_ERROR";
+export const NETWORK_ERROR = "NETWORK_ERROR";
+export const UNKNOWN_QUERY_ERROR = "UNKNOWN_QUERY_ERROR";
 
 export const useQueryApi = <
   TBody,
@@ -29,7 +31,6 @@ export const useQueryApi = <
     ApiResponse<TBody> | null,
     TQueryKey
   >,
-  knownErrorStatusCodes: number[] = [],
 ): UseQueryApiResult<TBody | undefined, TError> => {
   const logoutMutation = useLogoutMutation({
     showSuccessToast: false,
@@ -38,35 +39,8 @@ export const useQueryApi = <
 
   const queryResult = useQuery(queryOptions);
 
+  // Session expired
   useEffect(() => {
-    const errorMessage =
-      typeof queryResult.error === "object" &&
-      queryResult.error !== null &&
-      "message" in queryResult.error
-        ? queryResult.error.message
-        : undefined;
-
-    // JSON parsing error
-    if (
-      typeof errorMessage === "string" &&
-      errorMessage.includes("JSON.parse")
-    ) {
-      console.error("Failed to parse JSON response:", queryResult.error);
-      toaster.create({
-        title: "An error occurred",
-        description:
-          "Failed to parse server response. Try to refresh your page or try again later.",
-        type: "error",
-      });
-    } else if (queryResult.isError) {
-      console.error(
-        "An error occurred while fetching data:",
-        queryResult.error,
-      );
-      toaster.create(UNKNOWN_ERROR_TOAST);
-    }
-
-    // Session expired.
     if (queryResult.data?.status === 401 && !queryResult.isFetching) {
       toaster.create({
         title: "You are not logged in or your session expired",
@@ -75,21 +49,72 @@ export const useQueryApi = <
       });
 
       logoutMutation.mutate();
-
-      // Other non-success status codes
-    } else if (
-      queryResult.data?.status &&
-      queryResult.data.status >= 400 &&
-      !queryResult.isFetching &&
-      !knownErrorStatusCodes.includes(queryResult.data.status)
-    ) {
-      toaster.create(unknownErrorToastWithStatus(queryResult.data.status));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryResult.data?.status, queryResult.isError]);
 
-  return {
-    ...queryResult,
-    body: queryResult.data?.bodyJson,
-  };
+  return useMemo(() => {
+    // Adding additional error codes
+    const errorMessage =
+      typeof queryResult.error === "object" &&
+      queryResult.error !== null &&
+      "message" in queryResult.error &&
+      typeof queryResult.error.message === "string"
+        ? queryResult.error.message
+        : undefined;
+
+    if (errorMessage?.includes("JSON.parse")) {
+      console.error("Failed to parse JSON response:", queryResult.error);
+      return {
+        ...queryResult,
+        body: null,
+        queryError: { error: "JSON_PARSE_ERROR" },
+      };
+    } else if (
+      errorMessage?.includes("NetworkError when attempting to fetch resource")
+    ) {
+      console.error(
+        "Network error occurred while fetching data:",
+        queryResult.error,
+      );
+      return {
+        ...queryResult,
+        body: null,
+        queryError: { error: "NETWORK_ERROR" },
+      };
+    } else if (queryResult.isError) {
+      console.error(
+        "An error occurred while fetching data:",
+        queryResult.error,
+      );
+      return {
+        ...queryResult,
+        body: null,
+        queryError: { error: "UNKNOWN_QUERY_ERROR" },
+      };
+    }
+
+    // Check for server errors in the response body
+    if (
+      queryResult.data?.bodyJson &&
+      typeof queryResult.data.bodyJson === "object" &&
+      "error" in queryResult.data.bodyJson
+    ) {
+      console.error(
+        "The server returned an error response:",
+        queryResult.data.bodyJson,
+      );
+      return {
+        ...queryResult,
+        body: null,
+        queryError: queryResult.data.bodyJson,
+      };
+    }
+
+    return {
+      ...queryResult,
+      body: queryResult.data?.bodyJson as TBody,
+      queryError: null,
+    };
+  }, [queryResult]);
 };

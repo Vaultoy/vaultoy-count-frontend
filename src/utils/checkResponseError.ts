@@ -1,35 +1,6 @@
+import type { ServerErrorResponse } from "@/api/errors";
 import { UNKNOWN_ERROR_TOAST } from "@/components/toastMessages";
 import { toaster } from "@/components/ui/toast-store";
-
-interface ValidationErrorField {
-  field: string;
-  invalidTag: string;
-}
-
-interface ValidationErrorResponse {
-  error: "VALIDATION_ERROR";
-  fields: ValidationErrorField[];
-}
-
-interface TooManyRequestsResponse {
-  error: "TOO_MANY_REQUESTS";
-  limit: number;
-  retryAfterTime: number;
-  reason: string;
-}
-
-interface ErrorWithoutDetailsResponse {
-  error:
-    | "USERNAME_ALREADY_EXISTS"
-    | "EMAIL_ALREADY_EXISTS"
-    | "LAST_ADMIN_DEMOTION"
-    | "LAST_ADMIN_KICK";
-}
-
-type ServerErrorResponse =
-  | ValidationErrorResponse
-  | TooManyRequestsResponse
-  | ErrorWithoutDetailsResponse;
 
 /**
  * Returns true if there was an error AND it was handled, false otherwise.

@@ -46,7 +46,7 @@ const getDialogButtonText = (
 
 export const EquilibriumRepaymentsDialog = () => {
   const { user } = useContext(UserContext);
-  const { group, selfMember, isError } = useContext(GroupContext);
+  const { group, selfMember, groupError } = useContext(GroupContext);
   const selfRepayments = selfMember?.repaymentsToMake;
 
   const [open, setOpen] = useState(false);
@@ -86,7 +86,9 @@ export const EquilibriumRepaymentsDialog = () => {
           <Card.Body>
             <Flex alignItems="center" justifyContent="space-between">
               {group && <Heading size="lg">{dialogButtonText} </Heading>}
-              {!group && !isError && <Skeleton height="1.8em" width="10em" />}
+              {!group && !groupError && (
+                <Skeleton height="1.8em" width="10em" />
+              )}
               {(userHasRepaymentsToMake || othersHaveRepaymentsToMake) && (
                 <FaAnglesRight size="1.6em" />
               )}

@@ -9,6 +9,7 @@ import {
   Skeleton,
   HStack,
   SkeletonCircle,
+  Icon,
 } from "@chakra-ui/react";
 import { useContext, useEffect, useState } from "react";
 import { FaAnglesRight } from "react-icons/fa6";
@@ -24,7 +25,7 @@ import { TbFaceIdError } from "react-icons/tb";
 export const AppHomePage = () => {
   const user = useContext(UserContext);
 
-  const { body, isError } = useQueryApi({
+  const { body, queryError } = useQueryApi({
     queryKey: ["getGroupsAll"],
     queryFn: getGroupsQuery,
   });
@@ -107,7 +108,7 @@ export const AppHomePage = () => {
             </Card.Root>
           </NavLink>
         ))}
-        {!isError &&
+        {!queryError &&
           !decryptedGroups &&
           Array(3)
             .fill(0)
@@ -124,11 +125,36 @@ export const AppHomePage = () => {
                 </Card.Body>
               </Card.Root>
             ))}
-        {isError && (
-          <Text>
-            ❌ An unknown error occurred while loading groups. Please try again
-            later.
-          </Text>
+
+        {queryError && (
+          <VStack>
+            <Icon
+              as={TbFaceIdError}
+              height="4em"
+              width="4em"
+              color="gray.500"
+            />
+            <Text color="gray.600" textAlign="center">
+              {queryError.error === "NOT_AUTHORIZED" ? (
+                <>
+                  You are not logged in or your session has expired. <br />
+                  Please log in again to view your groups.
+                </>
+              ) : queryError.error === "NETWORK_ERROR" ? (
+                <>
+                  Could not connect to the server. <br />
+                  Please check your internet connection and try again.
+                </>
+              ) : (
+                <>
+                  An unknown error occurred while loading the group data.
+                  <br />
+                  Please try to refresh the page, or contact the support for
+                  help.
+                </>
+              )}
+            </Text>
+          </VStack>
         )}
         <CreateGroupDialog />
       </VStack>

@@ -1,3 +1,5 @@
+import type { ServerErrorResponse } from "./errors";
+
 export const fetchApi = (
   method: "GET" | "POST" | "PATCH" | "DELETE",
   url: string,
@@ -17,5 +19,5 @@ export const fetchApi = (
 };
 
 export interface ApiResponse<T> extends Response {
-  bodyJson: T;
+  bodyJson: T | ServerErrorResponse;
 }

@@ -23,7 +23,7 @@ import { ViewTransactionDialog } from "./ViewTransactionDialog";
 import { FaPlus } from "react-icons/fa";
 
 export const TransactionsTab = () => {
-  const { group, groupMembersIndex, isError } = useContext(GroupContext);
+  const { group, groupMembersIndex, groupError } = useContext(GroupContext);
 
   return (
     <VStack>
@@ -86,7 +86,7 @@ export const TransactionsTab = () => {
       })}
 
       {!group &&
-        !isError &&
+        !groupError &&
         Array(3)
           .fill(0)
           .map((_, i) => (

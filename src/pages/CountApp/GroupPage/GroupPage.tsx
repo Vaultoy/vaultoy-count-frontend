@@ -45,17 +45,14 @@ export const GroupPage = () => {
   const navigate = useNavigate();
   const { pathname: currentPath } = useLocation();
 
-  const { body, isError: isQueryError } = useQueryApi(
-    {
-      queryKey: ["getGroup", groupId],
-      queryFn: () =>
-        groupId !== undefined ? getGroupQuery(groupId) : Promise.resolve(null),
-    },
-    [403],
-  );
+  const { body, queryError } = useQueryApi({
+    queryKey: ["getGroup", groupId],
+    queryFn: () =>
+      groupId !== undefined ? getGroupQuery(groupId) : Promise.resolve(null),
+  });
 
-  useDecryptAndSaveGroupToContext(body, isQueryError);
-  const { group, isError } = useContext(GroupContext);
+  useDecryptAndSaveGroupToContext(body, queryError);
+  const { group, groupError } = useContext(GroupContext);
 
   const currentTab =
     currentPath.split("/")[currentPath.split("/").length - 1] !== ""
@@ -107,8 +104,8 @@ export const GroupPage = () => {
                 {group.name}
               </Heading>
             )}{" "}
-            {!isError && !group && <Skeleton height="2em" width="50%" />}
-            {isError && (
+            {!groupError && !group && <Skeleton height="2em" width="50%" />}
+            {groupError && (
               <VStack>
                 <Icon
                   as={TbFaceIdError}
@@ -117,23 +114,29 @@ export const GroupPage = () => {
                   color="gray.500"
                 />
                 <Text color="gray.600" textAlign="center">
-                  {isError === "NOT_AUTHORIZED" && (
+                  {groupError.error === "NOT_AUTHORIZED" ? (
                     <>
                       You are not authorized to view this group. <br />
                       The link you used might be invalid, or you might have been
                       kicked out of the group.
                     </>
-                  )}
-                  {isError === "DECRYPTION_ERROR" && (
+                  ) : groupError.error === "DECRYPTION_ERROR" ? (
                     <>
-                      There was an error while decrypting the group data. Please
-                      try to refresh the page, or contact the support for help.
+                      There was an error while decrypting the group data. <br />
+                      Please try to refresh the page, or contact the support for
+                      help.
                     </>
-                  )}
-                  {isError === "OTHER_ERROR" && (
+                  ) : groupError.error === "NETWORK_ERROR" ? (
                     <>
-                      There was an error while loading the group data. Please
-                      try to refresh the page, or contact the support for help.
+                      Could not connect to the server. <br />
+                      Please check your internet connection and try again.
+                    </>
+                  ) : (
+                    <>
+                      An unknown error occurred while loading the group data.
+                      <br />
+                      Please try to refresh the page, or contact the support for
+                      help.
                     </>
                   )}
                 </Text>
@@ -141,7 +144,7 @@ export const GroupPage = () => {
             )}
           </Center>
         </Card.Header>
-        <Card.Body display={isError ? "none" : undefined}>
+        <Card.Body display={groupError ? "none" : undefined}>
           <Tabs.Root
             value={currentTab}
             width="100%"
