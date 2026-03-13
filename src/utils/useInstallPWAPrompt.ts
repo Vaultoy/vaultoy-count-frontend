@@ -27,32 +27,81 @@ export const useInstallPWAPrompt = () => {
   const [isInstalled, setIsInstalled] = useState<boolean>(() =>
     isStandaloneMode(),
   );
+  const [canManualInstallHint, setCanManualInstallHint] =
+    useState<boolean>(false);
+
+  const recomputeInstallability = useCallback(() => {
+    const installed = isStandaloneMode();
+    setIsInstalled(installed);
+
+    const hasManifest = document.querySelector('link[rel="manifest"]') !== null;
+    const hasServiceWorkerSupport = "serviceWorker" in navigator;
+    const isSecureContextForInstall = window.isSecureContext;
+
+    setCanManualInstallHint(
+      !installed &&
+        hasManifest &&
+        hasServiceWorkerSupport &&
+        isSecureContextForInstall,
+    );
+  }, []);
 
   useEffect(() => {
     const onBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
-      setIsInstalled(isStandaloneMode());
+      recomputeInstallability();
     };
 
     const onAppInstalled = () => {
       setDeferredPrompt(null);
       setIsInstalled(true);
+      setCanManualInstallHint(false);
     };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        recomputeInstallability();
+      }
+    };
+
+    recomputeInstallability();
 
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     window.addEventListener("appinstalled", onAppInstalled);
+    window.addEventListener("focus", recomputeInstallability);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
       window.removeEventListener("appinstalled", onAppInstalled);
+      window.removeEventListener("focus", recomputeInstallability);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, []);
+  }, [recomputeInstallability]);
+
+  const hasNativePrompt = deferredPrompt !== null;
 
   const canInstall = useMemo(
-    () => deferredPrompt !== null && !isInstalled,
-    [deferredPrompt, isInstalled],
+    () => (hasNativePrompt || canManualInstallHint) && !isInstalled,
+    [canManualInstallHint, hasNativePrompt, isInstalled],
   );
+
+  const installMode = useMemo<"nativePrompt" | "manualDialog" | "none">(() => {
+    if (isInstalled) {
+      return "none";
+    }
+
+    if (hasNativePrompt) {
+      return "nativePrompt";
+    }
+
+    if (canManualInstallHint) {
+      return "manualDialog";
+    }
+
+    return "none";
+  }, [canManualInstallHint, hasNativePrompt, isInstalled]);
 
   const promptInstall = useCallback(async () => {
     if (!deferredPrompt || isInstalled) {
@@ -74,6 +123,8 @@ export const useInstallPWAPrompt = () => {
   return {
     canInstall,
     isInstalled,
+    hasNativePrompt,
+    installMode,
     promptInstall,
   };
 };
