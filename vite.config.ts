@@ -22,6 +22,7 @@ export default defineConfig({
         disabled: false,
         image: "public/vaultoy_count_logo_with_bg.svg",
         overrideManifestIcons: true,
+        includeHtmlHeadLinks: false,
       },
       manifest: {
         id: "com.vaultoy.count",
