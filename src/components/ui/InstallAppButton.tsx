@@ -19,6 +19,7 @@ type ManualInstallTutorial = {
 
 const getManualInstallTutorial = (): ManualInstallTutorial => {
   const userAgent = navigator.userAgent.toLowerCase();
+  const isMobile = /android|iphone|ipad|ipod/i.test(userAgent);
 
   const isIOS = /iphone|ipad|ipod/.test(userAgent);
   const isSafari =
@@ -30,22 +31,44 @@ const getManualInstallTutorial = (): ManualInstallTutorial => {
   const isChrome = /chrome|crios/.test(userAgent) && !isEdge;
 
   if (isSafari || isIOS) {
+    if (isMobile) {
+      return {
+        browserName: "iOS",
+        steps: [
+          "Tap the Share button (a square with arrow up)",
+          'Scroll down and tap "Add to Home Screen"',
+          'Tap "Add" in the top right corner',
+        ],
+      };
+    }
     return {
       browserName: "Safari",
       steps: [
-        "Tap the Share button",
-        "Select “Add to Home Screen”",
-        "Tap “Add” to confirm",
+        "Click the Share button in the toolbar",
+        'Choose "Add to Dock"',
+        'Click "Add" to confirm',
       ],
     };
   }
 
   if (isEdge) {
+    if (isMobile) {
+      // Verified on march 2026
+      return {
+        browserName: "Edge Mobile",
+        steps: [
+          "Tap the menu button (⋯) at the bottom",
+          "Swipe left to the second page of the menu",
+          'Tap "Add to phone"',
+        ],
+      };
+    }
+    // Verified on march 2026
     return {
       browserName: "Microsoft Edge",
       steps: [
-        "Open the browser menu (⋯)",
-        "Choose “Apps” then “Install this site as an app”",
+        "Click on the install button in the right of the address bar (a button with 3 squares and a plus sign)",
+        "Or open the menu (⋯) > More tools > Apps > Install Vaultoy Count",
         "Confirm the installation",
       ],
     };
@@ -55,42 +78,69 @@ const getManualInstallTutorial = (): ManualInstallTutorial => {
     return {
       browserName: "Samsung Internet",
       steps: [
-        "Open the browser menu (☰)",
-        "Tap “Add page to” then “Home screen”",
-        "Confirm the installation",
+        "Tap the menu icon (☰) in the bottom right",
+        'Tap "Add page to"',
+        'Select "Home screen"',
+        'Tap "Install"',
       ],
     };
   }
 
   if (isFirefox) {
+    if (isMobile) {
+      // Verified on march 2026
+      return {
+        browserName: "Firefox Mobile",
+        steps: [
+          "Tap the menu button (⋮)",
+          'Tap the "More" button (⋯)',
+          'Tap "Add app to Home screen" or "Install app"',
+        ],
+      };
+    }
+    // Verified on march 2026
     return {
       browserName: "Firefox",
       steps: [
-        "Open the browser menu",
-        "Choose “Install” or “Add to Home screen” if available",
-        "Confirm the installation",
+        "Click the install button in the right of the address bar (a screen with a down arrow)",
       ],
     };
   }
 
   if (isChrome) {
+    if (isMobile) {
+      // Verified on march 2026
+      return {
+        browserName: "Chrome on Android",
+        steps: [
+          "Tap the menu icon (⋮) in the top right corner",
+          'Tap "Add to Home screen" or "Install app"',
+        ],
+      };
+    }
+    // Verified on march 2026
     return {
       browserName: "Chrome",
       steps: [
-        "Open the browser menu (⋮)",
-        "Choose “Install app” or “Add to Home screen”",
-        "Confirm the installation",
+        "Click the install button in the right of the address bar (a screen with a down arrow)",
+        'Or open the menu (⋮) > "Cast, save and share" > "Install Vaultoy Count"',
+      ],
+    };
+  }
+
+  if (isMobile) {
+    return {
+      browserName: "your mobile browser",
+      steps: [
+        "Open the browser menu",
+        'Look for "Add to Home Screen" or "Install app"',
       ],
     };
   }
 
   return {
     browserName: "your browser",
-    steps: [
-      "Open the browser menu",
-      "Choose “Install app”, “Add to Home Screen”, or a similar option",
-      "Confirm the installation",
-    ],
+    steps: ["Open the browser menu", 'Look for an "Install" option'],
   };
 };
 
