@@ -18,6 +18,7 @@ import {
   Skeleton,
   VStack,
   Icon,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { MdArrowBack } from "react-icons/md";
 import { useContext, useEffect } from "react";
@@ -30,7 +31,7 @@ import {
 } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
 import { FcConferenceCall } from "react-icons/fc";
-import { MembersTab } from "./MembersTab/Members";
+import { MembersTab } from "./MembersTab/MembersTab";
 import { TbFaceIdError } from "react-icons/tb";
 
 const validTabs = ["transactions", "balances", "members"] as const;
@@ -53,6 +54,8 @@ export const GroupPage = () => {
 
   useDecryptAndSaveGroupToContext(body, queryError);
   const { group, groupError } = useContext(GroupContext);
+
+  const fitted = useBreakpointValue({ base: true, md: false });
 
   const currentTab =
     currentPath.split("/")[currentPath.split("/").length - 1] !== ""
@@ -144,17 +147,29 @@ export const GroupPage = () => {
             )}
           </Center>
         </Card.Header>
-        <Card.Body display={groupError ? "none" : undefined}>
+        <Card.Body
+          display={groupError ? "none" : undefined}
+          padding={{ base: "2em 1em 0 1em", md: "2em" }}
+        >
           <Tabs.Root
+            alignSelf="center"
             value={currentTab}
-            width="100%"
+            width={{ base: "100%", md: "fit-content" }}
+            minWidth={{ md: "60%" }}
+            fitted={fitted}
             variant="enclosed"
             marginBottom="2em"
             onValueChange={(event) => {
               navigate(`/app/group/${groupId}/${event.value}`);
             }}
           >
-            <Tabs.List width="100%" justifyContent="center">
+            <Tabs.List
+              width="100%"
+              justifyContent="center"
+              display={{ base: "flex", md: "grid" }}
+              gridAutoFlow={{ md: "column" }}
+              gridAutoColumns={{ md: "1fr" }}
+            >
               <Tabs.Trigger value="transactions">Transactions</Tabs.Trigger>
               <Tabs.Trigger value="balances">Balances</Tabs.Trigger>
               <Tabs.Trigger value="members">Members</Tabs.Trigger>

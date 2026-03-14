@@ -29,7 +29,7 @@ export const EquilibriumTab = () => {
   }, [group]);
 
   return (
-    <VStack>
+    <VStack gap={{ base: "0.5em", md: "1em" }}>
       <EquilibriumRepaymentsDialog />
 
       {group?.members.map((member) => {

@@ -26,7 +26,7 @@ export const TransactionsTab = () => {
   const { group, groupMembersIndex, groupError } = useContext(GroupContext);
 
   return (
-    <VStack>
+    <VStack gap={{ base: "0.5em", md: "1em" }}>
       <Center marginBottom="1.5em">
         <AddEditTransactionDialog>
           <Button variant="outline" disabled={!group}>

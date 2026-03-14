@@ -29,7 +29,10 @@ export const Navbar = () => {
 
   return (
     <Center>
-      <Card.Root width={{ base: "94%", md: "70%", lg: "60%" }} marginTop="2em">
+      <Card.Root
+        width={{ base: "94%", md: "70%", lg: "60%" }}
+        marginTop={{ base: "1em", md: "2em" }}
+      >
         <Card.Body>
           <HStack justifyContent="space-between" alignItems="center">
             <Link to="/">

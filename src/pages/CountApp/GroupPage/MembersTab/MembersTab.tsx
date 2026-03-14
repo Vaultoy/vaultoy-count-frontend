@@ -11,7 +11,7 @@ export const MembersTab = () => {
   const { group, groupError } = useContext(GroupContext);
 
   return (
-    <VStack>
+    <VStack gap={{ base: "0.5em", md: "1em" }}>
       <AddMemberDialog />
 
       {group?.members.map((member) => (
