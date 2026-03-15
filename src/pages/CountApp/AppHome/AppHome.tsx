@@ -57,7 +57,11 @@ export const AppHomePage = () => {
 
   return (
     <Center>
-      <VStack marginTop="3em" width={{ base: "94%", md: "70%", lg: "60%" }}>
+      <VStack
+        marginTop="3em"
+        marginBottom="3em"
+        width={{ base: "94%", md: "70%", lg: "60%" }}
+      >
         <Heading
           fontSize="3xl"
           marginBottom="1em"

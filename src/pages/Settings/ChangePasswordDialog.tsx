@@ -253,6 +253,9 @@ export const ChangePasswordDialog = () => {
                   {keyDerivationInProgress && "🔐..."}
                   {changePasswordMutation.isPending && "🖥️..."}
                 </Text>
+                <Dialog.ActionTrigger asChild>
+                  <Button variant="outline">Cancel</Button>
+                </Dialog.ActionTrigger>
                 <Button
                   disabled={!user}
                   type="submit"
@@ -264,9 +267,6 @@ export const ChangePasswordDialog = () => {
                 >
                   Change Password
                 </Button>
-                <Dialog.ActionTrigger asChild>
-                  <Button variant="outline">Cancel</Button>
-                </Dialog.ActionTrigger>
               </Dialog.Footer>
             </form>
 

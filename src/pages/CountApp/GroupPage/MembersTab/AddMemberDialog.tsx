@@ -103,7 +103,7 @@ export const AddMemberDialog = () => {
                   <Button variant="outline">Cancel</Button>
                 </Dialog.ActionTrigger>
                 <Button type="submit" loading={addMemberMutation.isPending}>
-                  Add member
+                  <FaPlus /> Add
                 </Button>
               </Dialog.Footer>
             </form>

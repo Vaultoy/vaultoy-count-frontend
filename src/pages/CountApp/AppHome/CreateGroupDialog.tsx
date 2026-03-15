@@ -114,7 +114,7 @@ export const CreateGroupDialog = () => {
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild marginTop="1em">
         <Button variant="outline">
-          <FaPlus /> Create Group
+          <FaPlus /> Create a group
         </Button>
       </Dialog.Trigger>
       <Portal>
@@ -122,7 +122,7 @@ export const CreateGroupDialog = () => {
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header>
-              <Dialog.Title>Create Group</Dialog.Title>
+              <Dialog.Title>Create a group</Dialog.Title>
             </Dialog.Header>
             <form onSubmit={onSubmit}>
               <Dialog.Body>
@@ -204,7 +204,7 @@ export const CreateGroupDialog = () => {
                   <Button variant="outline">Cancel</Button>
                 </Dialog.ActionTrigger>
                 <Button type="submit" loading={mutation.isPending}>
-                  Create
+                  <FaPlus /> Create
                 </Button>
               </Dialog.Footer>
             </form>
