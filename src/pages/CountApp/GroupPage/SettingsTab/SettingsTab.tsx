@@ -7,7 +7,7 @@ import { EditMemberDialog } from "./EditMemberDialog";
 import { AddMemberDialog } from "./AddMemberDialog";
 import { MdOutlineEdit } from "react-icons/md";
 
-export const MembersTab = () => {
+export const SettingsTab = () => {
   const { group, groupError } = useContext(GroupContext);
 
   return (

@@ -10,6 +10,7 @@ import {
   HStack,
   VStack,
   Center,
+  Text,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
@@ -148,7 +149,7 @@ export const CreateGroupDialog = () => {
                   width="100%"
                   marginTop="1em"
                 >
-                  <Field.Label>Other members&apos; nicknames</Field.Label>
+                  <Text fontWeight="medium">Other members&apos; nicknames</Text>
                   <VStack
                     justifyContent="center"
                     alignItems="center"

@@ -31,10 +31,10 @@ import {
 } from "@/contexts/GroupContext";
 import { useQueryApi } from "@/api/useQueryApi";
 import { FcConferenceCall } from "react-icons/fc";
-import { MembersTab } from "./MembersTab/MembersTab";
+import { SettingsTab } from "./SettingsTab/SettingsTab";
 import { TbFaceIdError } from "react-icons/tb";
 
-const validTabs = ["transactions", "balances", "members"] as const;
+const validTabs = ["transactions", "balances", "settings"] as const;
 
 export const GroupPage = () => {
   const { groupId: groupIdString } = useParams<{ groupId: string }>();
@@ -172,7 +172,7 @@ export const GroupPage = () => {
             >
               <Tabs.Trigger value="transactions">Transactions</Tabs.Trigger>
               <Tabs.Trigger value="balances">Balances</Tabs.Trigger>
-              <Tabs.Trigger value="members">Members</Tabs.Trigger>
+              <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
             </Tabs.List>
           </Tabs.Root>
 
@@ -180,7 +180,7 @@ export const GroupPage = () => {
             <Route path="/" element={<TransactionsTab />} />
             <Route path="/transactions" element={<TransactionsTab />} />
             <Route path="/balances" element={<EquilibriumTab />} />
-            <Route path="/members" element={<MembersTab />} />
+            <Route path="/settings" element={<SettingsTab />} />
           </Routes>
         </Card.Body>
         <Card.Footer />
