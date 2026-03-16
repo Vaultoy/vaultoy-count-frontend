@@ -75,6 +75,18 @@ export type NewGroupTransaction<isEncrypted extends boolean> = Omit<
   "id"
 >;
 
+export const patchEditGroupName = async ({
+  groupId,
+  newGroupName,
+}: {
+  groupId: number;
+  newGroupName: string;
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi("PATCH", `/v1/group/${groupId}/name`, {
+    newGroupName,
+  });
+};
+
 export const postAddTransactionMutation = async ({
   groupId,
   transactionData,

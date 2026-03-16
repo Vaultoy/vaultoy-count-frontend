@@ -52,14 +52,14 @@ export const TransactionsTab = () => {
                       {transaction.name}
                     </Text>
                     <Text color="gray.500">
-                      <Text as="span" fontWeight="medium">
+                      <Text as="span" fontWeight="bold">
                         {getPaidByText(transaction.transactionType)}
                       </Text>{" "}
                       {groupMembersIndex &&
                         groupMembersIndex[transaction.fromMemberId].nickname}
                     </Text>
                     <Text color="gray.500">
-                      <Text as="span" fontWeight="medium">
+                      <Text as="span" fontWeight="bold">
                         {getForText(
                           transaction.transactionType,
                           transaction.toMembers.length,

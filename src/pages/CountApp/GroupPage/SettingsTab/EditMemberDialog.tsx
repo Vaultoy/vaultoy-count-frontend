@@ -221,7 +221,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                 {member?.userId !== null ? (
                   <VStack width="100%" alignItems="flex-start" gap="0.5em">
                     <HStack>
-                      <Text fontWeight="medium">Associated user</Text>
+                      <Text fontWeight="bold">Associated user</Text>
                       <InfoPopover>
                         When joining the group, user &quot;
                         <Icon as={FaUser} height="0.85em" width="0.85em" />{" "}

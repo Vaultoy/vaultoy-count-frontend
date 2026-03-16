@@ -118,7 +118,7 @@ export const ViewTransactionDialog = ({
                     gap="0.5em"
                     alignItems="center"
                   >
-                    <Text fontWeight="medium">
+                    <Text fontWeight="bold">
                       {getPaidByText(transaction.transactionType)}
                     </Text>
                     <Text>{fromMember?.nickname}</Text>
@@ -161,7 +161,7 @@ export const ViewTransactionDialog = ({
                         paddingLeft="1em"
                         paddingRight="1em"
                       >
-                        <Text fontWeight="medium">
+                        <Text fontWeight="bold">
                           {getForText(
                             transaction.transactionType,
                             toMembers.length,
@@ -169,7 +169,7 @@ export const ViewTransactionDialog = ({
                         </Text>
 
                         {transaction.transactionType !== REPAYMENT && (
-                          <Text fontWeight="medium">Shares</Text>
+                          <Text fontWeight="bold">Shares</Text>
                         )}
                       </HStack>
 
@@ -216,7 +216,7 @@ export const ViewTransactionDialog = ({
                       gap="0.5em"
                       alignItems="center"
                     >
-                      <Text fontWeight="medium">
+                      <Text fontWeight="bold">
                         {getForText(
                           transaction.transactionType,
                           toMembers.length,

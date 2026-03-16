@@ -24,7 +24,7 @@ export const FeatureCard = ({
           marginTop="0.8em"
           marginBottom="0.6em"
         >
-          <Heading size="sm" fontWeight="medium">
+          <Heading size="sm" fontWeight="bold">
             {title}
           </Heading>
         </Badge>

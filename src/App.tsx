@@ -16,6 +16,7 @@ import { LanguageContextProvider } from "./contexts/LanguageContextProvider";
 import { LazyPage } from "./components/LazyPage";
 import { Home } from "./pages/Home/Home";
 import { Navbar } from "./pages/Navbar/Navbar";
+import { fieldSlotRecipe } from "@chakra-ui/react/theme";
 
 const CountApp = lazy(() => import("./pages/CountApp/CountApp"));
 const SettingsPage = lazy(() => import("./pages/Settings/Settings"));
@@ -28,10 +29,23 @@ const LegalPage = lazy(() => import("./pages/LegalPage/LegalPage"));
 
 const queryClient = new QueryClient();
 
+const customFieldRecipe = {
+  ...fieldSlotRecipe,
+  base: {
+    ...fieldSlotRecipe.base,
+    label: {
+      fontWeight: "bold",
+    },
+  },
+};
+
 const config = defineConfig({
   theme: {
     tokens: {
       colors: {},
+    },
+    slotRecipes: {
+      field: customFieldRecipe,
     },
   },
 });

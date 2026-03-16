@@ -431,12 +431,12 @@ export const AddEditTransactionDialog = ({
                                   >
                                     <Checkbox.HiddenInput />
                                     <Checkbox.Control />
-                                    <Checkbox.Label fontWeight="medium">
+                                    <Checkbox.Label fontWeight="bold">
                                       {getForText(transactionType, 42)}
                                     </Checkbox.Label>
                                   </Checkbox.Root>
 
-                                  <Text fontWeight="medium">Shares</Text>
+                                  <Text fontWeight="bold">Shares</Text>
                                 </HStack>
 
                                 {membersSelector.items.map((item) => (
@@ -557,7 +557,7 @@ export const AddEditTransactionDialog = ({
                         } else {
                           return (
                             <>
-                              <Text fontWeight="medium">
+                              <Text fontWeight="bold">
                                 {getForText(transactionType, 42)}
                               </Text>
 

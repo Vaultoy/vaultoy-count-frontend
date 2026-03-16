@@ -149,7 +149,7 @@ export const CreateGroupDialog = () => {
                   width="100%"
                   marginTop="1em"
                 >
-                  <Text fontWeight="medium">Other members&apos; nicknames</Text>
+                  <Text fontWeight="bold">Other members&apos; nicknames</Text>
                   <VStack
                     justifyContent="center"
                     alignItems="center"
