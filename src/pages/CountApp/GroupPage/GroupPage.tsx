@@ -134,6 +134,14 @@ export const GroupPage = () => {
                       Could not connect to the server. <br />
                       Please check your internet connection and try again.
                     </>
+                  ) : groupError.error ===
+                    "GROUP_NOT_FOUND_OR_USER_NOT_IN_GROUP" ? (
+                    <>
+                      Could not get this group.
+                      <br />
+                      You might not be a member of it, it might not exist, or
+                      have been deleted.
+                    </>
                   ) : (
                     <>
                       An unknown error occurred while loading the group data.

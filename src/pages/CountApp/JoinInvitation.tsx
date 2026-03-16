@@ -35,7 +35,10 @@ const formValuesSchema = z.object({
   selfMemberId: z.string("Please select who you are in this list"),
 });
 
-type JoiningError = "INVALID_LINK" | "UNKNOWN_ERROR";
+type JoiningError =
+  | "GROUP_INVITATION_NOT_FOUND"
+  | "GROUP_JOINING_FORBIDDEN"
+  | "UNKNOWN_ERROR";
 
 const JoinInvitation = () => {
   const { groupId: groupIdString, invitationLinkSecret } = useParams<{
@@ -118,8 +121,11 @@ const JoinInvitation = () => {
         return;
       }
 
-      if (error.error === "INCORRECT_INVITATION_AUTHENTICATION_TOKEN") {
-        setIsOtherError("INVALID_LINK");
+      if (
+        error.error === "GROUP_INVITATION_NOT_FOUND" ||
+        error.error === "GROUP_JOINING_FORBIDDEN"
+      ) {
+        setIsOtherError(error.error);
         return;
       }
 
@@ -149,8 +155,11 @@ const JoinInvitation = () => {
         return;
       }
 
-      if (error.error === "INCORRECT_INVITATION_AUTHENTICATION_TOKEN") {
-        setIsOtherError("INVALID_LINK");
+      if (
+        error.error === "GROUP_INVITATION_NOT_FOUND" ||
+        error.error === "GROUP_JOINING_FORBIDDEN"
+      ) {
+        setIsOtherError(error.error);
         return;
       }
 
@@ -303,7 +312,15 @@ const JoinInvitation = () => {
                   color="gray.500"
                 />
                 <Text color="gray.600" textAlign="center">
-                  {isOtherError === "INVALID_LINK" && (
+                  {isOtherError === "GROUP_INVITATION_NOT_FOUND" ? (
+                    <>
+                      The invitation link you just used is invalid. The group
+                      might have been deleted, or it might have been copied
+                      incorrectly.
+                      <br />
+                      Please ask the group admin for a new invitation link.
+                    </>
+                  ) : isOtherError === "GROUP_JOINING_FORBIDDEN" ? (
                     <>
                       The invitation link you just used is invalid. The group
                       admin may have revoked it, or it might have been copied
@@ -311,7 +328,10 @@ const JoinInvitation = () => {
                       <br />
                       Please ask the group admin for a new invitation link.
                     </>
-                  )}
+                  ) : isOtherError === "UNKNOWN_ERROR" ? (
+                    <>There was an unknown error. Please try again later.</>
+                  ) : null}
+
                   {joinInitiateMutation.isError ||
                     joinConcludeMutation.isError ||
                     (isOtherError === "UNKNOWN_ERROR" && (
