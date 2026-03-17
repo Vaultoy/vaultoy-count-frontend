@@ -11,8 +11,6 @@ import {
 } from "@chakra-ui/react";
 import { AddEditTransactionDialog } from "./AddEditTransactionDialog";
 import {
-  CURRENCY_SYMBOL,
-  floatCentsToString,
   getForText,
   getPaidByText,
   getTransactionEmoji,
@@ -21,6 +19,7 @@ import { GroupContext } from "@/contexts/GroupContext";
 import { useContext } from "react";
 import { ViewTransactionDialog } from "./ViewTransactionDialog";
 import { FaPlus } from "react-icons/fa";
+import { displayAmount } from "@/utils/currency";
 
 export const TransactionsTab = () => {
   const { group, groupMembersIndex, groupError } = useContext(GroupContext);
@@ -75,8 +74,10 @@ export const TransactionsTab = () => {
                     </Text>
                   </VStack>
                   <Text fontSize="lg" fontWeight="bold">
-                    {floatCentsToString(Math.abs(transaction.amount))}&nbsp;
-                    {CURRENCY_SYMBOL}
+                    {displayAmount(
+                      Math.abs(transaction.amount),
+                      group?.currencyInfo,
+                    )}
                   </Text>
                 </Flex>
               </Card.Body>

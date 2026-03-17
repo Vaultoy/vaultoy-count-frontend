@@ -34,16 +34,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState, useMemo } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
-import {
-  CURRENCY_SYMBOL,
-  floatCentsToString,
-  getForText,
-  getPaidByText,
-} from "@/utils/textGeneration";
+import { getForText, getPaidByText } from "@/utils/textGeneration";
 import { GroupContext } from "@/contexts/GroupContext";
 import { encryptTransaction } from "@/encryption/transactionEncryption";
 import { LuPencilLine } from "react-icons/lu";
 import { useMutationApi } from "@/api/useMutationApi";
+import { DEFAULT_CURRENCY_SYMBOL, displayAmount } from "@/utils/currency";
 
 const formValuesSchema = z
   .object({
@@ -295,7 +291,11 @@ export const AddEditTransactionDialog = ({
 
                   <Field.Root invalid={!!errors.amount}>
                     <Field.Label>Amount</Field.Label>
-                    <InputGroup endAddon={CURRENCY_SYMBOL}>
+                    <InputGroup
+                      endAddon={
+                        group?.currencyInfo?.symbol ?? DEFAULT_CURRENCY_SYMBOL
+                      }
+                    >
                       <Input
                         type="number"
                         step="0.01"
@@ -471,7 +471,7 @@ export const AddEditTransactionDialog = ({
                                           color="gray.500"
                                           marginTop="-0.2em"
                                         >
-                                          {floatCentsToString(
+                                          {displayAmount(
                                             totalShares === 0
                                               ? 0
                                               : ((field.value.find(
@@ -481,9 +481,8 @@ export const AddEditTransactionDialog = ({
                                                   totalShares) *
                                                   100 *
                                                   Number(amount),
+                                            group?.currencyInfo,
                                           )}
-                                          &nbsp;
-                                          {CURRENCY_SYMBOL}
                                         </Text>
                                       </VStack>
                                       <IconButton

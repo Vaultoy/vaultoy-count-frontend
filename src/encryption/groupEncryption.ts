@@ -39,6 +39,11 @@ export const decryptGroup = async (
       groupEncryptionKey,
       "group name",
     ),
+    currency: await decryptString(
+      encryptedGroup.currency,
+      groupEncryptionKey,
+      "group currency",
+    ),
     groupEncryptionKey,
     members: (
       await Promise.all(

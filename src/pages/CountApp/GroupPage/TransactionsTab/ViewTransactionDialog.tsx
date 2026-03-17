@@ -14,7 +14,6 @@ import {
 } from "@chakra-ui/react";
 import { useContext, useMemo, useState } from "react";
 import {
-  CURRENCY_SYMBOL,
   floatCentsToString,
   getForText,
   getPaidByText,
@@ -24,6 +23,7 @@ import { GroupContext } from "@/contexts/GroupContext";
 import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import { AddEditTransactionDialog } from "./AddEditTransactionDialog";
 import { LuPencilLine } from "react-icons/lu";
+import { displayAmount } from "@/utils/currency";
 
 export const ViewTransactionDialog = ({
   transactionId,
@@ -146,8 +146,10 @@ export const ViewTransactionDialog = ({
                     color="gray.800"
                     marginBottom={transaction.amount > 0 ? "0.5em" : "-0.5em"}
                   >
-                    {floatCentsToString(Math.abs(transaction.amount))}&nbsp;
-                    {CURRENCY_SYMBOL}
+                    {displayAmount(
+                      Math.abs(transaction.amount),
+                      group?.currencyInfo,
+                    )}
                   </Text>
                 </Box>
 
@@ -191,14 +193,13 @@ export const ViewTransactionDialog = ({
                                   color="gray.500"
                                   marginTop="-0.2em"
                                 >
-                                  {floatCentsToString(
+                                  {displayAmount(
                                     totalShares === 0
                                       ? 0
                                       : (toMember.share / totalShares) *
                                           Math.abs(transaction.amount),
+                                    group?.currencyInfo,
                                   )}
-                                  &nbsp;
-                                  {CURRENCY_SYMBOL}
                                 </Text>
                               </VStack>
                             </HStack>

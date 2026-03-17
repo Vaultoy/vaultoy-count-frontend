@@ -1,8 +1,9 @@
 import { Text, Card, VStack, HStack, Skeleton } from "@chakra-ui/react";
-import { CURRENCY_SYMBOL, floatCentsToString } from "@/utils/textGeneration";
+import { floatCentsToString } from "@/utils/textGeneration";
 import { useContext, useMemo } from "react";
 import { EquilibriumRepaymentsDialog } from "./EquilibriumRepaymentsDialog";
 import { GroupContext } from "@/contexts/GroupContext";
+import { displayAmount } from "@/utils/currency";
 
 export const EquilibriumTab = () => {
   const { group, groupError } = useContext(GroupContext);
@@ -56,7 +57,7 @@ export const EquilibriumTab = () => {
                   }
                   fontWeight="bold"
                 >
-                  {floatCentsToString(displayedBalance)}&nbsp;{CURRENCY_SYMBOL}
+                  {displayAmount(displayedBalance, group.currencyInfo)}
                 </Text>
               </HStack>
             </Card.Body>

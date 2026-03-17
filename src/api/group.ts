@@ -55,6 +55,7 @@ export interface GroupTransaction<isEncrypted extends boolean = true> {
 export interface GroupExtended<
   isEncrypted extends boolean = true,
 > extends Group<isEncrypted> {
+  currency: Encrypted<string, isEncrypted>;
   members: GroupMember<isEncrypted>[];
   transactions: GroupTransaction<isEncrypted>[];
 }

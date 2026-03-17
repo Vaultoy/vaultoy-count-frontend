@@ -51,6 +51,3 @@ export const floatCentsToString = (amount: number): string => {
     return (amount / 100).toFixed(2);
   }
 };
-
-// TODO: Make this user configurable
-export const CURRENCY_SYMBOL = "€";

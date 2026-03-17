@@ -1,6 +1,9 @@
 import { useMemo } from "react";
+import { floatCentsToString } from "./textGeneration";
 
-interface CurrencyInfo {
+export const DEFAULT_CURRENCY_SYMBOL = "¤";
+
+export interface CurrencyInfo {
   code: string;
   name: string;
   symbol: string;
@@ -48,4 +51,28 @@ export const useAllCurrencies = () => {
       others: otherCodes.map(getCurrencyInfo),
     };
   }, []);
+};
+
+export const displayAmount = (
+  amount: number,
+  currencyInfo: CurrencyInfo | undefined,
+) => {
+  const amountInCurrencyUnit = amount / 100;
+
+  if (!currencyInfo?.code) {
+    return `${floatCentsToString(amount)}\u00A0${DEFAULT_CURRENCY_SYMBOL}`;
+  }
+
+  try {
+    return new Intl.NumberFormat(currencyInfo.code !== "EUR" ? "en" : "fr", {
+      style: "currency",
+      currency: currencyInfo.code,
+      currencyDisplay: "narrowSymbol",
+      minimumFractionDigits: amount % 100 === 0 ? 0 : 2,
+      maximumFractionDigits: 2,
+    }).format(amountInCurrencyUnit);
+  } catch {
+    const symbol = currencyInfo.symbol ?? DEFAULT_CURRENCY_SYMBOL;
+    return `${floatCentsToString(amount)}\u00A0${symbol}`;
+  }
 };

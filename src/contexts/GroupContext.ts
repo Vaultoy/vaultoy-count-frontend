@@ -7,6 +7,7 @@ import {
   computeMembersBalanceAndRepayments,
 } from "@/utils/balanceComputation";
 import type { QueryErrorResponse } from "@/api/errors";
+import type { CurrencyInfo } from "@/utils/currency";
 
 export interface RepaymentsToMake {
   toMemberId: number;
@@ -23,6 +24,7 @@ export interface GroupMemberComputed extends GroupMember {
  */
 export interface GroupExtendedComputed extends GroupExtended<false> {
   members: GroupMemberComputed[];
+  currencyInfo: CurrencyInfo;
 }
 
 /**

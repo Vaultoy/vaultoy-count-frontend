@@ -4,6 +4,7 @@ import type {
   GroupMemberComputed,
 } from "@/contexts/GroupContext";
 import { computeEquilibriumRepayments } from "./equilibriumAlgorithm";
+import { getCurrencyInfo } from "./currency";
 
 export const computeMembersBalanceAndRepayments = (
   decryptedGroup: GroupExtended<false> | undefined,
@@ -60,6 +61,7 @@ export const computeMembersBalanceAndRepayments = (
   return {
     ...decryptedGroup,
     members: membersComputedWithRepayments,
+    currencyInfo: getCurrencyInfo(decryptedGroup.currency),
   };
 };
 

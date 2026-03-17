@@ -1,10 +1,11 @@
-import { CURRENCY_SYMBOL, floatCentsToString } from "@/utils/textGeneration";
+import { floatCentsToString } from "@/utils/textGeneration";
 import { VStack, Card, Text, HStack, Button, Icon } from "@chakra-ui/react";
 import { FaRegEdit } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa6";
 import { AddEditTransactionDialog } from "../TransactionsTab/AddEditTransactionDialog";
 import { useContext } from "react";
 import { GroupContext } from "@/contexts/GroupContext";
+import { displayAmount } from "@/utils/currency";
 
 export const EquilibriumRepayment = ({
   fromMemberId,
@@ -15,7 +16,7 @@ export const EquilibriumRepayment = ({
   toMemberId: number | undefined;
   amount: number;
 }) => {
-  const { groupMembersIndex } = useContext(GroupContext);
+  const { group, groupMembersIndex } = useContext(GroupContext);
 
   const fromMember = fromMemberId
     ? groupMembersIndex?.[fromMemberId]
@@ -56,7 +57,7 @@ export const EquilibriumRepayment = ({
             </AddEditTransactionDialog>
             <FaArrowRight size="1.5em" />
             <Text fontSize="0.9em" color="gray.500" height="1.7em">
-              {floatCentsToString(amount)}&nbsp;{CURRENCY_SYMBOL}
+              {displayAmount(amount, group?.currencyInfo)}
             </Text>
           </VStack>
           <Text>{toMember?.nickname}</Text>
