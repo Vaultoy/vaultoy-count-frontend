@@ -26,7 +26,11 @@ import { useMutationApi } from "@/api/useMutationApi";
 import { useQueryClient } from "@tanstack/react-query";
 import { patchEditGroupCurrency, patchEditGroupName } from "@/api/group";
 import { encryptString } from "@/encryption/encryption";
-import { useAllCurrenciesSelectItems } from "@/utils/currency";
+import {
+  EMPTY_LIST_COLLECTION,
+  getAllCurrenciesSelectItems,
+  type AllCurrencySelectItems,
+} from "@/utils/currency";
 import { SelectItemCurrency } from "@/components/SelectItemCurrency";
 
 const formValuesSchema = z.object({
@@ -37,8 +41,12 @@ export const SettingsTab = () => {
   const { group, groupError, selfMember } = useContext(GroupContext);
   const queryClient = useQueryClient();
   const [newCurrency, setNewCurrency] = useState("");
-  const { mostCommonCurrencyItems, otherCurrencyItems, currencyCollection } =
-    useAllCurrenciesSelectItems();
+  const [currencySelectItems, setCurrencySelectItems] =
+    useState<AllCurrencySelectItems>({
+      mostCommonCurrencyItems: [],
+      otherCurrencyItems: [],
+      currencyCollection: EMPTY_LIST_COLLECTION,
+    });
 
   const {
     handleSubmit,
@@ -117,6 +125,21 @@ export const SettingsTab = () => {
     }
   }, [group, setValue]);
 
+  useEffect(() => {
+    const loadCurrencies = () => {
+      setCurrencySelectItems(getAllCurrenciesSelectItems());
+    };
+
+    // Defer setting the currency select items
+    // to avoid making the initial render too heavy
+    // (150 components to render)
+    const timeoutId = window.setTimeout(loadCurrencies, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
     <VStack gap={{ base: "0.5em", md: "1em" }}>
       <Field.Root invalid={!!errors.groupName}>
@@ -174,33 +197,43 @@ export const SettingsTab = () => {
         <Field.ErrorText>{errors.groupName?.message}</Field.ErrorText>
       </Field.Root>
 
-      <Field.Root>
-        <Field.Label>Group currency</Field.Label>
+      <VStack width="100%" alignItems="flex-start">
+        <Text fontWeight="bold" fontSize="sm" width="100%" marginTop="1em">
+          Group currency
+        </Text>
         {selfMember && selfMember.rights !== "admin" && (
           <Text fontSize="0.9em" color="gray.500">
-            Only admins can edit the group currency
+            Only admins can edit the currency
           </Text>
         )}
+        {!selfMember ||
+          (selfMember.rights === "admin" && (
+            <Text fontSize="0.9em" color="gray.500">
+              This setting only changes the currency symbol. No existing amounts
+              will be converted.
+            </Text>
+          ))}
 
         {!group && !groupError && <Skeleton height="1.1em" width="12em" />}
 
         {group && (
           <HStack
             width={{ base: "90%", md: "fit-content" }}
+            marginTop="0.5em"
             marginLeft="1em"
             justifyContent="center"
           >
             <Select.Root
               value={newCurrency ? [newCurrency] : []}
               onValueChange={({ value }) => setNewCurrency(value[0] ?? "")}
-              collection={currencyCollection}
+              collection={currencySelectItems.currencyCollection}
               disabled={selfMember?.rights !== "admin"}
               positioning={{ strategy: "fixed", hideWhenDetached: true }}
             >
               <Select.HiddenSelect />
               <Select.Control minWidth={{ base: "14em", md: "22em" }}>
                 <Select.Trigger>
-                  <Select.ValueText placeholder="Select currency" />
+                  <Select.ValueText placeholder="" />
                 </Select.Trigger>
                 <Select.IndicatorGroup>
                   <Select.Indicator />
@@ -209,16 +242,18 @@ export const SettingsTab = () => {
               <Portal>
                 <Select.Positioner>
                   <Select.Content zIndex={2000}>
-                    {mostCommonCurrencyItems.map((currency) => (
-                      <SelectItemCurrency
-                        currency={currency}
-                        key={currency.value}
-                      />
-                    ))}
+                    {currencySelectItems.mostCommonCurrencyItems.map(
+                      (currency) => (
+                        <SelectItemCurrency
+                          currency={currency}
+                          key={currency.value}
+                        />
+                      ),
+                    )}
 
                     <Separator margin="1em" />
 
-                    {otherCurrencyItems.map((currency) => (
+                    {currencySelectItems.otherCurrencyItems.map((currency) => (
                       <SelectItemCurrency
                         currency={currency}
                         key={currency.value}
@@ -252,7 +287,7 @@ export const SettingsTab = () => {
             )}
           </HStack>
         )}
-      </Field.Root>
+      </VStack>
 
       <Text fontWeight="bold" fontSize="sm" width="100%" marginTop="1em">
         Group members

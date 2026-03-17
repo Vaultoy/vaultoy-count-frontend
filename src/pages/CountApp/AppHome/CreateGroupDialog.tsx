@@ -23,7 +23,7 @@ import { FaPlus, FaRegTrashAlt } from "react-icons/fa";
 import { UserContext } from "@/contexts/UserContext";
 import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
 import { useMutationApi } from "@/api/useMutationApi";
-import { useAllCurrenciesSelectItems } from "@/utils/currency";
+import { getAllCurrenciesSelectItems } from "@/utils/currency";
 import { SelectItemCurrency } from "@/components/SelectItemCurrency";
 import { encryptNewGroup } from "@/encryption/groupEncryption";
 
@@ -40,7 +40,7 @@ export const CreateGroupDialog = () => {
   const user = useContext(UserContext);
 
   const { mostCommonCurrencyItems, otherCurrencyItems, currencyCollection } =
-    useAllCurrenciesSelectItems();
+    getAllCurrenciesSelectItems();
 
   const {
     register,

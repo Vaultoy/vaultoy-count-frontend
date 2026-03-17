@@ -1,6 +1,5 @@
-import { useMemo } from "react";
 import { floatCentsToString } from "./textGeneration";
-import { createListCollection } from "@chakra-ui/react";
+import { createListCollection, type ListCollection } from "@chakra-ui/react";
 
 export const DEFAULT_CURRENCY_SYMBOL = "¤";
 
@@ -15,6 +14,19 @@ interface AllCurrencyInfo {
   others: CurrencyInfo[];
 }
 
+interface CurrencySelectItem {
+  label: string;
+  value: string;
+  name: string;
+  symbol: string;
+}
+
+export interface AllCurrencySelectItems {
+  mostCommonCurrencyItems: CurrencySelectItem[];
+  otherCurrencyItems: CurrencySelectItem[];
+  currencyCollection: ListCollection<CurrencySelectItem>;
+}
+
 const MOST_COMMON_CURRENCIES = [
   "USD",
   "EUR",
@@ -26,9 +38,12 @@ const MOST_COMMON_CURRENCIES = [
   "CNY",
 ];
 
+const currencyDisplayNames = new Intl.DisplayNames(["en"], {
+  type: "currency",
+});
+
 export const getCurrencyInfo = (code: string): CurrencyInfo => {
-  const name =
-    new Intl.DisplayNames(["en"], { type: "currency" }).of(code) ?? code;
+  const name = currencyDisplayNames.of(code) ?? code;
   const symbol =
     new Intl.NumberFormat("en", {
       style: "currency",
@@ -52,8 +67,10 @@ const getAllCurrencies = (): AllCurrencyInfo => {
   };
 };
 
-export const useAllCurrenciesSelectItems = () => {
-  return useMemo(() => {
+let memoizedCurrenciesSelectItems: AllCurrencySelectItems | null = null;
+
+export const getAllCurrenciesSelectItems = (): AllCurrencySelectItems => {
+  if (!memoizedCurrenciesSelectItems) {
     const currencies = getAllCurrencies();
 
     const mostCommonCurrencyItems = currencies.mostCommon.map((currency) => ({
@@ -72,13 +89,19 @@ export const useAllCurrenciesSelectItems = () => {
       items: [...mostCommonCurrencyItems, ...otherCurrencyItems],
     });
 
-    return {
+    memoizedCurrenciesSelectItems = {
       mostCommonCurrencyItems,
       otherCurrencyItems,
       currencyCollection,
     };
-  }, []);
+  }
+
+  return memoizedCurrenciesSelectItems;
 };
+
+export const EMPTY_LIST_COLLECTION = createListCollection({
+  items: [] as CurrencySelectItem[],
+});
 
 export const displayAmount = (
   amount: number,
