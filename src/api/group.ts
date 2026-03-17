@@ -1,11 +1,12 @@
 import type { EmptyObject, Encrypted } from "@/types";
 import { fetchJsonApi, type ApiResponse } from "./fetch";
 
-interface CreateGroupBody {
-  name: string;
-  encryptedGroupEncryptionKey: string;
-  selfMemberNickname: string;
-  memberNicknames: string[];
+export interface CreateGroupBody {
+  name: Encrypted<string, true>;
+  encryptedGroupEncryptionKey: Encrypted<CryptoKey, true>;
+  currency: Encrypted<string, true>;
+  selfMemberNickname: Encrypted<string, true>;
+  memberNicknames: Encrypted<string, true>[];
 }
 
 export const createGroupMutation = async (

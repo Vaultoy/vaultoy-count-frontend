@@ -3,32 +3,34 @@ import { createGroupMutation } from "@/api/group";
 import {
   Button,
   CloseButton,
+  createListCollection,
   Dialog,
   Field,
   Input,
   Portal,
   HStack,
+  Select,
   VStack,
   Center,
   Text,
+  Separator,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { FaPlus, FaRegTrashAlt } from "react-icons/fa";
-import {
-  decryptEncryptionKey,
-  encryptEncryptionKey,
-  encryptString,
-} from "@/encryption/encryption";
 import { UserContext } from "@/contexts/UserContext";
 import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
 import { useMutationApi } from "@/api/useMutationApi";
+import { useAllCurrencies } from "@/utils/currency";
+import { SelectItemCurrency } from "@/components/SelectItemCurrency";
+import { encryptNewGroup } from "@/encryption/groupEncryption";
 
 const formValuesSchema = z.object({
   name: z.string().min(3).max(100),
+  currency: z.string().length(3),
   selfMemberNickname: z.string().min(3).max(100),
   memberNicknames: z.array(z.string().min(3).max(100)),
 });
@@ -37,6 +39,33 @@ export const CreateGroupDialog = () => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const user = useContext(UserContext);
+
+  const currencies = useAllCurrencies();
+
+  const { mostCommonCurrencyItems, otherCurrencyItems, currencyCollection } =
+    useMemo(() => {
+      const mostCommonCurrencyItems = currencies.mostCommon.map((currency) => ({
+        label: `${currency.code}  •  ${currency.symbol}  •  ${currency.name}`,
+        value: currency.code,
+        name: currency.name,
+        symbol: currency.symbol,
+      }));
+      const otherCurrencyItems = currencies.others.map((currency) => ({
+        label: `${currency.code}  •  ${currency.symbol}  •  ${currency.name}`,
+        value: currency.code,
+        name: currency.name,
+        symbol: currency.symbol,
+      }));
+      const currencyCollection = createListCollection({
+        items: [...mostCommonCurrencyItems, ...otherCurrencyItems],
+      });
+
+      return {
+        mostCommonCurrencyItems,
+        otherCurrencyItems,
+        currencyCollection,
+      };
+    }, [currencies]);
 
   const {
     register,
@@ -50,6 +79,9 @@ export const CreateGroupDialog = () => {
     z.output<typeof formValuesSchema>
   >({
     resolver: zodResolver(formValuesSchema),
+    defaultValues: {
+      currency: currencies.mostCommon[0]?.code ?? "USD",
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -76,39 +108,17 @@ export const CreateGroupDialog = () => {
       return;
     }
 
-    const groupEncryptionKeyRaw = crypto.getRandomValues(new Uint8Array(32));
-
-    const encryptedGroupEncryptionKey = await encryptEncryptionKey(
-      groupEncryptionKeyRaw,
+    const encryptedNewGroup = await encryptNewGroup(
+      {
+        name: data.name,
+        currency: data.currency,
+        selfMemberNickname: data.selfMemberNickname,
+        memberNicknames: data.memberNicknames,
+      },
       user.user.userEncryptionKey,
-      "group key for new group",
     );
 
-    const groupEncryptionKey = await decryptEncryptionKey(
-      encryptedGroupEncryptionKey,
-      user.user.userEncryptionKey,
-      false,
-      "group key for new group",
-    );
-
-    mutation.mutate({
-      name: await encryptString(data.name, groupEncryptionKey, "group name"),
-      encryptedGroupEncryptionKey,
-      selfMemberNickname: await encryptString(
-        data.selfMemberNickname,
-        groupEncryptionKey,
-        "self member nickname for new group",
-      ),
-      memberNicknames: await Promise.all(
-        data.memberNicknames.map((nickname, index) =>
-          encryptString(
-            nickname,
-            groupEncryptionKey,
-            `member nickname ${index} for new group`,
-          ),
-        ),
-      ),
-    });
+    mutation.mutate(encryptedNewGroup);
   });
 
   return (
@@ -131,6 +141,55 @@ export const CreateGroupDialog = () => {
                   <Field.Label>Group name</Field.Label>
                   <Input {...register("name")} />
                   <Field.ErrorText>{errors.name?.message}</Field.ErrorText>
+                </Field.Root>
+
+                <Field.Root invalid={!!errors.currency} marginTop="1em">
+                  <Field.Label>Currency</Field.Label>
+
+                  <Controller
+                    control={control}
+                    name="currency"
+                    render={({ field }) => (
+                      <Select.Root
+                        name={field.name}
+                        value={field.value ? [field.value] : []}
+                        onValueChange={({ value }) => field.onChange(value[0])}
+                        onInteractOutside={() => field.onBlur()}
+                        collection={currencyCollection}
+                      >
+                        <Select.HiddenSelect />
+                        <Select.Control>
+                          <Select.Trigger>
+                            <Select.ValueText placeholder="Select currency" />
+                          </Select.Trigger>
+                          <Select.IndicatorGroup>
+                            <Select.Indicator />
+                          </Select.IndicatorGroup>
+                        </Select.Control>
+                        <Select.Positioner>
+                          <Select.Content zIndex={2000}>
+                            {mostCommonCurrencyItems.map((currency) => (
+                              <SelectItemCurrency
+                                currency={currency}
+                                key={currency.value}
+                              />
+                            ))}
+
+                            <Separator margin="1em" />
+
+                            {otherCurrencyItems.map((currency) => (
+                              <SelectItemCurrency
+                                currency={currency}
+                                key={currency.value}
+                              />
+                            ))}
+                          </Select.Content>
+                        </Select.Positioner>
+                      </Select.Root>
+                    )}
+                  />
+
+                  <Field.ErrorText>{errors.currency?.message}</Field.ErrorText>
                 </Field.Root>
 
                 <Field.Root

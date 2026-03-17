@@ -1,11 +1,21 @@
-import { type Group, type GroupExtended, type GroupMember } from "@/api/group";
+import {
+  type CreateGroupBody,
+  type Group,
+  type GroupExtended,
+  type GroupMember,
+} from "@/api/group";
 import type { GroupForJoiningInitiate } from "@/api/invitation";
 import { type Encrypted, type Result } from "@/types";
 import {
   deriveInvitationAuthenticationToken,
   deriveInvitationEncryptionKey,
 } from "./groupInvitationDerivation";
-import { decryptEncryptionKey, decryptString } from "./encryption";
+import {
+  decryptEncryptionKey,
+  decryptString,
+  encryptEncryptionKey,
+  encryptString,
+} from "./encryption";
 import { decryptTransaction } from "./transactionEncryption";
 
 /**
@@ -150,4 +160,53 @@ export const decryptGroupForAppHomePage = async (
       isOk: false,
     };
   }
+};
+
+export const encryptNewGroup = async (
+  newGroup: {
+    name: string;
+    currency: string;
+    selfMemberNickname: string;
+    memberNicknames: string[];
+  },
+  userEncryptionKey: CryptoKey,
+): Promise<CreateGroupBody> => {
+  const groupEncryptionKeyRaw = crypto.getRandomValues(new Uint8Array(32));
+
+  const encryptedGroupEncryptionKey = await encryptEncryptionKey(
+    groupEncryptionKeyRaw,
+    userEncryptionKey,
+    "group key for new group",
+  );
+
+  const groupEncryptionKey = await decryptEncryptionKey(
+    encryptedGroupEncryptionKey,
+    userEncryptionKey,
+    false,
+    "group key for new group",
+  );
+
+  return {
+    name: await encryptString(newGroup.name, groupEncryptionKey, "group name"),
+    encryptedGroupEncryptionKey,
+    currency: await encryptString(
+      newGroup.currency,
+      groupEncryptionKey,
+      "group currency for new group",
+    ),
+    selfMemberNickname: await encryptString(
+      newGroup.selfMemberNickname,
+      groupEncryptionKey,
+      "self member nickname for new group",
+    ),
+    memberNicknames: await Promise.all(
+      newGroup.memberNicknames.map((nickname, index) =>
+        encryptString(
+          nickname,
+          groupEncryptionKey,
+          `member nickname ${index} for new group`,
+        ),
+      ),
+    ),
+  };
 };
