@@ -89,6 +89,18 @@ export const patchEditGroupName = async ({
   });
 };
 
+export const patchEditGroupCurrency = async ({
+  groupId,
+  newGroupCurrency,
+}: {
+  groupId: number;
+  newGroupCurrency: string;
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi("PATCH", `/v1/group/${groupId}/currency`, {
+    newGroupCurrency,
+  });
+};
+
 export const postAddTransactionMutation = async ({
   groupId,
   transactionData,

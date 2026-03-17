@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { floatCentsToString } from "./textGeneration";
+import { createListCollection } from "@chakra-ui/react";
 
 export const DEFAULT_CURRENCY_SYMBOL = "¤";
 
@@ -40,15 +41,41 @@ export const getCurrencyInfo = (code: string): CurrencyInfo => {
   return { code, name, symbol };
 };
 
-export const useAllCurrencies = () => {
-  return useMemo<AllCurrencyInfo>(() => {
-    const otherCodes = Intl.supportedValuesOf("currency").filter(
-      (code) => !MOST_COMMON_CURRENCIES.includes(code),
-    );
+const getAllCurrencies = (): AllCurrencyInfo => {
+  const otherCodes = Intl.supportedValuesOf("currency").filter(
+    (code) => !MOST_COMMON_CURRENCIES.includes(code),
+  );
+
+  return {
+    mostCommon: MOST_COMMON_CURRENCIES.map(getCurrencyInfo),
+    others: otherCodes.map(getCurrencyInfo),
+  };
+};
+
+export const useAllCurrenciesSelectItems = () => {
+  return useMemo(() => {
+    const currencies = getAllCurrencies();
+
+    const mostCommonCurrencyItems = currencies.mostCommon.map((currency) => ({
+      label: `${currency.code}  •  ${currency.symbol}  •  ${currency.name}`,
+      value: currency.code,
+      name: currency.name,
+      symbol: currency.symbol,
+    }));
+    const otherCurrencyItems = currencies.others.map((currency) => ({
+      label: `${currency.code}  •  ${currency.symbol}  •  ${currency.name}`,
+      value: currency.code,
+      name: currency.name,
+      symbol: currency.symbol,
+    }));
+    const currencyCollection = createListCollection({
+      items: [...mostCommonCurrencyItems, ...otherCurrencyItems],
+    });
 
     return {
-      mostCommon: MOST_COMMON_CURRENCIES.map(getCurrencyInfo),
-      others: otherCodes.map(getCurrencyInfo),
+      mostCommonCurrencyItems,
+      otherCurrencyItems,
+      currencyCollection,
     };
   }, []);
 };

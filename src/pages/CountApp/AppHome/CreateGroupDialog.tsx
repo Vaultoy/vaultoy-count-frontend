@@ -3,7 +3,6 @@ import { createGroupMutation } from "@/api/group";
 import {
   Button,
   CloseButton,
-  createListCollection,
   Dialog,
   Field,
   Input,
@@ -19,12 +18,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useState } from "react";
 import { FaPlus, FaRegTrashAlt } from "react-icons/fa";
 import { UserContext } from "@/contexts/UserContext";
 import { UNEXPECTED_ERROR_TOAST } from "@/components/toastMessages";
 import { useMutationApi } from "@/api/useMutationApi";
-import { useAllCurrencies } from "@/utils/currency";
+import { useAllCurrenciesSelectItems } from "@/utils/currency";
 import { SelectItemCurrency } from "@/components/SelectItemCurrency";
 import { encryptNewGroup } from "@/encryption/groupEncryption";
 
@@ -40,32 +39,8 @@ export const CreateGroupDialog = () => {
   const queryClient = useQueryClient();
   const user = useContext(UserContext);
 
-  const currencies = useAllCurrencies();
-
   const { mostCommonCurrencyItems, otherCurrencyItems, currencyCollection } =
-    useMemo(() => {
-      const mostCommonCurrencyItems = currencies.mostCommon.map((currency) => ({
-        label: `${currency.code}  •  ${currency.symbol}  •  ${currency.name}`,
-        value: currency.code,
-        name: currency.name,
-        symbol: currency.symbol,
-      }));
-      const otherCurrencyItems = currencies.others.map((currency) => ({
-        label: `${currency.code}  •  ${currency.symbol}  •  ${currency.name}`,
-        value: currency.code,
-        name: currency.name,
-        symbol: currency.symbol,
-      }));
-      const currencyCollection = createListCollection({
-        items: [...mostCommonCurrencyItems, ...otherCurrencyItems],
-      });
-
-      return {
-        mostCommonCurrencyItems,
-        otherCurrencyItems,
-        currencyCollection,
-      };
-    }, [currencies]);
+    useAllCurrenciesSelectItems();
 
   const {
     register,
@@ -80,7 +55,7 @@ export const CreateGroupDialog = () => {
   >({
     resolver: zodResolver(formValuesSchema),
     defaultValues: {
-      currency: currencies.mostCommon[0]?.code ?? "USD",
+      currency: "USD",
     },
   });
 

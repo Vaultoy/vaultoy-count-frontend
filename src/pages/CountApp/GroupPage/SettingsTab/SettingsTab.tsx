@@ -8,8 +8,11 @@ import {
   Button,
   Field,
   Editable,
+  Select,
+  Portal,
+  Separator,
 } from "@chakra-ui/react";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaUser, FaUserSlash } from "react-icons/fa";
 import { LuCheck, LuCrown, LuPencilLine, LuX } from "react-icons/lu";
 import { EditMemberDialog } from "./EditMemberDialog";
@@ -21,8 +24,10 @@ import { toaster } from "@/components/ui/toast-store";
 import { Controller, useForm } from "react-hook-form";
 import { useMutationApi } from "@/api/useMutationApi";
 import { useQueryClient } from "@tanstack/react-query";
-import { patchEditGroupName } from "@/api/group";
+import { patchEditGroupCurrency, patchEditGroupName } from "@/api/group";
 import { encryptString } from "@/encryption/encryption";
+import { useAllCurrenciesSelectItems } from "@/utils/currency";
+import { SelectItemCurrency } from "@/components/SelectItemCurrency";
 
 const formValuesSchema = z.object({
   groupName: z.string().min(3).max(100),
@@ -31,6 +36,9 @@ const formValuesSchema = z.object({
 export const SettingsTab = () => {
   const { group, groupError, selfMember } = useContext(GroupContext);
   const queryClient = useQueryClient();
+  const [newCurrency, setNewCurrency] = useState("");
+  const { mostCommonCurrencyItems, otherCurrencyItems, currencyCollection } =
+    useAllCurrenciesSelectItems();
 
   const {
     handleSubmit,
@@ -59,6 +67,34 @@ export const SettingsTab = () => {
     },
   });
 
+  const editGroupCurrencyMutation = useMutationApi({
+    mutationFn: patchEditGroupCurrency,
+    onSuccess: async () => {
+      toaster.create({
+        title: "Currency edited successfully",
+        type: "success",
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["getGroup", group?.id],
+      });
+    },
+  });
+
+  const submitGroupCurrency = async () => {
+    if (!group || !newCurrency) return;
+    if (newCurrency === group.currency) return;
+
+    editGroupCurrencyMutation.mutate({
+      groupId: group.id,
+      newGroupCurrency: await encryptString(
+        newCurrency,
+        group.groupEncryptionKey,
+        "new group currency",
+      ),
+    });
+  };
+
   const submitGroupName = () => {
     handleSubmit(async (data) => {
       if (!group) return;
@@ -77,6 +113,7 @@ export const SettingsTab = () => {
   useEffect(() => {
     if (group) {
       setValue("groupName", group.name);
+      setNewCurrency(group.currency);
     }
   }, [group, setValue]);
 
@@ -135,6 +172,86 @@ export const SettingsTab = () => {
         />
 
         <Field.ErrorText>{errors.groupName?.message}</Field.ErrorText>
+      </Field.Root>
+
+      <Field.Root>
+        <Field.Label>Group currency</Field.Label>
+        {selfMember && selfMember.rights !== "admin" && (
+          <Text fontSize="0.9em" color="gray.500">
+            Only admins can edit the group currency
+          </Text>
+        )}
+
+        {!group && !groupError && <Skeleton height="1.1em" width="12em" />}
+
+        {group && (
+          <HStack
+            width={{ base: "90%", md: "fit-content" }}
+            marginLeft="1em"
+            justifyContent="center"
+          >
+            <Select.Root
+              value={newCurrency ? [newCurrency] : []}
+              onValueChange={({ value }) => setNewCurrency(value[0] ?? "")}
+              collection={currencyCollection}
+              disabled={selfMember?.rights !== "admin"}
+              positioning={{ strategy: "fixed", hideWhenDetached: true }}
+            >
+              <Select.HiddenSelect />
+              <Select.Control minWidth={{ base: "14em", md: "22em" }}>
+                <Select.Trigger>
+                  <Select.ValueText placeholder="Select currency" />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Portal>
+                <Select.Positioner>
+                  <Select.Content zIndex={2000}>
+                    {mostCommonCurrencyItems.map((currency) => (
+                      <SelectItemCurrency
+                        currency={currency}
+                        key={currency.value}
+                      />
+                    ))}
+
+                    <Separator margin="1em" />
+
+                    {otherCurrencyItems.map((currency) => (
+                      <SelectItemCurrency
+                        currency={currency}
+                        key={currency.value}
+                      />
+                    ))}
+                  </Select.Content>
+                </Select.Positioner>
+              </Portal>
+            </Select.Root>
+
+            {newCurrency !== group.currency && (
+              <>
+                <Button
+                  size="xs"
+                  onClick={submitGroupCurrency}
+                  loading={editGroupCurrencyMutation.isPending}
+                  disabled={!newCurrency || newCurrency === group.currency}
+                >
+                  <LuCheck /> Save
+                </Button>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={() => {
+                    setNewCurrency(group.currency);
+                  }}
+                >
+                  <LuX />
+                </Button>
+              </>
+            )}
+          </HStack>
+        )}
       </Field.Root>
 
       <Text fontWeight="bold" fontSize="sm" width="100%" marginTop="1em">
