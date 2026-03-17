@@ -199,22 +199,28 @@ export const SettingsTab = () => {
 
       <VStack width="100%" alignItems="flex-start">
         <Text fontWeight="bold" fontSize="sm" width="100%" marginTop="1em">
-          Group currency
+          Currency
         </Text>
         {selfMember && selfMember.rights !== "admin" && (
           <Text fontSize="0.9em" color="gray.500">
             Only admins can edit the currency
           </Text>
         )}
-        {!selfMember ||
-          (selfMember.rights === "admin" && (
-            <Text fontSize="0.9em" color="gray.500">
-              This setting only changes the currency symbol. No existing amounts
-              will be converted.
-            </Text>
-          ))}
+        {(!selfMember || selfMember.rights === "admin") && (
+          <Text fontSize="0.9em" color="gray.500">
+            This setting only changes the currency symbol. No existing amounts
+            will be converted.
+          </Text>
+        )}
 
-        {!group && !groupError && <Skeleton height="1.1em" width="12em" />}
+        {!group && !groupError && (
+          <Skeleton
+            height="2em"
+            width="12em"
+            marginLeft="1em"
+            marginTop="0.5em"
+          />
+        )}
 
         {group && (
           <HStack
@@ -289,8 +295,14 @@ export const SettingsTab = () => {
         )}
       </VStack>
 
-      <Text fontWeight="bold" fontSize="sm" width="100%" marginTop="1em">
-        Group members
+      <Text
+        fontWeight="bold"
+        fontSize="sm"
+        width="100%"
+        marginTop="1em"
+        marginBottom="0.5em"
+      >
+        Members
       </Text>
 
       <AddMemberDialog />
