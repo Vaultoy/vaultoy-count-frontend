@@ -14,11 +14,15 @@ import {
   Button,
   Card,
   Center,
+  Field,
   Fieldset,
   Heading,
+  HStack,
   Icon,
+  Input,
   ProgressCircle,
   RadioGroup,
+  Separator,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -27,13 +31,35 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
 import z from "zod";
-import { encryptEncryptionKey } from "@/encryption/encryption";
+import { encryptEncryptionKey, encryptString } from "@/encryption/encryption";
 import { TbFaceIdError } from "react-icons/tb";
 import { onUnknownError, useMutationApi } from "@/api/useMutationApi";
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/utils/constants";
 
-const formValuesSchema = z.object({
-  selfMemberId: z.string("Please select who you are in this list"),
-});
+const CREATE_NEW_MEMBER_VALUE = "CREATE_NEW_MEMBER_VALUE" as const;
+
+const formValuesSchema = z
+  .object({
+    selfMemberId: z.string("Please select who you are in this list"),
+    selfMemberNickname: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.selfMemberId === CREATE_NEW_MEMBER_VALUE) {
+        const trimmedNickname = data.selfMemberNickname?.trim();
+        return (
+          trimmedNickname !== undefined &&
+          trimmedNickname.length >= USERNAME_MIN_LENGTH &&
+          trimmedNickname.length <= USERNAME_MAX_LENGTH
+        );
+      }
+      return true;
+    },
+    {
+      message: "Your nickname must be between 3 and 20 characters long",
+      path: ["selfMemberNickname"],
+    },
+  );
 
 type JoiningError =
   | "GROUP_INVITATION_NOT_FOUND"
@@ -67,6 +93,8 @@ const JoinInvitation = () => {
     handleSubmit,
     reset,
     control,
+    register,
+    watch,
     formState: { errors },
   } = useForm<
     z.input<typeof formValuesSchema>,
@@ -238,8 +266,11 @@ const JoinInvitation = () => {
       return;
     }
 
-    const selfMemberIdInt = parseInt(data.selfMemberId, 10);
-    if (isNaN(selfMemberIdInt)) {
+    const selfMemberIdInt =
+      data.selfMemberId !== CREATE_NEW_MEMBER_VALUE
+        ? parseInt(data.selfMemberId, 10)
+        : CREATE_NEW_MEMBER_VALUE;
+    if (selfMemberIdInt !== CREATE_NEW_MEMBER_VALUE && isNaN(selfMemberIdInt)) {
       toaster.create({
         title: "Invalid member ID",
         description: "Please select a valid member from the list.",
@@ -258,16 +289,29 @@ const JoinInvitation = () => {
       "group key for invitation",
     );
 
+    const memberData =
+      selfMemberIdInt !== CREATE_NEW_MEMBER_VALUE
+        ? { memberId: selfMemberIdInt }
+        : {
+            memberNickname: await encryptString(
+              data.selfMemberNickname!,
+              groupForJoining.groupEncryptionKey,
+              "self nickname for invitation",
+            ),
+          };
+
     joinConcludeMutation.mutate({
       groupId,
       invitationData: {
-        memberId: selfMemberIdInt,
+        ...memberData,
         invitationAuthenticationToken:
           groupForJoining.invitationAuthenticationToken,
         groupEncryptionKey: encryptedGroupEncryptionKey,
       },
     });
   });
+
+  const selfMemberId = watch("selfMemberId");
 
   return (
     <Center>
@@ -399,6 +443,30 @@ const JoinInvitation = () => {
                               </Card.Body>
                             </Card.Root>
                           ))}
+
+                        <HStack width="100%">
+                          <Separator flex="1" />
+                          <Text flexShrink="0" color="gray.500">
+                            Or
+                          </Text>
+                          <Separator flex="1" />
+                        </HStack>
+
+                        <Card.Root width="100%">
+                          <Card.Body padding="0.7em">
+                            <RadioGroup.Item value={CREATE_NEW_MEMBER_VALUE}>
+                              <RadioGroup.ItemHiddenInput
+                                onBlur={field.onBlur}
+                              />
+                              <RadioGroup.ItemIndicator />
+                              <VStack alignItems="flex-start" gap="0.25em">
+                                <Text fontSize="md" color="black">
+                                  Create a new member
+                                </Text>
+                              </VStack>
+                            </RadioGroup.Item>
+                          </Card.Body>
+                        </Card.Root>
                       </VStack>
                     </RadioGroup.Root>
                   )}
@@ -407,6 +475,19 @@ const JoinInvitation = () => {
                 <Fieldset.ErrorText>
                   {errors.selfMemberId?.message}
                 </Fieldset.ErrorText>
+
+                {selfMemberId === CREATE_NEW_MEMBER_VALUE && (
+                  <Field.Root invalid={!!errors.selfMemberNickname}>
+                    <Field.Label>Your nickname</Field.Label>
+                    <Input
+                      {...register("selfMemberNickname")}
+                      width={{ base: "100%", md: "20em" }}
+                    />
+                    <Field.ErrorText>
+                      {errors.selfMemberNickname?.message}
+                    </Field.ErrorText>
+                  </Field.Root>
+                )}
 
                 <Button
                   size="sm"

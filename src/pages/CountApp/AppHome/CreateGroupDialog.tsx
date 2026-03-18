@@ -26,12 +26,18 @@ import { useMutationApi } from "@/api/useMutationApi";
 import { getAllCurrenciesSelectItems } from "@/utils/currency";
 import { SelectItemCurrency } from "@/components/SelectItemCurrency";
 import { encryptNewGroup } from "@/encryption/groupEncryption";
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/utils/constants";
 
 const formValuesSchema = z.object({
   name: z.string().min(3).max(100),
   currency: z.string().length(3),
-  selfMemberNickname: z.string().min(3).max(100),
-  memberNicknames: z.array(z.string().min(3).max(100)),
+  selfMemberNickname: z
+    .string()
+    .min(USERNAME_MIN_LENGTH)
+    .max(USERNAME_MAX_LENGTH),
+  memberNicknames: z.array(
+    z.string().min(USERNAME_MIN_LENGTH).max(USERNAME_MAX_LENGTH),
+  ),
 });
 
 export const CreateGroupDialog = () => {

@@ -28,11 +28,17 @@ export const joinInvitationInitiateMutation = async ({
   );
 };
 
-export interface GroupJoinConcludeBody {
+export type GroupJoinConcludeBody = {
   invitationAuthenticationToken: string;
   groupEncryptionKey: Encrypted<CryptoKey, true>;
-  memberId: number;
-}
+} & (
+  | {
+      memberId: number;
+    }
+  | {
+      memberNickname: Encrypted<string, true>;
+    }
+);
 
 export const joinInvitationConcludeMutation = async ({
   groupId,

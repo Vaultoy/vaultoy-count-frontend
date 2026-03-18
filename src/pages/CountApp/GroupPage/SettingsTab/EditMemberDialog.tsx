@@ -9,6 +9,7 @@ import { InfoPopover } from "@/components/InfoPopover";
 import { toaster } from "@/components/ui/toast-store";
 import { GroupContext } from "@/contexts/GroupContext";
 import { encryptString } from "@/encryption/encryption";
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/utils/constants";
 import {
   Button,
   Center,
@@ -35,7 +36,7 @@ import { useNavigate } from "react-router";
 import z from "zod";
 
 const formValuesSchema = z.object({
-  nickname: z.string().min(3).max(100),
+  nickname: z.string().min(USERNAME_MIN_LENGTH).max(USERNAME_MAX_LENGTH),
 });
 
 export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
