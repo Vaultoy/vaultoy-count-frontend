@@ -62,6 +62,16 @@ export const useMutationApi = <TBody, TVariables = void>(
       const serverError = data.bodyJson as ServerErrorResponse;
 
       switch (serverError.error) {
+        case "MAINTENANCE": {
+          toaster.create({
+            title: "Vaultoy is under maintenance",
+            description:
+              "To improve our service, we are currently performing a maintenance. We will be back online as soon as possible!",
+            type: "error",
+          });
+
+          return;
+        }
         case "VALIDATION_ERROR": {
           const description = serverError.fields
             .map(

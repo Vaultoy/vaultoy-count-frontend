@@ -17,6 +17,7 @@ interface TooManyRequestsResponse {
 
 interface ServerErrorWithoutDetailsResponse {
   error:
+    | "MAINTENANCE"
     | "INTERNAL_SERVER_ERROR"
     | "NOT_AUTHENTICATED"
     | "NOT_AUTHORIZED"

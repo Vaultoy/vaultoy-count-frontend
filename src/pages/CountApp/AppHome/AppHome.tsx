@@ -139,7 +139,13 @@ export const AppHomePage = () => {
               color="gray.500"
             />
             <Text color="gray.600" textAlign="center">
-              {queryError.error === "NOT_AUTHORIZED" ? (
+              {queryError.error === "MAINTENANCE" ? (
+                <>
+                  To improve our service, we are currently performing a
+                  maintenance. <br />
+                  We will be back online as soon as possible!
+                </>
+              ) : queryError.error === "NOT_AUTHORIZED" ? (
                 <>
                   You are not logged in or your session has expired. <br />
                   Please log in again to view your groups.

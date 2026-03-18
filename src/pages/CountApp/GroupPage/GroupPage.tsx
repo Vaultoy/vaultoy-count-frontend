@@ -117,7 +117,13 @@ export const GroupPage = () => {
                   color="gray.500"
                 />
                 <Text color="gray.600" textAlign="center">
-                  {groupError.error === "NOT_AUTHORIZED" ? (
+                  {groupError.error === "MAINTENANCE" ? (
+                    <>
+                      To improve our service, we are currently performing a
+                      maintenance. <br />
+                      We will be back online as soon as possible!
+                    </>
+                  ) : groupError.error === "NOT_AUTHORIZED" ? (
                     <>
                       You are not authorized to view this group. <br />
                       The link you used might be invalid, or you might have been
