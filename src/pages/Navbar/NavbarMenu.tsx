@@ -1,7 +1,7 @@
 import { useLogoutMutation } from "@/api/auth";
 import { UserContext } from "@/contexts/UserContext";
 import { Menu, Button, Portal } from "@chakra-ui/react";
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import type { IconType } from "react-icons";
 import { AiOutlineMenu } from "react-icons/ai";
 import { FaBalanceScale, FaHome, FaScroll } from "react-icons/fa";
@@ -19,7 +19,6 @@ interface MenuItem {
 
 type MenuItemOrSeparator = MenuItem | typeof SEPARATOR;
 
-const currentPageColor = "purple.600";
 const SEPARATOR = "SEPARATOR" as const;
 
 const menuItems: MenuItemOrSeparator[] = [
@@ -40,15 +39,16 @@ export const NavbarMenu = () => {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const { pathname: actualPath } = useLocation();
+  const [pathAtMenuOpen, setPathAtMenuOpen] = useState(actualPath);
   const logoutMigration = useLogoutMutation({
     showSuccessToast: true,
     navigateToAfterLogout: "/",
   });
 
   const currentPathIs = (path: string) => {
-    const normalizedActualPath = actualPath.endsWith("/")
-      ? actualPath.slice(0, -1)
-      : actualPath;
+    const normalizedActualPath = pathAtMenuOpen.endsWith("/")
+      ? pathAtMenuOpen.slice(0, -1)
+      : pathAtMenuOpen;
 
     if (path === "/") {
       return normalizedActualPath === "";
@@ -81,6 +81,13 @@ export const NavbarMenu = () => {
 
   return (
     <Menu.Root
+      onOpenChange={(event) => {
+        if (event.open) {
+          // Without this, we would very briefly see the menu item corresponding to the new path highlighted
+          // before it switches to the correct one, which is ugly
+          setPathAtMenuOpen(actualPath);
+        }
+      }}
       onSelect={(event) => {
         const value = event.value as string;
         if (value === "LOGOUT") {
@@ -106,18 +113,19 @@ export const NavbarMenu = () => {
                 <Menu.Item
                   key={item.path}
                   value={item.path}
-                  color={
-                    currentPathIs(item.path) ? currentPageColor : "inherit"
+                  color={currentPathIs(item.path) ? "white" : "black"}
+                  borderRadius="lg"
+                  background={
+                    currentPathIs(item.path) ? "black" : "transparent"
                   }
                   padding="0.7em"
                   fontSize="md"
+                  _hover={{
+                    background: currentPathIs(item.path) ? "black" : "gray.100",
+                    color: currentPathIs(item.path) ? "white" : "black",
+                  }}
                 >
-                  <item.icon
-                    size="1.2em"
-                    color={
-                      currentPathIs(item.path) ? currentPageColor : "inherit"
-                    }
-                  />
+                  <item.icon size="1.2em" />
                   {item.label}
                 </Menu.Item>
               ),
