@@ -32,6 +32,7 @@ import {
   type AllCurrencySelectItems,
 } from "@/utils/currency";
 import { SelectItemCurrency } from "@/components/SelectItemCurrency";
+import { DeleteGroupDialog } from "./DeleteGroupDialog";
 
 const formValuesSchema = z.object({
   groupName: z.string().min(3).max(100),
@@ -373,6 +374,10 @@ export const SettingsTab = () => {
               </Card.Body>
             </Card.Root>
           ))}
+
+      <Separator margin="1em" width="100%" />
+
+      <DeleteGroupDialog />
     </VStack>
   );
 };

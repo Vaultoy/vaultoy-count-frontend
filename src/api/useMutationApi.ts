@@ -72,6 +72,7 @@ export const useMutationApi = <TBody, TVariables = void>(
 
           return;
         }
+
         case "VALIDATION_ERROR": {
           const description = serverError.fields
             .map(

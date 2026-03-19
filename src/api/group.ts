@@ -15,6 +15,14 @@ export const createGroupMutation = async (
   return fetchJsonApi("POST", "/v1/group", data);
 };
 
+export const deleteGroupMutation = async ({
+  groupId,
+}: {
+  groupId: number;
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi("DELETE", `/v1/group/${groupId}`);
+};
+
 export interface Group<isEncrypted extends boolean = true> {
   id: number;
   name: Encrypted<string, isEncrypted>; // encrypted with group encryption key
@@ -128,6 +136,19 @@ export const patchEditTransactionMutation = async ({
     "PATCH",
     `/v1/group/${groupId}/transaction/${transactionId}`,
     transactionData,
+  );
+};
+
+export const deleteTransactionMutation = async ({
+  groupId,
+  transactionId,
+}: {
+  groupId: number;
+  transactionId: number;
+}): Promise<ApiResponse<EmptyObject>> => {
+  return fetchJsonApi(
+    "DELETE",
+    `/v1/group/${groupId}/transaction/${transactionId}`,
   );
 };
 

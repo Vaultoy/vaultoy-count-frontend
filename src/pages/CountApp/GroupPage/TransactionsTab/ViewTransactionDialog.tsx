@@ -24,6 +24,7 @@ import { FaArrowDownLong, FaArrowUpLong } from "react-icons/fa6";
 import { AddEditTransactionDialog } from "./AddEditTransactionDialog";
 import { LuPencilLine } from "react-icons/lu";
 import { displayAmount } from "@/utils/currency";
+import { DeleteTransactionDialog } from "./DeleteTransactionDialog";
 
 export const ViewTransactionDialog = ({
   transactionId,
@@ -229,7 +230,8 @@ export const ViewTransactionDialog = ({
                 )}
               </VStack>
             </Dialog.Body>
-            <Dialog.Footer>
+            <Dialog.Footer justifyContent="space-between">
+              <DeleteTransactionDialog transactionId={transaction.id} />
               <AddEditTransactionDialog
                 editTransactionId={transaction.id}
                 defaultValues={defaultValuesForEdit}
