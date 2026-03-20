@@ -1,6 +1,7 @@
 import {
   TRANSACTION_TYPES,
   type GroupTransaction,
+  type GroupTransactionResult,
   type NewGroupTransaction,
   type TransactionType,
 } from "@/api/group";
@@ -14,8 +15,8 @@ import {
 export const decryptTransaction = async (
   encryptedTransaction: GroupTransaction<true>,
   groupEncryptionKey: CryptoKey,
-): Promise<GroupTransaction<false>> => {
-  let transactionType = (await decryptString(
+): Promise<GroupTransactionResult<false>> => {
+  const transactionType = (await decryptString(
     encryptedTransaction.transactionType,
     groupEncryptionKey,
     "group transaction type",
@@ -26,52 +27,66 @@ export const decryptTransaction = async (
       "Invalid transaction type after decryption:",
       transactionType,
     );
-    // Default to a valid type to prevent crashes, but this should not happen
-    transactionType = TRANSACTION_TYPES[0];
+
+    return {
+      id: encryptedTransaction.id,
+      isOk: false,
+    };
   }
 
-  const decryptedTransaction: GroupTransaction<false> = {
-    id: encryptedTransaction.id,
-    name: await decryptString(
-      encryptedTransaction.name,
-      groupEncryptionKey,
-      "group transaction name",
-    ),
-    amount: await decryptNumber(
-      encryptedTransaction.amount,
-      groupEncryptionKey,
-      "group transaction amount",
-    ),
-    fromMemberId: await decryptNumber(
-      encryptedTransaction.fromMemberId,
-      groupEncryptionKey,
-      "group transaction from member id",
-    ),
-    toMembers: (
-      await Promise.all(
-        encryptedTransaction.toMembers.map(async (toMember) => ({
-          memberId: await decryptNumber(
-            toMember.memberId,
-            groupEncryptionKey,
-            "group transaction to member id",
-          ),
-          share: await decryptNumber(
-            toMember.share,
-            groupEncryptionKey,
-            "group transaction to member share",
-          ),
-        })),
-      )
-    ).sort((a, b) => a.memberId - b.memberId),
-    transactionType,
-    date: await decryptNumber(
-      encryptedTransaction.date,
-      groupEncryptionKey,
-      "group transaction date",
-    ),
-  };
+  try {
+    const decryptedTransaction: GroupTransaction<false> = {
+      id: encryptedTransaction.id,
+      name: await decryptString(
+        encryptedTransaction.name,
+        groupEncryptionKey,
+        "group transaction name",
+      ),
+      amount: await decryptNumber(
+        encryptedTransaction.amount,
+        groupEncryptionKey,
+        "group transaction amount",
+      ),
+      fromMemberId: await decryptNumber(
+        encryptedTransaction.fromMemberId,
+        groupEncryptionKey,
+        "group transaction from member id",
+      ),
+      toMembers: (
+        await Promise.all(
+          encryptedTransaction.toMembers.map(async (toMember) => ({
+            memberId: await decryptNumber(
+              toMember.memberId,
+              groupEncryptionKey,
+              "group transaction to member id",
+            ),
+            share: await decryptNumber(
+              toMember.share,
+              groupEncryptionKey,
+              "group transaction to member share",
+            ),
+          })),
+        )
+      ).sort((a, b) => a.memberId - b.memberId),
+      transactionType,
+      date: await decryptNumber(
+        encryptedTransaction.date,
+        groupEncryptionKey,
+        "group transaction date",
+      ),
+    };
 
-  return decryptedTransaction;
+    return { ...decryptedTransaction, isOk: true };
+  } catch (error) {
+    console.error(
+      `Failed to decrypt transaction with id ${encryptedTransaction.id}:`,
+      error,
+    );
+    return {
+      id: encryptedTransaction.id,
+      isOk: false,
+    };
+  }
 };
 
 export const encryptTransaction = async (

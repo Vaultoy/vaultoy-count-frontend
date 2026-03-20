@@ -34,8 +34,12 @@ export const EquilibriumTab = () => {
       <EquilibriumRepaymentsDialog />
 
       {group?.members.map((member) => {
+        // Show zero if there is only one non-zero balance and that it
+        // is inferior to 100 cents
         const displayedBalance =
-          numberOfNonZeroBalances !== 1 ? member.balance : 0;
+          numberOfNonZeroBalances === 1 && Math.abs(member.balance) <= 100
+            ? 0
+            : member.balance;
 
         return (
           <Card.Root key={member.memberId} width="100%">

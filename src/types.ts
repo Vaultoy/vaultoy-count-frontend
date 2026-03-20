@@ -5,8 +5,6 @@ export type Encrypted<
   ? string // Base64 encoded encrypted data
   : T;
 
-export type Result<T> = T & {
-  isOk: boolean;
-};
+export type Result<Ok, Err> = (Ok & { isOk: true }) | (Err & { isOk: false });
 
 export type EmptyObject = Record<string, never>;

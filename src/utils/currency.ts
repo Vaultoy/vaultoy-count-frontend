@@ -107,7 +107,12 @@ export const displayAmount = (
   amount: number,
   currencyInfo: CurrencyInfo | undefined,
 ) => {
-  const amountInCurrencyUnit = amount / 100;
+  let amountInCurrencyUnit = amount / 100;
+
+  // Display -0 as 0
+  if (amountInCurrencyUnit === 0) {
+    amountInCurrencyUnit = 0;
+  }
 
   if (!currencyInfo?.code) {
     return `${floatCentsToString(amount)}\u00A0${DEFAULT_CURRENCY_SYMBOL}`;

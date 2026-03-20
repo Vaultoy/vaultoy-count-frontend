@@ -1,4 +1,4 @@
-import type { EmptyObject, Encrypted } from "@/types";
+import type { EmptyObject, Encrypted, Result } from "@/types";
 import { fetchJsonApi, type ApiResponse } from "./fetch";
 
 export interface CreateGroupBody {
@@ -60,12 +60,17 @@ export interface GroupTransaction<isEncrypted extends boolean = true> {
   date: Encrypted<number, isEncrypted>;
 }
 
+export type GroupTransactionResult<isEncrypted extends boolean = true> =
+  isEncrypted extends true
+    ? GroupTransaction<true>
+    : Result<GroupTransaction<false>, { id: number }>;
+
 export interface GroupExtended<
   isEncrypted extends boolean = true,
 > extends Group<isEncrypted> {
   currency: Encrypted<string, isEncrypted>;
   members: GroupMember<isEncrypted>[];
-  transactions: GroupTransaction<isEncrypted>[];
+  transactions: GroupTransactionResult<isEncrypted>[];
 }
 
 export const getGroupsQuery = async (): Promise<

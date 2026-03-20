@@ -58,7 +58,12 @@ export const decryptGroup = async (
           decryptTransaction(transaction, groupEncryptionKey),
         ),
       )
-    ).sort((a, b) => b.date - a.date),
+    ).sort((a, b) => {
+      if (a.isOk && b.isOk) return b.date - a.date;
+      if (a.isOk) return -1;
+      if (b.isOk) return 1;
+      return b.id - a.id;
+    }),
   };
 
   return decryptedGroup;
@@ -133,7 +138,7 @@ export const decryptGroupForJoining = async (
 export const decryptGroupForAppHomePage = async (
   encryptedGroup: Group<true>,
   userEncryptionKey: CryptoKey,
-): Promise<Result<Group<false>>> => {
+): Promise<Result<Group<false>, { id: number }>> => {
   try {
     const groupEncryptionKey = await decryptEncryptionKey(
       encryptedGroup.groupEncryptionKey,
@@ -160,8 +165,6 @@ export const decryptGroupForAppHomePage = async (
     );
     return {
       id: encryptedGroup.id,
-      name: "Failed to decrypt",
-      groupEncryptionKey: null as unknown as CryptoKey,
       isOk: false,
     };
   }

@@ -31,7 +31,7 @@ export const AppHomePage = () => {
   });
 
   const [decryptedGroups, setDecryptedGroups] = useState<
-    Result<Group<false>>[] | undefined
+    Result<Group<false>, { id: number }>[] | undefined
   >(undefined);
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export const AppHomePage = () => {
                       ) : (
                         <TbFaceIdError size="1.7em" />
                       )}{" "}
-                      {group.name}
+                      {group.isOk ? group.name : "Failed to decrypt"}
                     </Heading>
                     {!group.isOk && (
                       <Text fontSize="sm" color="gray.400">

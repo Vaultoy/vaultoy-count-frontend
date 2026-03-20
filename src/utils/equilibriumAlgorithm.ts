@@ -26,8 +26,8 @@ export const computeEquilibriumRepayments = (
   // Add all perfect repayments
   for (let i = 0; i < balances.length; i++) {
     for (let j = 0; j < balances.length; j++) {
-      if (i !== j && balances[i] > 0 && balances[i] === -balances[j]) {
-        paymentMatrix[j][i] += balances[i];
+      if (i !== j && balances[i]! > 0 && balances[i] === -balances[j]!) {
+        paymentMatrix[j]![i]! += balances[i]!;
         balances[i] = 0;
         balances[j] = 0;
       }
@@ -39,19 +39,19 @@ export const computeEquilibriumRepayments = (
   let iterationCount = 0;
   while (balances.filter((balance) => balance !== 0).length > 1) {
     const maxIndex = balances.reduce(
-      (maxIdx, value, idx, arr) => (value > arr[maxIdx] ? idx : maxIdx),
+      (maxIdx, value, idx, arr) => (value > arr[maxIdx]! ? idx : maxIdx),
       0,
     );
     const minIndex = balances.reduce(
-      (minIdx, value, idx, arr) => (value < arr[minIdx] ? idx : minIdx),
+      (minIdx, value, idx, arr) => (value < arr[minIdx]! ? idx : minIdx),
       0,
     );
 
-    const amountToPay = Math.min(balances[maxIndex], -balances[minIndex]);
+    const amountToPay = Math.min(balances[maxIndex]!, -balances[minIndex]!);
 
-    paymentMatrix[minIndex][maxIndex] += amountToPay;
-    balances[maxIndex] -= amountToPay;
-    balances[minIndex] += amountToPay;
+    paymentMatrix[minIndex]![maxIndex]! += amountToPay;
+    balances[maxIndex]! -= amountToPay;
+    balances[minIndex]! += amountToPay;
 
     iterationCount++;
     if (iterationCount > balances.length) {
@@ -69,14 +69,14 @@ export const computeEquilibriumRepayments = (
   const repayments: Record<number, RepaymentsToMake[]> = {};
 
   for (let i = 0; i < paymentMatrix.length; i++) {
-    for (let j = 0; j < paymentMatrix[i].length; j++) {
-      if (paymentMatrix[i][j] > 0) {
-        if (!repayments[userIds[i]]) {
-          repayments[userIds[i]] = [];
+    for (let j = 0; j < paymentMatrix[i]!.length; j++) {
+      if (paymentMatrix[i]![j]! > 0) {
+        if (!repayments[userIds[i]!]) {
+          repayments[userIds[i]!] = [];
         }
-        repayments[userIds[i]].push({
-          toMemberId: userIds[j],
-          amount: paymentMatrix[i][j],
+        repayments[userIds[i]!]!.push({
+          toMemberId: userIds[j]!,
+          amount: paymentMatrix[i]![j]!,
         });
       }
     }

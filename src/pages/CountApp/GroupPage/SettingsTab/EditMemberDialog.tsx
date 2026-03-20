@@ -147,10 +147,11 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
   const memberAppearsInATransaction = useMemo(() => {
     return group?.transactions.some(
       (transaction) =>
-        transaction.fromMemberId === memberId ||
-        transaction.toMembers.some(
-          (toMember) => toMember.memberId === memberId,
-        ),
+        transaction.isOk &&
+        (transaction.fromMemberId === memberId ||
+          transaction.toMembers.some(
+            (toMember) => toMember.memberId === memberId,
+          )),
     );
   }, [group, memberId]);
 
@@ -234,7 +235,7 @@ export const EditMemberDialog = ({ memberId }: { memberId: number }) => {
                     <HStack marginLeft="1em" gap="0.3em" flexWrap="wrap">
                       <Text>
                         <Icon as={FaUser} size="xs" />{" "}
-                        {member?.username ?? "Unknown"}
+                        {member?.username ?? "[Unknown]"}
                       </Text>
                       {member?.rights === "admin" && (
                         <>

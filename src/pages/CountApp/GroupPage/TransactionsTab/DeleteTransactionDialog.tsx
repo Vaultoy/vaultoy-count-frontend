@@ -47,7 +47,9 @@ export const DeleteTransactionDialog = ({
     return null;
   }
 
-  const transactionEmoji = getTransactionEmoji(transaction.transactionType);
+  const transactionEmoji = transaction.isOk
+    ? getTransactionEmoji(transaction.transactionType)
+    : "";
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
@@ -74,7 +76,10 @@ export const DeleteTransactionDialog = ({
                 marginBottom="1em"
                 textAlign="center"
               >
-                {transactionEmoji} {transaction.name}
+                {transactionEmoji}{" "}
+                {transaction.isOk
+                  ? transaction.name
+                  : `Transaction #${transaction.id} that cannot be decrypted`}
               </Heading>
               <Text>
                 This action <strong>cannot be undone</strong>.

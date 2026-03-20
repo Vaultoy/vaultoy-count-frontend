@@ -15,6 +15,10 @@ export const computeMembersBalanceAndRepayments = (
     .map((member) => ({
       ...member,
       balance: decryptedGroup.transactions.reduce((balance, transaction) => {
+        if (!transaction.isOk) {
+          return balance;
+        }
+
         let newBalance = balance;
 
         const totalShares = transaction.toMembers.reduce(
