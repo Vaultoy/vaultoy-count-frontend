@@ -23,22 +23,32 @@ export const useKeyDerivation = () => {
 
         const worker = workerRef.current;
 
+        const cleanup = () => {
+          worker.removeEventListener("message", handleMessage);
+          worker.removeEventListener("error", handleError);
+        };
+
         const handleMessage = (event: MessageEvent) => {
+          cleanup();
           const { passwordEncryptionKey, authenticationToken, error } =
             event.data;
 
           if (error) {
-            worker.removeEventListener("message", handleMessage);
             reject(new Error(error));
             return;
           }
 
-          worker.removeEventListener("message", handleMessage);
-
           resolve({ passwordEncryptionKey, authenticationToken });
         };
 
+        const handleError = (error: ErrorEvent) => {
+          cleanup();
+          console.error("Worker failed to load or execute:", error);
+          reject(new Error(error.message || "Failed to load Web Worker"));
+        };
+
         worker.addEventListener("message", handleMessage);
+        worker.addEventListener("error", handleError);
         worker.postMessage({ username, password });
       });
     },
