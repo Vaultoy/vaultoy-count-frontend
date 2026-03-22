@@ -39,9 +39,16 @@ export const useQueryApi = <
 
   const queryResult = useQuery(queryOptions);
 
+  const serverErrorCode =
+    queryResult.data?.bodyJson &&
+    typeof queryResult.data.bodyJson === "object" &&
+    "error" in queryResult.data.bodyJson
+      ? queryResult.data.bodyJson.error
+      : null;
+
   // Session expired
   useEffect(() => {
-    if (queryResult.data?.status === 401 && !queryResult.isFetching) {
+    if (serverErrorCode === "NOT_AUTHENTICATED" && !queryResult.isFetching) {
       toaster.create({
         title: "You are not logged in or your session expired",
         description: "Please log in or sign up.",
@@ -51,7 +58,7 @@ export const useQueryApi = <
       logoutMutation.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryResult.data?.status, queryResult.isError]);
+  }, [serverErrorCode]);
 
   return useMemo(() => {
     // Adding additional error codes

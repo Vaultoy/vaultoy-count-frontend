@@ -20,6 +20,7 @@ interface ServerErrorWithoutDetailsResponse {
     | "MAINTENANCE"
     | "INTERNAL_SERVER_ERROR"
     | "NOT_AUTHENTICATED"
+    | "INCORRECT_CREDENTIALS"
     | "NOT_AUTHORIZED"
     | "BAD_REQUEST"
     | "BAD_JSON_SYNTAX"

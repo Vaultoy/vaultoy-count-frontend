@@ -4,7 +4,7 @@ import { toaster } from "@/components/ui/toast-store";
 import { UserContext } from "@/contexts/UserContext";
 import { useContext } from "react";
 import { useNavigate } from "react-router";
-import { useMutationApi } from "./useMutationApi";
+import { useMutationApiWithoutLogout } from "./useMutationApi";
 
 type LoginSignupBody =
   | ({
@@ -67,7 +67,7 @@ export const useLogoutMutation = ({
   const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  return useMutationApi({
+  return useMutationApiWithoutLogout({
     mutationFn: postLogoutMutation,
     onSuccess: async () => {
       if (showSuccessToast) {

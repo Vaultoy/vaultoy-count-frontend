@@ -100,7 +100,7 @@ export const ChangePasswordDialog = () => {
       logoutMutation.mutate();
     },
     onOtherError: (error) => {
-      if (error.error === "NOT_AUTHENTICATED") {
+      if (error.error === "INCORRECT_CREDENTIALS") {
         toaster.create({
           title: "Failed to change password",
           description: "The old password is incorrect",
@@ -149,7 +149,7 @@ export const ChangePasswordDialog = () => {
       });
     },
     onOtherError: (error) => {
-      if (error.error === "NOT_AUTHENTICATED") {
+      if (error.error === "INCORRECT_CREDENTIALS") {
         toaster.create({
           title: "Failed to change password",
           description: "The old password is incorrect",

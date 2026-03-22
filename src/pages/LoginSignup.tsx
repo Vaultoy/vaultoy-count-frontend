@@ -150,7 +150,7 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     onOtherError: (error) => {
       setTmpUserWaiting(undefined);
 
-      if (isLogin && error.error === "NOT_AUTHENTICATED") {
+      if (isLogin && error.error === "INCORRECT_CREDENTIALS") {
         toaster.create({
           title: "Login failed",
           description: `Invalid username or password`,

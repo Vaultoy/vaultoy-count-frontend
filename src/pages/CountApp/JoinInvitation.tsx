@@ -107,6 +107,8 @@ const JoinInvitation = () => {
   const joinInitiateMutation = useMutationApi({
     mutationFn: joinInvitationInitiateMutation,
     onSuccess: async (data) => {
+      setPostLoginRedirectInfos(undefined);
+
       if (!groupId || !invitationLinkSecret) {
         toaster.create({
           title: "Invalid invitation link",
@@ -164,6 +166,8 @@ const JoinInvitation = () => {
   const joinConcludeMutation = useMutationApi({
     mutationFn: joinInvitationConcludeMutation,
     onSuccess: async () => {
+      setPostLoginRedirectInfos(undefined);
+
       toaster.create({
         title: "Successfully joined the group",
         type: "success",
@@ -206,6 +210,18 @@ const JoinInvitation = () => {
         return;
       }
 
+      // Used if the user is not logged in,
+      // OR if the server returns a NOT_AUTHENTICATED error (e.g. if the session expired)
+      setPostLoginRedirectInfos({
+        uri: `/join/${groupId}/${invitationLinkSecret}`,
+        type: "JOIN_INVITATION",
+      });
+
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+
       const invitationAuthenticationToken =
         await deriveInvitationAuthenticationToken(invitationLinkSecret);
 
@@ -220,16 +236,6 @@ const JoinInvitation = () => {
 
     // Prevent multiple calls to joinGroup and wait for user data to be loaded from IndexedDB
     if (hasExecuted.current || !userDataRetrievedFromLocalDB) {
-      return;
-    }
-
-    if (!user) {
-      setPostLoginRedirectInfos({
-        uri: `/join/${groupId}/${invitationLinkSecret}`,
-        type: "JOIN_INVITATION",
-      });
-
-      navigate("/login");
       return;
     }
 

@@ -6,6 +6,7 @@ import {
   UNEXPECTED_ERROR_TOAST,
   unexpectedErrorToastWithServerError,
 } from "@/components/toastMessages";
+import { useLogoutMutation } from "./auth";
 
 export interface UseMutationApiProps<TBody, TVariables> {
   mutationFn: (variables: TVariables) => Promise<ApiResponse<TBody>>;
@@ -19,6 +20,43 @@ export const onUnknownError = (serverError: ServerErrorResponse) => {
   toaster.create(unexpectedErrorToastWithServerError(serverError.error));
 };
 
+const onError = (error: Error) => {
+  const errorMessage =
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+      ? error.message
+      : undefined;
+
+  if (error instanceof TypeError && errorMessage?.includes("Failed to fetch")) {
+    console.error("A network error occurred during the mutation:", error);
+    toaster.create({
+      title: "Could not connect to the server",
+      description: "Please check your internet connection and try again.",
+      type: "error",
+    });
+    return;
+  }
+
+  // JSON errors
+  if (error instanceof SyntaxError && errorMessage?.includes("JSON")) {
+    console.error(
+      "Could not parse the server response as JSON during the mutation:",
+      error,
+    );
+    toaster.create({
+      title: "Received an unexpected response from the server",
+      description: "Please try again later.",
+      type: "error",
+    });
+    return;
+  }
+
+  console.error("An unexpected error occurred during the mutation:", error);
+  toaster.create(UNEXPECTED_ERROR_TOAST);
+};
+
 /**
  * A custom hook that wraps useMutation from react-query to handle API mutations with standardized success and error handling.
  *
@@ -27,6 +65,11 @@ export const onUnknownError = (serverError: ServerErrorResponse) => {
 export const useMutationApi = <TBody, TVariables = void>(
   props: UseMutationApiProps<TBody, TVariables>,
 ) => {
+  const logoutMutation = useLogoutMutation({
+    showSuccessToast: false,
+    navigateToAfterLogout: "/login",
+  });
+
   const successCode = props.successCode ?? 200;
   const onOtherError = props.onOtherError ?? onUnknownError;
 
@@ -62,6 +105,17 @@ export const useMutationApi = <TBody, TVariables = void>(
       const serverError = data.bodyJson as ServerErrorResponse;
 
       switch (serverError.error) {
+        case "NOT_AUTHENTICATED": {
+          toaster.create({
+            title: "You are not logged in or your session expired",
+            description: "Please log in or sign up.",
+            type: "warning",
+          });
+
+          logoutMutation.mutate();
+          return;
+        }
+
         case "MAINTENANCE": {
           toaster.create({
             title: "Vaultoy is under maintenance",
@@ -151,44 +205,55 @@ export const useMutationApi = <TBody, TVariables = void>(
       }
     },
 
-    onError: (error) => {
-      const errorMessage =
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error &&
-        typeof error.message === "string"
-          ? error.message
-          : undefined;
+    onError,
+  });
+};
 
+/**
+ * Like useMutationApi, but without most of the standardized error handling, and without the automatic logout on "NOT_AUTHENTICATED" error. This can be useful for mutations that are not directly related to user actions, such as background tasks or mutations that are called in contexts where logging out the user would not make sense.
+ *
+ * Necessary to implement useLogoutMutation without circular dependency.
+ */
+export const useMutationApiWithoutLogout = <TBody, TVariables = void>(
+  props: UseMutationApiProps<TBody, TVariables>,
+) => {
+  const successCode = props.successCode ?? 200;
+  const onOtherError = props.onOtherError ?? onUnknownError;
+
+  return useMutation({
+    mutationFn: props.mutationFn,
+    onSuccess: async (data) => {
+      // Success
       if (
-        error instanceof TypeError &&
-        errorMessage?.includes("Failed to fetch")
+        data.status === successCode &&
+        typeof data.bodyJson === "object" &&
+        data.bodyJson &&
+        !("error" in data.bodyJson)
       ) {
-        console.error("A network error occurred during the mutation:", error);
-        toaster.create({
-          title: "Could not connect to the server",
-          description: "Please check your internet connection and try again.",
-          type: "error",
-        });
+        props.onSuccess?.(data.bodyJson as TBody);
         return;
       }
 
-      // JSON errors
-      if (error instanceof SyntaxError && errorMessage?.includes("JSON")) {
+      // Not success but also no error in the response
+      if (
+        typeof data.bodyJson !== "object" ||
+        data.bodyJson === null ||
+        !("error" in data.bodyJson)
+      ) {
         console.error(
-          "Could not parse the server response as JSON during the mutation:",
-          error,
+          "Received an error response with an unexpected format:",
+          data.bodyJson,
         );
-        toaster.create({
-          title: "Received an unexpected response from the server",
-          description: "Please try again later.",
-          type: "error",
-        });
+        toaster.create(UNEXPECTED_ERROR_TOAST);
         return;
       }
 
-      console.error("An unexpected error occurred during the mutation:", error);
-      toaster.create(UNEXPECTED_ERROR_TOAST);
+      // Error in response
+      const serverError = data.bodyJson as ServerErrorResponse;
+      onOtherError(serverError);
+      return;
     },
+
+    onError,
   });
 };
