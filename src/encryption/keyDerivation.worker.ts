@@ -13,10 +13,10 @@ interface KeyDerivationRequest {
 
 self.onmessage = async (event: MessageEvent<KeyDerivationRequest>) => {
   try {
+    const startTime = performance.now();
+
     const { username, password } = event.data;
     const saltString = VAULTOY_DERIVATION_SALT + username;
-
-    const startTime = performance.now();
 
     const saltBuffer = await crypto.subtle.digest(
       "SHA-256",
