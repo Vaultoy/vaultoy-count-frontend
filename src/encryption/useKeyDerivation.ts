@@ -43,6 +43,8 @@ export const useKeyDerivation = () => {
 
         const handleError = (error: ErrorEvent) => {
           cleanup();
+          worker.terminate();
+          workerRef.current = null;
           console.error("Worker failed to load or execute:", error);
           reject(new Error(error.message || "Failed to load Web Worker"));
         };
