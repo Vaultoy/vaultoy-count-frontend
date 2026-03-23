@@ -11,21 +11,19 @@ import { ErrorPage } from "./pages/ErrorPage";
 import { UserContextProvider } from "./contexts/UserContextProvider";
 import { PostLoginRedirectContextProvider } from "./contexts/PostLoginRedirectContextProvider";
 import { GroupContextProvider } from "./contexts/GroupContextProvider";
-import { lazy, useEffect } from "react";
+import { useEffect } from "react";
 import { LanguageContextProvider } from "./contexts/LanguageContextProvider";
-import { LazyPage } from "./components/LazyPage";
 import { Home } from "./pages/Home/Home";
 import { Navbar } from "./pages/Navbar/Navbar";
 import { fieldSlotRecipe } from "@chakra-ui/react/theme";
-
-const CountApp = lazy(() => import("./pages/CountApp/CountApp"));
-const SettingsPage = lazy(() => import("./pages/Settings/Settings"));
-const LoginSignup = lazy(() => import("./pages/LoginSignup"));
-const JoinInvitation = lazy(() => import("./pages/CountApp/JoinInvitation"));
-const PricingPage = lazy(() => import("./pages/Pricing"));
-const ContactPage = lazy(() => import("./pages/ContactPage/ContactPage"));
-const WhitepaperPage = lazy(() => import("./pages/Whitepaper"));
-const LegalPage = lazy(() => import("./pages/LegalPage/LegalPage"));
+import CountApp from "./pages/CountApp/CountApp";
+import SettingsPage from "./pages/Settings/Settings";
+import LoginSignup from "./pages/LoginSignup";
+import JoinInvitation from "./pages/CountApp/JoinInvitation";
+import PricingPage from "./pages/Pricing";
+import ContactPage from "./pages/ContactPage/ContactPage";
+import WhitepaperPage from "./pages/Whitepaper";
+import LegalPage from "./pages/LegalPage/LegalPage";
 
 const queryClient = new QueryClient();
 
@@ -58,66 +56,20 @@ const RoutesWithNavbar = () => (
     <Routes>
       <Route path="/" element={<Home />} />
 
-      <Route
-        path="/settings"
-        element={
-          <LazyPage>
-            <SettingsPage />
-          </LazyPage>
-        }
-      />
+      <Route path="/settings" element={<SettingsPage />} />
 
-      <Route
-        path="/app/*"
-        element={
-          <LazyPage>
-            <CountApp />
-          </LazyPage>
-        }
-      />
+      <Route path="/app/*" element={<CountApp />} />
 
       <Route
         path="/join/:groupId/:invitationLinkSecret"
-        element={
-          <LazyPage>
-            <JoinInvitation />
-          </LazyPage>
-        }
+        element={<JoinInvitation />}
       />
 
-      <Route
-        path="/pricing"
-        element={
-          <LazyPage>
-            <PricingPage />
-          </LazyPage>
-        }
-      />
+      <Route path="/pricing" element={<PricingPage />} />
 
-      <Route
-        path="/contact"
-        element={
-          <LazyPage>
-            <ContactPage />
-          </LazyPage>
-        }
-      />
-      <Route
-        path="/whitepaper"
-        element={
-          <LazyPage>
-            <WhitepaperPage />
-          </LazyPage>
-        }
-      />
-      <Route
-        path="/legal"
-        element={
-          <LazyPage>
-            <LegalPage />
-          </LazyPage>
-        }
-      />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/whitepaper" element={<WhitepaperPage />} />
+      <Route path="/legal" element={<LegalPage />} />
 
       <Route
         path="*"
@@ -147,21 +99,10 @@ const App = () => {
                 <Toaster />
                 <BrowserRouter>
                   <Routes>
-                    <Route
-                      path="/login"
-                      element={
-                        <LazyPage>
-                          <LoginSignup isLogin />
-                        </LazyPage>
-                      }
-                    />
+                    <Route path="/login" element={<LoginSignup isLogin />} />
                     <Route
                       path="/signup"
-                      element={
-                        <LazyPage>
-                          <LoginSignup isLogin={false} />
-                        </LazyPage>
-                      }
+                      element={<LoginSignup isLogin={false} />}
                     />
                     <Route path="*" element={<RoutesWithNavbar />} />
                   </Routes>
