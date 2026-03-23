@@ -18,12 +18,6 @@ export default defineConfig({
         "vaultoy_count_logo_adaptative.svg",
         "at.png",
       ],
-      pwaAssets: {
-        disabled: false,
-        image: "public/vaultoy_count_logo_with_bg.svg",
-        overrideManifestIcons: true,
-        includeHtmlHeadLinks: false,
-      },
       manifest: {
         id: "com.vaultoy.count",
         name: "Vaultoy Count",
@@ -34,8 +28,28 @@ export default defineConfig({
         display: "standalone",
         start_url: "/",
         scope: "/",
-        icons: [], // Generated in pwaAssets configuration above
+        icons: [
+          { src: "pwa-64x64.png", sizes: "64x64", type: "image/png" },
+          { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
+          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
+          {
+            src: "maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
       },
+      /*
+      This config was used to generate the icons. Now, they are in the public folder.
+      The apple-touch-icon was modified manually.
+
+      pwaAssets: {
+        disabled: false,
+        image: "public/vaultoy_count_logo_with_bg.svg",
+        overrideManifestIcons: false,
+        includeHtmlHeadLinks: false,
+      }, */
     }),
   ],
   define: {
