@@ -244,17 +244,6 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
           </Card.Root>
         )}
 
-        <Card.Root width="100%">
-          <Card.Body>
-            <Text>
-              ⚠️ This is a very early prototype. Feel free to play around with
-              it. However, be aware that until the project reaches a more mature
-              state, I intent to <strong>regularly delete all data</strong> such
-              as accounts and groups.
-            </Text>
-          </Card.Body>
-        </Card.Root>
-
         <Card.Root padding="1em">
           <Card.Header>
             <HStack justifyContent="space-between">

@@ -2,7 +2,6 @@ import { Logo } from "@/components/Logo";
 import { UserContext } from "@/contexts/UserContext";
 import {
   Button,
-  Card,
   HStack,
   VStack,
   Text,
@@ -148,17 +147,6 @@ export const Home = () => {
             }
           />
         </SimpleGrid>
-
-        <Card.Root width="100%">
-          <Card.Body>
-            <Text>
-              ⚠️ This is a very early prototype. Feel free to play around with
-              it. However, be aware that until the project reaches a more mature
-              state, I intent to <strong>regularly delete all data</strong> such
-              as accounts and groups.
-            </Text>
-          </Card.Body>
-        </Card.Root>
       </VStack>
     </Center>
   );
