@@ -16,7 +16,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { toaster } from "@/components/ui/toast-store";
 import { postSignupLoginMutation } from "@/api/auth";
 import { UserContext } from "@/contexts/UserContext";
@@ -48,6 +48,7 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   const [tmpUserWaiting, setTmpUserWaiting] = useState<
     TemporaryUserWaitingForServerResponse | undefined
   >(undefined);
+  const usernameInputRef = useRef<HTMLInputElement | null>(null);
 
   const navigate = useNavigate();
   const user = useContext(UserContext);
@@ -63,8 +64,8 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
         .min(USERNAME_MIN_LENGTH)
         .max(USERNAME_MAX_LENGTH)
         .regex(
-          /^[a-z0-9]+$/,
-          "Username can only contain lowercase letters and numbers, without spaces",
+          /^[a-z0-9-_]+$/,
+          "Username can only contain lowercase letters, numbers, dashes, and underscores, without spaces",
         ),
       password: z.string().min(PASSWORD_MINIMUM_LENGTH),
       confirmPassword: isLogin ? z.string().optional() : z.string(),
@@ -104,6 +105,8 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   >({
     resolver: zodResolver(formValuesSchema),
   });
+
+  const usernameField = register("username");
 
   const mutation = useMutationApi({
     mutationFn: postSignupLoginMutation,
@@ -262,7 +265,35 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
             <form onSubmit={onSubmit}>
               <Field.Root invalid={!!errors.username}>
                 <Field.Label>Username</Field.Label>
-                <Input {...register("username")} />
+                <Input
+                  type="text"
+                  {...usernameField}
+                  ref={(element) => {
+                    // ref and onChange allow to convert input to lowercase while keeping cursor position
+                    usernameInputRef.current = element;
+                    usernameField.ref(element);
+                  }}
+                  onChange={(event) => {
+                    const selectionStart = event.target.selectionStart;
+                    const selectionEnd = event.target.selectionEnd;
+
+                    event.target.value = event.target.value.toLowerCase();
+                    usernameField.onChange(event);
+
+                    requestAnimationFrame(() => {
+                      if (
+                        usernameInputRef.current &&
+                        selectionStart !== null &&
+                        selectionEnd !== null
+                      ) {
+                        usernameInputRef.current.setSelectionRange(
+                          selectionStart,
+                          selectionEnd,
+                        );
+                      }
+                    });
+                  }}
+                />
                 <Field.ErrorText>{errors.username?.message}</Field.ErrorText>
               </Field.Root>
               {!isLogin && (
