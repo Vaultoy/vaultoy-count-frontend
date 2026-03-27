@@ -107,6 +107,9 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
   });
 
   const usernameField = register("username");
+  const emailField = register("email");
+  const passwordField = register("password");
+  const confirmPasswordField = register("confirmPassword");
 
   const mutation = useMutationApi({
     mutationFn: postSignupLoginMutation,
@@ -223,6 +226,28 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
     }
   });
 
+  const onUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const selectionStart = input.selectionStart;
+    const selectionEnd = input.selectionEnd;
+
+    input.value = input.value.toLowerCase();
+    usernameField.onChange(event);
+
+    requestAnimationFrame(() => {
+      if (
+        usernameInputRef.current &&
+        selectionStart !== null &&
+        selectionEnd !== null
+      ) {
+        usernameInputRef.current.setSelectionRange(
+          selectionStart,
+          selectionEnd,
+        );
+      }
+    });
+  };
+
   return (
     <Flex minH="100vh" align="center" justify="center" marginY="1em">
       <VStack
@@ -276,33 +301,19 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                     usernameInputRef.current = element;
                     usernameField.ref(element);
                   }}
-                  onChange={(event) => {
-                    const selectionStart = event.target.selectionStart;
-                    const selectionEnd = event.target.selectionEnd;
-
-                    event.target.value = event.target.value.toLowerCase();
-                    usernameField.onChange(event);
-
-                    requestAnimationFrame(() => {
-                      if (
-                        usernameInputRef.current &&
-                        selectionStart !== null &&
-                        selectionEnd !== null
-                      ) {
-                        usernameInputRef.current.setSelectionRange(
-                          selectionStart,
-                          selectionEnd,
-                        );
-                      }
-                    });
-                  }}
+                  onChange={onUsernameChange}
+                  onInput={onUsernameChange}
                 />
                 <Field.ErrorText>{errors.username?.message}</Field.ErrorText>
               </Field.Root>
               {!isLogin && (
                 <Field.Root invalid={!!errors.email} marginTop="1em">
                   <Field.Label>Email</Field.Label>
-                  <Input autoComplete="email" {...register("email")} />
+                  <Input
+                    autoComplete="email"
+                    {...emailField}
+                    onInput={emailField.onChange}
+                  />
                   <Field.ErrorText>{errors.email?.message}</Field.ErrorText>
                 </Field.Root>
               )}
@@ -310,7 +321,8 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                 <Field.Label>Password</Field.Label>
                 <PasswordInput
                   autoComplete={isLogin ? "current-password" : "new-password"}
-                  {...register("password")}
+                  {...passwordField}
+                  onInput={passwordField.onChange}
                   onChange={(e) =>
                     setPasswordLength(e.target.value?.length ?? 0)
                   }
@@ -326,7 +338,8 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                     <Field.Label>Confirm Password</Field.Label>
                     <PasswordInput
                       autoComplete="new-password"
-                      {...register("confirmPassword")}
+                      {...confirmPasswordField}
+                      onInput={confirmPasswordField.onChange}
                     />
                     <Field.ErrorText>
                       {errors.confirmPassword?.message}
