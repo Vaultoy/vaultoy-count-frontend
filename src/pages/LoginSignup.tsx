@@ -267,6 +267,9 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                 <Field.Label>Username</Field.Label>
                 <Input
                   type="text"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
                   {...usernameField}
                   ref={(element) => {
                     // ref and onChange allow to convert input to lowercase while keeping cursor position
@@ -299,13 +302,14 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
               {!isLogin && (
                 <Field.Root invalid={!!errors.email} marginTop="1em">
                   <Field.Label>Email</Field.Label>
-                  <Input {...register("email")} />
+                  <Input autoComplete="email" {...register("email")} />
                   <Field.ErrorText>{errors.email?.message}</Field.ErrorText>
                 </Field.Root>
               )}
               <Field.Root invalid={!!errors.password} marginTop="1em">
                 <Field.Label>Password</Field.Label>
                 <PasswordInput
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                   {...register("password")}
                   onChange={(e) =>
                     setPasswordLength(e.target.value?.length ?? 0)
@@ -320,7 +324,10 @@ const LoginSignup = ({ isLogin }: { isLogin: boolean }) => {
                     marginTop="1em"
                   >
                     <Field.Label>Confirm Password</Field.Label>
-                    <PasswordInput {...register("confirmPassword")} />
+                    <PasswordInput
+                      autoComplete="new-password"
+                      {...register("confirmPassword")}
+                    />
                     <Field.ErrorText>
                       {errors.confirmPassword?.message}
                     </Field.ErrorText>
