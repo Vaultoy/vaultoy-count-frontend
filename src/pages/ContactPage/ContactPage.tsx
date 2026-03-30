@@ -43,7 +43,7 @@ const ContactPage = () => (
             </List.Item>
             <List.Item>
               <HStack wrap="wrap">
-                For reporting vulnerabilities:{" "}
+                For security concerns:{" "}
                 <EmailButton mailUser="security" mailDomain="vaultoy.com" />
               </HStack>
             </List.Item>
