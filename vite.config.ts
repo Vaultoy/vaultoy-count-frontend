@@ -4,7 +4,10 @@ import path from "path";
 import { execSync } from "child_process";
 import { VitePWA } from "vite-plugin-pwa";
 
-const commitHash = execSync("git rev-parse HEAD").toString().trim();
+const commitHash =
+  process.env.NODE_ENV === "production"
+    ? execSync("git rev-parse HEAD").toString().trim()
+    : "dev";
 
 // https://vite.dev/config/
 export default defineConfig({
